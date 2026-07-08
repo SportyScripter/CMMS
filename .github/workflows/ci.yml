@@ -30,3 +30,7 @@ jobs:
       - name: Lint code with Ruff
         run: |
           ruff check backend/
+
+      - name: Check static typing with Mypy
+        run: |
+          mypy backend/ --ignore-missing-imports
