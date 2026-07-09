@@ -1,7 +1,7 @@
 """Initial CMMS tables
 
 Revision ID: fc5443389ed0
-Revises: 
+Revises:
 Create Date: 2026-07-09 17:12:12.870101
 
 """
@@ -10,7 +10,6 @@ from typing import Sequence, Union
 
 from alembic import op  # type: ignore
 import sqlalchemy as sa
-
 
 # revision identifiers, used by Alembic.
 revision: str = "fc5443389ed0"
