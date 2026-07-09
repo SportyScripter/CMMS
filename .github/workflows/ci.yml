@@ -33,4 +33,4 @@ jobs:
 
       - name: Check static typing with Mypy
         run: |
-          mypy backend/ --ignore-missing-imports
+          mypy . --explicit-package-bases
