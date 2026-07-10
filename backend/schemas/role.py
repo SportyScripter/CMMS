@@ -5,8 +5,8 @@ from datetime import datetime
 
 class RoleBase(BaseModel):
     """
-    Base schema for Role containing common atributes.
-    Examlples of roles: 'Maintenance Manager', 'Elektrical Manager', 'Production Foreman', 'Director', 'Machanik', 'Electrician'.
+    Base schema for Role containing common attributes.
+    Examples of roles: 'Maintenance Manager', 'Electrical Manager', 'Production Foreman', 'Director', 'Mechanic', 'Electrician'.
     """
 
     name: str = Field(
@@ -19,7 +19,7 @@ class RoleBase(BaseModel):
     )
 
 
-class RoleCreate(BaseModel):
+class RoleCreate(RoleBase):  # <--- TUTAJ WRACA RoleBase
     """
     Schema used by Administrator to create a new Role in the system.
     Inherits all required fields directly from RoleBase.
@@ -28,7 +28,7 @@ class RoleCreate(BaseModel):
     pass
 
 
-class RoleUpdate(BaseModel):
+class RoleUpdate(BaseModel):  # <--- TUTAJ ZOSTAJE BaseModel (dla mypy)
     """
     Schema used for updating an existing Role.
     Fields are optional to allow partial updates.
@@ -40,7 +40,7 @@ class RoleUpdate(BaseModel):
     )
 
 
-class RoleResponse(BaseModel):
+class RoleResponse(RoleBase):  # <--- TUTAJ WRACA RoleBase
     """
     Schema used for returning Role data in API responses.
     Includes database-generated fields like 'id' and timestamps.
