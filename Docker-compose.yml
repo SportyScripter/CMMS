@@ -24,5 +24,18 @@ services:
       - "5050:80"
     depends_on:
       - db
+  api:
+    build:
+      context: .  
+      dockerfile: backend/Dockerfile  
+    container_name: cmms_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db  
+    volumes:
+      - .:/app  
 volumes:
   postgres_data:
