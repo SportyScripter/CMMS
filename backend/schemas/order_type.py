@@ -15,7 +15,7 @@ class OrderTypeBase(BaseModel):
 
 
 class OrderTypeCreate(OrderTypeBase):
-    """ "
+    """
     Schema used for creating a new Order Type.
     Inherits all required fields directly from OrderTypeBase.
     """
