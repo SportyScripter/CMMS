@@ -29,6 +29,7 @@ class OrderCalendarBase(BaseModel):
     )
     status: str = Field(
         ...,
+        max_length=50,
         description="Current execution state (e.g., 'scheduled', 'in_progress', 'completed').",
     )
 
@@ -65,7 +66,9 @@ class OrderCalendarUpdate(BaseModel):
     scheduled_date: Optional[datetime] = Field(
         None, description="Updated planned date and time."
     )
-    status: Optional[str] = Field(None, description="Updated current execution state.")
+    status: Optional[str] = Field(
+        None, max_length=50, description="Updated current execution state."
+    )
 
 
 class OrderCalendarResponse(OrderCalendarBase):
