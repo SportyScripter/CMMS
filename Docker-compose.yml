@@ -26,8 +26,11 @@ services:
       - db
   api:
     build:
-      context: .  
-      dockerfile: backend/Dockerfile  
+      context: ./backend
+      dockerfile: Dockerfile  
+    environment:
+      - PYTHONPATH=/app/backend
+    working_dir: /app/backend
     container_name: cmms_backend
     ports:
       - "8000:8000"
