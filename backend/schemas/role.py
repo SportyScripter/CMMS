@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field
 from typing import Optional
-from datetime import datetime
 
 
 class RoleBase(BaseModel):
@@ -48,12 +47,6 @@ class RoleResponse(RoleBase):  # <--- TUTAJ WRACA RoleBase
 
     id: int = Field(
         ..., description="The unique identifier of the role in the database."
-    )
-    created_at: datetime = Field(
-        ..., description="Timestamp when the role was created."
-    )
-    updated_at: datetime = Field(
-        ..., description="Timestamp when the role was last updated."
     )
 
     class Config:

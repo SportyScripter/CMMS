@@ -17,6 +17,7 @@ def seed_admin():
 
     try:
         admin_role_name = "Super Admin"
+        admin_role_description = "Super Admin role with all permissions"
         roles = crud_roles.get_roles(db)
         admin_role = next(
             (role for role in roles if role.name == admin_role_name), None
@@ -26,7 +27,7 @@ def seed_admin():
             print(f"Creating role: {admin_role_name}")
             role_in = RoleCreate(
                 name=admin_role_name,
-                description="Super Admin role with all permissions",
+                description=admin_role_description,
             )
             admin_role = crud_roles.create_role(db=db, role_in=role_in)
         else:
@@ -40,8 +41,8 @@ def seed_admin():
             user_in = UserCreate(
                 sap_number=admin_sap_number,
                 password="admin123",
-                first_name="Admin",
-                last_name="User",
+                name="Admin",
+                lastname="User",
                 role_id=admin_role.id,
                 is_active=True,
             )
