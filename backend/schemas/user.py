@@ -72,10 +72,4 @@ class UserResponse(UserBase):
         ..., description="Timestamp of the last update to the user profile."
     )
 
-    class config:
-        """
-        Pydantic V2 config mapping.
-        from_attrinutes=True allows Pydantic to read data directly from SQLAlchemy models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

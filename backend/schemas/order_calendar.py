@@ -87,9 +87,4 @@ class OrderCalendarResponse(OrderCalendarBase):
         ..., description="Timestamp when the order was last updated."
     )
 
-    class Config:
-        """
-        Enable compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

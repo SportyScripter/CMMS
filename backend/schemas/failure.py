@@ -91,9 +91,4 @@ class FailureResponse(FailureBase):
         ..., description="Timestamp of the last update to the failure record."
     )
 
-    class Config:
-        """
-        Enables compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

@@ -109,9 +109,4 @@ class PartResponse(PartBase):
 
     id: int = Field(..., description="The unique internal identifier of the part.")
 
-    class Config:
-        """
-        Enable compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}
