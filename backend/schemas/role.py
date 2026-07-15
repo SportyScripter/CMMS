@@ -49,9 +49,4 @@ class RoleResponse(RoleBase):  # <--- TUTAJ WRACA RoleBase
         ..., description="The unique identifier of the role in the database."
     )
 
-    class Config:
-        """
-        Enables compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

@@ -44,9 +44,4 @@ class OrderTypeResponse(OrderTypeBase):
         ..., description="The unique internal identifier of the order type."
     )
 
-    class Config:
-        """
-        Enable compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

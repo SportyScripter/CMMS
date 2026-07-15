@@ -40,9 +40,4 @@ class PartCategoryResponse(PartCategoryBase):
 
     id: int = Field(..., description="The unique internal identifier of the category.")
 
-    class config:
-        """
-        Enable compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

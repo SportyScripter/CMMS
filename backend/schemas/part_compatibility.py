@@ -39,9 +39,4 @@ class PartCompatibilityResponse(PartCompatibilityBase):
     Schema used for returning part compatibility data in API responses.
     """
 
-    class Config:
-        """
-        Enable compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

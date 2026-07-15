@@ -81,10 +81,4 @@ class MachineResponse(MachineBase):
         ..., description="Timestamp when the machine record was last updated."
     )
 
-    class config:
-        """
-        Pydantic V2 config mapping.
-        from_attributes=True allows Pydantic to read data directly from SQLAlchemy models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}

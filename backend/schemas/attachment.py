@@ -51,9 +51,4 @@ class AttachmentResponse(AttachmentBase):
     )
     uploaded_at: datetime = Field(..., description="UTC timestamp of the file upload.")
 
-    class Config:
-        """
-        Enable compatibility with SQLAlchemy ORM models.
-        """
-
-        from_attributes = True
+    model_config = {"from_attributes": True}
