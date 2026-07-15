@@ -11,3 +11,4 @@ python-multipart
 pydantic_settings
 passlib[bcrypt]
 bcrypt==3.2.2
+requests

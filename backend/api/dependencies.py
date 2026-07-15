@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Generator, List
 from db.database import SessionLocal
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -47,3 +47,29 @@ def get_current_user(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return user
+
+
+class RoleChecker:
+    def __init__(self, allowed_roles: List[str]):
+        """
+        Initializes a RoleChecker instance to verify if a user has the required role(s) for access control.
+        RoleChecker used list of roles to check if user has any of the required roles.
+        """
+        self.allowed_roles = allowed_roles
+
+    def __call__(self, current_user=Depends(get_current_user)):
+        """
+        Checks if the current user has any of the allowed roles.
+        Raises an HTTPException if the user does not have the required role(s).
+        """
+        if not current_user.role:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User has no role assigned.",
+            )
+        if current_user.role.name not in self.allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Operation not permitted. Requires one of: {', '.join(self.allowed_roles)}.",
+            )
+        return current_user
