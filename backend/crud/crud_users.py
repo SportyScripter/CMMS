@@ -25,7 +25,7 @@ def create_user(db: Session, user_in: UserCreate) -> User:
     obj_in_data = user_in.model_dump()
     password = obj_in_data.pop("password")
     hashed_password = get_password_hash(password)
-    db_user = User(**obj_in_data, hashed_password=hashed_password)
+    db_user = User(**obj_in_data, password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

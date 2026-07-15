@@ -24,6 +24,9 @@ class Role(Base):
         nullable=False,
         comment="Unique role identifier (e.g., 'Admin', 'Technician')",
     )
+    description = Column(
+        String, nullable=True, comment="Detailed description of the role's purpose"
+    )
 
     # Relationships
     users = relationship("User", back_populates="role")
