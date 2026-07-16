@@ -10,13 +10,14 @@ from alembic import context  # type: ignore
 # Dzięki temu Python traktuje folder 'backend' jako główny moduł.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from db.database import Base, SQLALCHEMY_DATABASE_URL
+from db.database import Base
+from core.config import settings
 
 # Zamiast 'from models import *', importujemy po prostu cały moduł.
 # To wymusi na Pythonie wykonanie Twojego pliku models/__init__.py
 
 config = context.config
-config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 target_metadata = Base.metadata
 print("\n" + "=" * 40)

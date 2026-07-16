@@ -22,3 +22,22 @@ ALLOW_READ_ONLY = RoleChecker(
 ALLOW_MANAGE_MACHINES = RoleChecker(
     ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider"]
 )
+
+# Users with the following roles can manage parts
+ALLOW_MANAGE_PARTS = RoleChecker(["Super Admin", "Kierownik", "Magazynier"])
+
+ALLOW_CHECK_PARTS = RoleChecker(
+    [
+        "Super Admin",
+        "Kierownik",
+        "Dyrektor",
+        "Manager",
+        "Mechanik",
+        "Elektryk",
+        "Magazynier",
+    ]
+)
+
+ALLOW_EDIT_PARTS = RoleChecker(
+    ["Super Admin", "Kierownik", "Manager", "Magazynier", "Elektryk", "Mechanik"]
+)
