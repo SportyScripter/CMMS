@@ -28,7 +28,7 @@ class Part(Base):
 
     name = Column(
         String,
-        unique=True,
+        unique=False,
         nullable=False,
         comment="Descriptive name or part number identifier",
     )
