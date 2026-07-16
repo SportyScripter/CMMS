@@ -1,5 +1,13 @@
 from fastapi import APIRouter
-from api.v1 import roles, auth, users, machines, parts, part_categories
+from api.v1 import (
+    roles,
+    auth,
+    users,
+    machines,
+    parts,
+    part_categories,
+    part_compatibilities,
+)
 
 api_router = APIRouter()
 
@@ -11,4 +19,9 @@ api_router.include_router(machines.router, prefix="/machines", tags=["Machines"]
 api_router.include_router(parts.router, prefix="/parts", tags=["Parts"])
 api_router.include_router(
     part_categories.router, prefix="/part-categories", tags=["Part Categories"]
+)
+api_router.include_router(
+    part_compatibilities.router,
+    prefix="/part-compatibilities",
+    tags=["Part Compatibilities"],
 )

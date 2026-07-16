@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from schemas.part import PartResponse
+from schemas.machine import MachineResponse
 
 
 class PartCompatibilityBase(BaseModel):
@@ -37,6 +39,9 @@ class PartCompatibilityUpdate(BaseModel):
 class PartCompatibilityResponse(PartCompatibilityBase):
     """
     Schema used for returning part compatibility data in API responses.
+    Includes full nested objects for Part and Machine to prevent N+1 queries on the frontend.
     """
 
+    part: PartResponse
+    machine: MachineResponse
     model_config = {"from_attributes": True}
