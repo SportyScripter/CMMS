@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from schemas.part import PartResponse
 
 
 class FailurePartBase(BaseModel):
@@ -40,4 +41,5 @@ class FailurePartResponse(FailurePartBase):
     Schema used for returning part consumption data in API responses.
     """
 
+    part: PartResponse
     model_config = {"from_attributes": True}

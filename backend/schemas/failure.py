@@ -1,9 +1,10 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
 from schemas.user import UserResponse
 from schemas.machine import MachineResponse
 from schemas.department import DepartmentResponse
+from schemas.failure_part import FailurePartResponse
 
 
 class FailureBase(BaseModel):
@@ -96,5 +97,5 @@ class FailureResponse(FailureBase):
     recipient: Optional[UserResponse] = None
     machine: MachineResponse
     department: DepartmentResponse
-
+    used_parts: List[FailurePartResponse] = []
     model_config = {"from_attributes": True}
