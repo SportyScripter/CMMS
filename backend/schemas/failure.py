@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+from schemas.user import UserResponse
+from schemas.machine import MachineResponse
+from schemas.department import DepartmentResponse
 
 
 class FailureBase(BaseModel):
@@ -18,8 +21,7 @@ class FailureBase(BaseModel):
         ..., description="Detailed description of the problem reported by the user."
     )
     status: str = Field(
-        ...,
-        default="open",
+        default="Pending",
         max_length=50,
         description="Current lifecycle state (e.g., 'open', 'in_progress','closed').",
     )
@@ -90,5 +92,9 @@ class FailureResponse(FailureBase):
     updated_at: datetime = Field(
         ..., description="Timestamp of the last update to the failure record."
     )
+    submitter: UserResponse
+    recipient: Optional[UserResponse] = None
+    machine: MachineResponse
+    department: DepartmentResponse
 
     model_config = {"from_attributes": True}

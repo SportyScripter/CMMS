@@ -10,7 +10,7 @@ class Failure(Base, TimestampMixin):
 
     This is a central entity in the CMMS, tracking the entire lifecycle of a failure
     from its initial report (submitter) to its resolution (recipient, end_date, repair_description).
-    It links to the affected machine, the responsible department, consumed parts, and attached files.
+    It links to the affected machine, the responsible d epartment, consumed parts, and attached files.
     """
 
     __tablename__ = "failures"
@@ -44,6 +44,7 @@ class Failure(Base, TimestampMixin):
     status = Column(
         String,
         nullable=False,
+        default="Pending",
         comment="Current lifecycle state (e.g., 'open', 'in_progress', 'closed')",
     )
 
