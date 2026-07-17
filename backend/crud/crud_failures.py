@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from models.failure import Failure
 from schemas.failure import FailureCreate, FailureUpdate
+from models.failure_part import FailurePart
 
 
 def create_failure(db: Session, failure_in: FailureCreate) -> Failure:
@@ -23,6 +24,7 @@ def get_failure(db: Session, failure_id: int) -> Optional[Failure]:
             joinedload(Failure.department),
             joinedload(Failure.submitter),
             joinedload(Failure.recipient),
+            joinedload(Failure.used_parts).joinedload(FailurePart.part),
         )
         .filter(Failure.id == failure_id)
         .first()
@@ -38,6 +40,7 @@ def get_failures(db: Session, skip: int = 0, limit: int = 100) -> List[Failure]:
             joinedload(Failure.department),
             joinedload(Failure.submitter),
             joinedload(Failure.recipient),
+            joinedload(Failure.used_parts).joinedload(FailurePart.part),
         )
         .offset(skip)
         .limit(limit)
@@ -54,6 +57,7 @@ def get_failures_by_machine(db: Session, machine_id: int) -> List[Failure]:
             joinedload(Failure.department),
             joinedload(Failure.submitter),
             joinedload(Failure.recipient),
+            joinedload(Failure.used_parts).joinedload(FailurePart.part),
         )
         .filter(Failure.machine_id == machine_id)
         .all()

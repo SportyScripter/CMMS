@@ -9,6 +9,7 @@ from api.v1 import (
     part_compatibilities,
     departments,
     failures,
+    failure_parts,
 )
 
 api_router = APIRouter()
@@ -31,3 +32,6 @@ api_router.include_router(
     departments.router, prefix="/departments", tags=["Departments"]
 )
 api_router.include_router(failures.router, prefix="/failures", tags=["Failures"])
+api_router.include_router(
+    failure_parts.router, prefix="/failure-parts", tags=["Failure Parts"]
+)
