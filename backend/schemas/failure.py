@@ -5,6 +5,7 @@ from schemas.user import UserResponse
 from schemas.machine import MachineResponse
 from schemas.department import DepartmentResponse
 from schemas.failure_part import FailurePartResponse
+from schemas.attachment import AttachmentResponse
 
 
 class FailureBase(BaseModel):
@@ -98,4 +99,5 @@ class FailureResponse(FailureBase):
     machine: MachineResponse
     department: DepartmentResponse
     used_parts: List[FailurePartResponse] = []
+    attachments: List[AttachmentResponse] = []
     model_config = {"from_attributes": True}
