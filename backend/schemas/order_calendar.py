@@ -1,5 +1,9 @@
+from schemas.user import UserResponse
+from schemas.machine import MachineResponse
+from schemas.order_type import OrderTypeResponse
+from schemas.attachment import AttachmentResponse
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -86,5 +90,9 @@ class OrderCalendarResponse(OrderCalendarBase):
     updated_at: datetime = Field(
         ..., description="Timestamp when the order was last updated."
     )
-
+    order_type: OrderTypeResponse
+    principal: UserResponse
+    performed: Optional[UserResponse] = None
+    order_machine: Optional[MachineResponse] = None
+    attachments: List[AttachmentResponse] = []
     model_config = {"from_attributes": True}
