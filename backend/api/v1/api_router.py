@@ -12,6 +12,7 @@ from api.v1 import (
     failure_parts,
     attachments,
     order_types,
+    order_calendar,
 )
 
 api_router = APIRouter()
@@ -42,4 +43,7 @@ api_router.include_router(
 )
 api_router.include_router(
     order_types.router, prefix="/order-types", tags=["Order Types"]
+)
+api_router.include_router(
+    order_calendar.router, prefix="/order-calendar", tags=["Order Calendar"]
 )
