@@ -2,6 +2,7 @@ from schemas.user import UserResponse
 from schemas.machine import MachineResponse
 from schemas.order_type import OrderTypeResponse
 from schemas.attachment import AttachmentResponse
+from schemas.order_checklist_item import OrderChecklistItemResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
@@ -95,4 +96,5 @@ class OrderCalendarResponse(OrderCalendarBase):
     performed: Optional[UserResponse] = None
     order_machine: Optional[MachineResponse] = None
     attachments: List[AttachmentResponse] = []
+    checklist_items: List[OrderChecklistItemResponse] = []
     model_config = {"from_attributes": True}

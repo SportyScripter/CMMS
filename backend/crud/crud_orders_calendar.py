@@ -24,6 +24,7 @@ def get_order(db: Session, order_id: int) -> Optional[OrderCalendar]:
             joinedload(OrderCalendar.performed),
             joinedload(OrderCalendar.order_machine),
             joinedload(OrderCalendar.attachments),
+            joinedload(OrderCalendar.checklist_items),
         )
         .filter(OrderCalendar.id == order_id)
         .first()
@@ -40,6 +41,7 @@ def get_orders(db: Session, skip: int = 0, limit: int = 100) -> List[OrderCalend
             joinedload(OrderCalendar.performed),
             joinedload(OrderCalendar.order_machine),
             joinedload(OrderCalendar.attachments),
+            joinedload(OrderCalendar.checklist_items),
         )
         .offset(skip)
         .limit(limit)
@@ -57,6 +59,7 @@ def get_orders_by_machine(db: Session, machine_id: int) -> List[OrderCalendar]:
             joinedload(OrderCalendar.performed),
             joinedload(OrderCalendar.order_machine),
             joinedload(OrderCalendar.attachments),
+            joinedload(OrderCalendar.checklist_items),
         )
         .filter(OrderCalendar.order_machine_id == machine_id)
         .all()
@@ -73,6 +76,7 @@ def get_orders_by_technician(db: Session, technician_id: int) -> List[OrderCalen
             joinedload(OrderCalendar.performed),
             joinedload(OrderCalendar.order_machine),
             joinedload(OrderCalendar.attachments),
+            joinedload(OrderCalendar.checklist_items),
         )
         .filter(OrderCalendar.performed_id == technician_id)
         .all()

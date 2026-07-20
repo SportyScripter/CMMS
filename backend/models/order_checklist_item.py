@@ -28,7 +28,7 @@ class OrderChecklistItem(Base):
 
     task_description = Column(
         String,
-        nullable=False,
+        nullable=True,
         comment="Detailed instruction for this specific checklist step",
     )
 
