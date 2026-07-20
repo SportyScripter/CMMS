@@ -40,5 +40,17 @@ services:
       - db  
     volumes:
       - .:/app  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cmms_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 volumes:
   postgres_data:
