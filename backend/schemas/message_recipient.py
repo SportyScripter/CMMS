@@ -1,3 +1,4 @@
+from schemas.user import UserResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -41,4 +42,5 @@ class MessageRecipientResponse(MessageRecipientBase):
     Schema used for returning message recipient data in API responses.
     """
 
+    recipient: UserResponse
     model_config = {"from_attributes": True}

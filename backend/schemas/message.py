@@ -1,5 +1,7 @@
+from schemas.user import UserResponse
+from schemas.message_recipient import MessageRecipientResponse
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
 
 
@@ -10,6 +12,9 @@ class MessageBase(BaseModel):
 
     parent_message_id: Optional[int] = Field(
         None, description="Reference to a parent message to support threading/replies."
+    )
+    recipient_ids: List[int] = Field(
+        default=[], description="List of user IDs who should receive this message."
     )
     subject: str = Field(..., description="Topic or summary of the message.")
     content: str = Field(..., description="Main body text of the message.")
@@ -56,5 +61,7 @@ class MessageResponse(MessageBase):
     updated_at: datetime = Field(
         ..., description="Timestamp when the message record was last updated."
     )
+    sender: UserResponse
+    recipients: List[MessageRecipientResponse] = []
 
     model_config = {"from_attributes": True}

@@ -14,6 +14,7 @@ from api.v1 import (
     order_types,
     order_calendar,
     order_checklist_items,
+    messages,
 )
 
 api_router = APIRouter()
@@ -53,3 +54,4 @@ api_router.include_router(
     prefix="/order-checklist-items",
     tags=["Order Checklist Items"],
 )
+api_router.include_router(messages.router, prefix="/messages", tags=["Messages"])
