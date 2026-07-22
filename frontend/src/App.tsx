@@ -6,7 +6,7 @@ import { MainLayout } from './components/MainLayout';
 import { UsersDashboard } from './pages/UsersDashboard';
 import { CreateRolePage } from './pages/CreateRolePage';
 import { RoleListPage } from './pages/RoleListPage';
-
+import { UserListPage } from './pages/UserListPage';
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
@@ -44,6 +44,7 @@ const AppRoutes = () => {
         <Route path="users" element={<UsersDashboard />} />
         <Route path="users/roles/create" element={<CreateRolePage />} />
         <Route path="users/roles/list" element={<RoleListPage />} />
+        <Route path="users/list" element={<UserListPage />} />
       </Route>
     </Routes>
   );
