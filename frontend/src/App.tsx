@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { MainLayout } from './components/MainLayout';
+import { UsersDashboard } from './pages/UsersDashboard';
+import { CreateRolePage } from './pages/CreateRolePage';
+import { RoleListPage } from './pages/RoleListPage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -24,7 +27,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const Dashboard = () => <div><h1 className="text-2xl font-bold mb-4">Pulpit</h1><p className="text-gray-600">Witaj w systemie CMMS.</p></div>;
 const Machines = () => <div><h1 className="text-2xl font-bold mb-4">Park Maszynowy</h1></div>;
-
 const AppRoutes = () => {
   const { user } = useAuth();
 
@@ -39,6 +41,9 @@ const AppRoutes = () => {
         <Route path="calendar" element={<div><h1 className="text-2xl font-bold mb-4">Kalendarz</h1></div>} />
         <Route path="inventory" element={<div><h1 className="text-2xl font-bold mb-4">Magazyn</h1></div>} />
         <Route path="messages" element={<div><h1 className="text-2xl font-bold mb-4">Wiadomości</h1></div>} />
+        <Route path="users" element={<UsersDashboard />} />
+        <Route path="users/roles/create" element={<CreateRolePage />} />
+        <Route path="users/roles/list" element={<RoleListPage />} />
       </Route>
     </Routes>
   );

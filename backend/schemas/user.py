@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
+from schemas.role import RoleMinimal
 
 
 class UserBase(BaseModel):
@@ -71,5 +72,5 @@ class UserResponse(UserBase):
     updated_at: datetime = Field(
         ..., description="Timestamp of the last update to the user profile."
     )
-
+    role: RoleMinimal = Field(..., description="Details of the assigned role")
     model_config = {"from_attributes": True}
