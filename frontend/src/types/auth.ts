@@ -9,3 +9,8 @@ export interface User {
     name: string;
   };
 }
+
+export interface Role {
+    id : number;
+    name : string;
+}
