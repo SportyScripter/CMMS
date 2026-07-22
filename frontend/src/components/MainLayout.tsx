@@ -8,21 +8,22 @@ import {
   CalendarClock, 
   Package, 
   MessageSquare, 
-  LogOut 
+  LogOut, IdCard
 } from 'lucide-react';
 import clsx from 'clsx';
 
 const navigation = [
-  { name: 'Pulpit', href: '/', icon: LayoutDashboard },
-  { name: 'Maszyny', href: '/machines', icon: Settings },
-  { name: 'Awarie', href: '/failures', icon: Wrench },
-  { name: 'Kalendarz Zleceń', href: '/calendar', icon: CalendarClock },
-  { name: 'Magazyn', href: '/inventory', icon: Package },
-  { name: 'Wiadomości', href: '/messages', icon: MessageSquare },
+  { name: 'Pulpit', href: '/', icon: LayoutDashboard, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
+  { name: 'Maszyny', href: '/machines', icon: Settings, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
+  { name: 'Awarie', href: '/failures', icon: Wrench, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
+  { name: 'Kalendarz Zleceń', href: '/calendar', icon: CalendarClock, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
+  { name: 'Magazyn', href: '/inventory', icon: Package, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
+  { name: 'Wiadomości', href: '/messages', icon: MessageSquare, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
+  { name: 'Użytkownicy', href: '/users', icon: IdCard, allowedRoles: ['Super Admin','Kierownik','Administrator'] },
 ];
 
 export const MainLayout = () => {
-  const { user, logout } = useAuth();
+  const { user, logout} = useAuth();
   const location = useLocation();
 
   return (
@@ -35,7 +36,7 @@ export const MainLayout = () => {
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {navigation.map((item) => {
+          {navigation.filter(item => item.allowedRoles.includes(user?.role?.name || '')).map((item) => {
             const isActive = location.pathname === item.href;
             return (
               <Link
@@ -57,7 +58,7 @@ export const MainLayout = () => {
 
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center mb-4 px-2">
-            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm ">
               {user?.name?.[0]}{user?.lastname?.[0]}
             </div>
             <div className="ml-3 overflow-hidden">

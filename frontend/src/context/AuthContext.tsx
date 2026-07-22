@@ -5,9 +5,11 @@ import { User } from '../types/auth';
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  role_id: number | null;
   login: (token: string) => void;
   logout: () => void;
   isLoading: boolean;
+  role_name: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
