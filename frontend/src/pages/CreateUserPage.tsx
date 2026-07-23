@@ -17,7 +17,6 @@ export const CreateUserPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState("");
-
     useEffect(() => {
         const fetchRoles = async () => {
             try{
@@ -62,8 +61,8 @@ export const CreateUserPage = () => {
     return (
         <div className="max-w-2xl mx-auto">
             <div className="flex items-center mb-8">
-                <Link to="/users" className="mr-4 p-2 text-gray-400 hover:text-blue-600 gover:bg-blue-50 rounded-lg transition-colors">
-                    <ArrowLeft className="w-6 h-6"/>
+                <Link to="/users" className="mr-4 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <ArrowLeft className="w-20 h-20 text-blue-400 hover:text-blue-600"/>
                 </Link>
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center">
