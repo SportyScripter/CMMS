@@ -29,14 +29,6 @@ const adminActions = [
     bgColor: "bg-emerald-100",
   },
   {
-    title: "Wyszukaj użytkownika",
-    description: "Znajdź pracownika po numerze SAP, imieniu lub nazwisku.",
-    icon: Search,
-    href: "/users/search",
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
-  },
-  {
     title: "Przeglądaj użytkowników",
     description:
       "Zobacz pełną listę pracowników w systemie i zarządzaj ich kontami.",
