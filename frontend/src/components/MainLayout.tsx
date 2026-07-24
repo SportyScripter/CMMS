@@ -17,7 +17,7 @@ const navigation = [
   { name: 'Maszyny', href: '/machines', icon: Settings, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
   { name: 'Awarie', href: '/failures', icon: Wrench, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
   { name: 'Kalendarz Zleceń', href: '/calendar', icon: CalendarClock, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
-  { name: 'Magazyn', href: '/inventory', icon: Package, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
+  { name: 'Magazyn', href: '/parts', icon: Package, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
   { name: 'Wiadomości', href: '/messages', icon: MessageSquare, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
   { name: 'Użytkownicy', href: '/users', icon: IdCard, allowedRoles: ['Super Admin','Kierownik','Administrator'] },
 ];
