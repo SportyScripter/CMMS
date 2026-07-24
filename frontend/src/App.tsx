@@ -9,7 +9,7 @@ import { RoleListPage } from './pages/RoleListPage';
 import { UserListPage } from './pages/UserListPage';
 import {CreateUserPage} from './pages/CreateUserPage';
 import { MachineListPage } from './pages/MachineListPage';
-
+import { MachineCreatePage } from './pages/MachineCreatePage';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
@@ -41,6 +41,7 @@ const AppRoutes = () => {
       <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="machines" element={<MachineListPage />} />
+        <Route path="machines/create" element={<MachineCreatePage />} />
         <Route path="failures" element={<div><h1 className="text-2xl font-bold mb-4">Awarie</h1></div>} />
         <Route path="calendar" element={<div><h1 className="text-2xl font-bold mb-4">Kalendarz</h1></div>} />
         <Route path="inventory" element={<div><h1 className="text-2xl font-bold mb-4">Magazyn</h1></div>} />
