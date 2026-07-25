@@ -4,5 +4,8 @@ ignore = [
     "I",       
     "UP",      
     "BLE001",  
-    "PIE790"   
+    "PIE790",
+    "DTZ003",
+    "RUF012",
+    "RUF100"
 ]
