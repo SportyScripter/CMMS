@@ -25,6 +25,12 @@ class Part(Base):
         nullable=False,
         comment="Links to the category (e.g., Bearings, Electrical) for organizational grouping",
     )
+    producer = Column(
+        String,
+        unique=False,
+        nullable=True,
+        comment="Manufacturer or supplier of the part",
+    )
 
     name = Column(
         String,

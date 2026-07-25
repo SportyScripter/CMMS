@@ -11,6 +11,9 @@ class PartBase(BaseModel):
         ...,
         description="Links to the category (e.g., 'Bearings', 'Electrical Components').",
     )
+    producer: Optional[str] = Field(
+        None, max_length=100, description="Manufacturer or supplier of the part."
+    )
     name: str = Field(
         ..., max_length=100, description="Descriptive name or part number indentifier."
     )
@@ -63,6 +66,11 @@ class PartUpdate(BaseModel):
     """
 
     category_id: Optional[int] = Field(None, description="Updated category ID.")
+    producer: Optional[str] = Field(
+        None,
+        max_length=100,
+        description="Updated manufacturer or supplier of the part.",
+    )
     name: Optional[str] = Field(
         None,
         max_length=100,
