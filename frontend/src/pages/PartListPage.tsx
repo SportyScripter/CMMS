@@ -14,6 +14,8 @@ import {
   AlertTriangle,
   Link as LinkIcon,
   Info,
+  Wrench,
+  Edit,
 } from "lucide-react";
 
 export const PartListPage = () => {
@@ -28,6 +30,10 @@ export const PartListPage = () => {
   const [categories, setCategories] = useState<PartCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [compatibleMachines, setCompatibleMachines] = useState<any[]>([]);
+  const [isCompatModalOpen, setIsCompatModalOpen] = useState(false);
+  const [isLoadingCompat, setIsLoadingCompat] = useState(false);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filterName, setFilterName] = useState("");
@@ -56,6 +62,18 @@ export const PartListPage = () => {
     };
     fetchWarehouseData();
   }, []);
+
+  const fetchCompatibilities = async (partId: number) => {
+    setIsLoadingCompat(true);
+    try {
+      const response = await api.get(`/part-compatibilities/part/${partId}`);
+      setCompatibleMachines(response.data);
+    } catch (err) {
+      console.error("Nie udało się pobrać kompatybilnych maszyn", err);
+    } finally {
+      setIsLoadingCompat(false);
+    }
+  };
 
   const getCategoryName = (categoryId: number) => {
     const category = categories.find((c) => c.id === categoryId);
@@ -122,7 +140,7 @@ export const PartListPage = () => {
               }`}
             >
               <Filter className="w-4 h-4 mr-2" />
-              Filtuj
+              Filtruj
             </button>
           )}
           {canManageParts && (
@@ -153,7 +171,7 @@ export const PartListPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                Prducent / Dostawca
+                Producent / Dostawca
               </label>
               <input
                 type="text"
@@ -252,7 +270,7 @@ export const PartListPage = () => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-600">
                   <th className="px-6 py-4 w-12 text-center">#</th>
-                  <th className="px-6 py-4">producent</th>
+                  <th className="px-6 py-4">Producent</th>
                   <th className="px-6 py-4">Nazwa</th>
                   <th className="px-6 py-4">Typ</th>
                   <th className="px-6 py-4">Kategoria</th>
@@ -274,7 +292,9 @@ export const PartListPage = () => {
                         {index + 1}
                       </td>
                       <td className="px-6 py-4 font-semibold text-gray-900">
-                        {part.producer || <span className="italic text-gray-300">Brak</span>}
+                        {part.producer || (
+                          <span className="italic text-gray-300">Brak</span>
+                        )}
                       </td>
 
                       <td className="px-6 py-4 font-semibold text-gray-900">
@@ -330,13 +350,25 @@ export const PartListPage = () => {
           </div>
         )}
       </div>
+
       {selectedPart && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden relative">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900">
-                Szczegóły części
-              </h2>
+              <div className="flex items-center gap-4">
+                <h2 className="text-xl font-bold text-gray-900">
+                  Szczegóły części
+                </h2>
+                {canManageParts && (
+                  <Link
+                    to={`/parts/${selectedPart.id}/edit`}
+                    className="flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors shadow-sm"
+                  >
+                    <Edit className="w-3.5 h-3.5 mr-1.5" />
+                    Przejdź do edycji
+                  </Link>
+                )}
+              </div>
               <button
                 onClick={() => setSelectedPart(null)}
                 className="text-gray-400 hover:text-gray-500"
@@ -344,6 +376,7 @@ export const PartListPage = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <div className="p-6">
               <div className="grid grid-cols-2 gap-y-4 gap-x-8">
                 <div>
@@ -411,7 +444,9 @@ export const PartListPage = () => {
                   </p>
                 </div>
               </div>
-              {(selectedPart.url_address || selectedPart.docs) && (
+              {(selectedPart.url_address ||
+                selectedPart.docs ||
+                selectedPart.id) && (
                 <div className="mt-8 pt-6 border-t border-gray-100 flex gap-4">
                   {selectedPart.url_address && (
                     <a
@@ -435,19 +470,86 @@ export const PartListPage = () => {
                       Dokumentacja techniczna
                     </a>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCompatModalOpen(true);
+                      fetchCompatibilities(selectedPart.id);
+                    }}
+                    className="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-sm font-medium flex items-center transition-colors ml-auto"
+                  >
+                    <Wrench className="w-4 h-4 mr-2" /> Pasuje do urządzeń
+                  </button>
                 </div>
               )}
             </div>
-            {canManageParts && (
-              <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
-                <Link
-                  to={`/parts/${selectedPart.id}/edit`}
-                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
-                >
-                  Przejdź do edycji
-                </Link>
+
+            {isCompatModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+                  <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50">
+                    <h3 className="font-semibold text-gray-900 flex items-center text-base">
+                      <Wrench className="w-5 h-5 text-emerald-600 mr-2" />
+                      Kompatybilne urządzenia dla: {selectedPart.name}
+                    </h3>
+                    <button
+                      onClick={() => setIsCompatModalOpen(false)}
+                      className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="p-4 overflow-y-auto space-y-2 flex-1">
+                    {isLoadingCompat ? (
+                      <div className="flex justify-center items-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                      </div>
+                    ) : compatibleMachines.length === 0 ? (
+                      <p className="text-center text-gray-500 py-8 text-sm">
+                        Ta część nie została przypisana do żadnego urządzenia.
+                      </p>
+                    ) : (
+                      compatibleMachines.map((item) => (
+                        <div
+                          key={`${item.part_id}-${item.machine_id}`}
+                          className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex flex-col"
+                        >
+                          <span className="font-medium text-gray-900 text-sm">
+                            {item.machine.name}
+                          </span>
+                          {item.machine.location && (
+                            <span className="text-xs text-gray-500 mt-0.5">
+                              Lokalizacja: {item.machine.location}
+                            </span>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setIsCompatModalOpen(false)}
+                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                    >
+                      Zamknij
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
+
+            <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedPart(null)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
+              >
+                Zamknij
+              </button>
+            </div>
           </div>
         </div>
       )}
