@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Part, PartCategory } from "../types/part";
+import { PartEditModal } from "../components/PartEditModal";
 import { useAuth } from "../context/AuthContext";
 import {
   ArrowLeft,
@@ -33,6 +34,7 @@ export const PartListPage = () => {
 
   const [compatibleMachines, setCompatibleMachines] = useState<any[]>([]);
   const [isCompatModalOpen, setIsCompatModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoadingCompat, setIsLoadingCompat] = useState(false);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -360,13 +362,14 @@ export const PartListPage = () => {
                   Szczegóły części
                 </h2>
                 {canManageParts && (
-                  <Link
-                    to={`/parts/${selectedPart.id}/edit`}
-                    className="flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors shadow-sm"
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors shadow-sm cursor-pointer"
                   >
                     <Edit className="w-3.5 h-3.5 mr-1.5" />
                     Przejdź do edycji
-                  </Link>
+                  </button>
                 )}
               </div>
               <button
@@ -483,6 +486,28 @@ export const PartListPage = () => {
                 </div>
               )}
             </div>
+            {isEditModalOpen && selectedPart && (
+              <PartEditModal
+                part={selectedPart}
+                categories={categories}
+                onClose={() => setIsEditModalOpen(false)}
+                onUpdated={async () => {
+                  setIsLoading(true);
+                  try {
+                    const response = await api.get<Part[]>("/parts");
+                    setParts(response.data);
+                    const updatedCurrent = response.data.find(
+                      (p) => p.id === selectedPart.id,
+                    );
+                    if (updatedCurrent) setSelectedPart(updatedCurrent);
+                  } catch (err) {
+                    console.error("Nie udało się odświeżyć listy części", err);
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+              />
+            )}
 
             {isCompatModalOpen && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
