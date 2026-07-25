@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
-from typing import Any, Optional, Union
+from typing import Any
+
 from jose import jwt
 from passlib.context import CryptContext
+
 from core.config import settings
 
 SECRET_KEY = settings.SECRET_KEY
@@ -21,14 +23,15 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(
-    subject: Union[str, Any], expires_delta: Optional[timedelta] = None
+    subject: str | Any,
+    expires_delta: timedelta | None = None,
 ) -> str:
-    "Generate a JWT access token for a given subject (user identifier)."
+    """Generate a JWT access token for a given subject (user identifier)."""
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
         )
     to_encode = {"exp": expire, "sub": str(subject)}
     encode_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

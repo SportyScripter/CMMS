@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from typing import List, Optional
+
 from models.order_type import OrderType
 from schemas.order_type import OrderTypeCreate, OrderTypeUpdate
 
@@ -13,24 +13,26 @@ def create_order_type(db: Session, order_type_in: OrderTypeCreate) -> OrderType:
     return order_type
 
 
-def get_order_type(db: Session, order_type_id: int) -> Optional[OrderType]:
+def get_order_type(db: Session, order_type_id: int) -> OrderType | None:
     """Retrieve an order type by its ID."""
     return db.query(OrderType).filter(OrderType.id == order_type_id).first()
 
 
-def get_order_type_by_name(db: Session, name: str) -> Optional[OrderType]:
+def get_order_type_by_name(db: Session, name: str) -> OrderType | None:
     """Retrieve an order type by its name."""
     return db.query(OrderType).filter(OrderType.name == name).first()
 
 
-def get_order_types(db: Session, skip: int = 0, limit: int = 100) -> List[OrderType]:
+def get_order_types(db: Session, skip: int = 0, limit: int = 100) -> list[OrderType]:
     """Retrieve a list of order types with pagination."""
     return db.query(OrderType).offset(skip).limit(limit).all()
 
 
 def update_order_type(
-    db: Session, order_type_id: int, order_type_in: OrderTypeUpdate
-) -> Optional[OrderType]:
+    db: Session,
+    order_type_id: int,
+    order_type_in: OrderTypeUpdate,
+) -> OrderType | None:
     """Update an existing order type in the database."""
     db_order_type = db.query(OrderType).filter(OrderType.id == order_type_id).first()
     if not db_order_type:

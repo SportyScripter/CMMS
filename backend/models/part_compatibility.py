@@ -1,11 +1,11 @@
-from db.database import Base
-from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
+
+from db.database import Base
 
 
 class PartCompatibility(Base):
-    """
-    Association object mapping spare parts to the machines they are compatible with.
+    """Association object mapping spare parts to the machines they are compatible with.
 
     This table enables the CMMS to filter the parts inventory based on the specific
     machine being repaired, significantly reducing search time for technicians
@@ -14,7 +14,7 @@ class PartCompatibility(Base):
 
     __tablename__ = "part_compatibilities"
     __table_args__ = {
-        "comment": "Defines compatibility mapping between spare parts and machines"
+        "comment": "Defines compatibility mapping between spare parts and machines",
     }
 
     part_id = Column(

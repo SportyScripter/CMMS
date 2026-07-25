@@ -1,17 +1,17 @@
-import sys
 import os
+import sys
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
+
 from alembic import context  # type: ignore
 
 # --- KRYTYCZNA POPRAWKA: Wymuszenie ścieżki do głównego folderu backend ---
 # Dzięki temu Python traktuje folder 'backend' jako główny moduł.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from db.database import Base
 from core.config import settings
+from db.database import Base
 
 # Zamiast 'from models import *', importujemy po prostu cały moduł.
 # To wymusi na Pythonie wykonanie Twojego pliku models/__init__.py

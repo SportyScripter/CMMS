@@ -1,11 +1,8 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class DepartmentBase(BaseModel):
-    """
-    Base schema for Department containing common attributes.
-    """
+    """Base schema for Department containing common attributes."""
 
     name: str = Field(
         ...,
@@ -15,33 +12,31 @@ class DepartmentBase(BaseModel):
 
 
 class DepartmentCreate(DepartmentBase):
-    """
-    Schema used for creating a new Department.
+    """Schema used for creating a new Department.
     Inherits all required fields directly from DepartmentBase.
     """
 
-    pass
-
 
 class DepartmentUpdate(BaseModel):
-    """
-    Schema used for updating an existing Department.
+    """Schema used for updating an existing Department.
     Field are optional to allow for partial updates.
     """
 
-    name: Optional[str] = Field(
-        None, max_length=100, description="Updated department name."
+    name: str | None = Field(
+        None,
+        max_length=100,
+        description="Updated department name.",
     )
 
 
 class DepartmentResponse(DepartmentBase):
-    """
-    Schema used for returning Department data in API responses.
+    """Schema used for returning Department data in API responses.
     Includes database-generated ID.
     """
 
     id: int = Field(
-        ..., description="The unique internal identifier of the department."
+        ...,
+        description="The unique internal identifier of the department.",
     )
 
     model_config = {"from_attributes": True}

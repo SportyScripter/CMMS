@@ -1,36 +1,41 @@
-from schemas.user import UserResponse
-from schemas.machine import MachineResponse
-from schemas.order_type import OrderTypeResponse
-from schemas.attachment import AttachmentResponse
-from schemas.order_checklist_item import OrderChecklistItemResponse
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
+from schemas.attachment import AttachmentResponse
+from schemas.machine import MachineResponse
+from schemas.order_checklist_item import OrderChecklistItemResponse
+from schemas.order_type import OrderTypeResponse
+from schemas.user import UserResponse
 
 
 class OrderCalendarBase(BaseModel):
-    """
-    Base schema for OrderCalendar containing core scheduling attributes.
-    """
+    """Base schema for OrderCalendar containing core scheduling attributes."""
 
     order_type_id: int = Field(
-        ..., description="Reference to the classification of the maintenance task."
+        ...,
+        description="Reference to the classification of the maintenance task.",
     )
     description: str = Field(..., description="Summary of the work to be performed.")
     principal_id: int = Field(
-        ..., description="User who created or requested the order."
+        ...,
+        description="User who created or requested the order.",
     )
-    performed_id: Optional[int] = Field(
-        None, description="Technician assigned to execute the task."
+    performed_id: int | None = Field(
+        None,
+        description="Technician assigned to execute the task.",
     )
-    machine_id: Optional[int] = Field(
-        None, description="Target machine for the maintenance task."
+    machine_id: int | None = Field(
+        None,
+        description="Target machine for the maintenance task.",
     )
-    comments: Optional[str] = Field(
-        None, description="Additional notes regarding the execution or scope of work."
+    comments: str | None = Field(
+        None,
+        description="Additional notes regarding the execution or scope of work.",
     )
     scheduled_date: datetime = Field(
-        ..., description="Planned date and time for task execution."
+        ...,
+        description="Planned date and time for task execution.",
     )
     status: str = Field(
         ...,
@@ -40,61 +45,60 @@ class OrderCalendarBase(BaseModel):
 
 
 class OrderCalendarCreate(OrderCalendarBase):
-    """
-    Schema used for creating a new OrderCalendar entry.
+    """Schema used for creating a new OrderCalendar entry.
     Inherits all required fields directly from OrderCalendarBase.
     """
 
-    pass
-
 
 class OrderCalendarUpdate(BaseModel):
-    """
-    Schema used for updating an existing OrderCalendar entry.
+    """Schema used for updating an existing OrderCalendar entry.
     All fields are optional to allow for partial updates (PATCH requests).
     """
 
-    order_type_id: Optional[int] = Field(
-        None, description="Updated order type reference."
+    order_type_id: int | None = Field(None, description="Updated order type reference.")
+    description: str | None = Field(
+        None,
+        description="Updated summary of the work to be performed.",
     )
-    description: Optional[str] = Field(
-        None, description="Updated summary of the work to be performed."
+    principal_id: int | None = Field(
+        None,
+        description="Updated user who requested the order.",
     )
-    principal_id: Optional[int] = Field(
-        None, description="Updated user who requested the order."
+    performed_id: int | None = Field(None, description="Updated technician assigned.")
+    machine_id: int | None = Field(None, description="Updated target machine.")
+    comments: str | None = Field(None, description="Updated additional notes.")
+    scheduled_date: datetime | None = Field(
+        None,
+        description="Updated planned date and time.",
     )
-    performed_id: Optional[int] = Field(
-        None, description="Updated technician assigned."
-    )
-    machine_id: Optional[int] = Field(None, description="Updated target machine.")
-    comments: Optional[str] = Field(None, description="Updated additional notes.")
-    scheduled_date: Optional[datetime] = Field(
-        None, description="Updated planned date and time."
-    )
-    status: Optional[str] = Field(
-        None, max_length=50, description="Updated current execution state."
+    status: str | None = Field(
+        None,
+        max_length=50,
+        description="Updated current execution state.",
     )
 
 
 class OrderCalendarResponse(OrderCalendarBase):
-    """
-    Schema used for returning OrderCalendar data in API responses.
+    """Schema used for returning OrderCalendar data in API responses.
     Includes the database-generated ID.
     """
 
     id: int = Field(
-        ..., description="The unique internal identifier of the calendar entry."
+        ...,
+        description="The unique internal identifier of the calendar entry.",
     )
     created_at: datetime = Field(
-        ..., description="Timestamp when the order was created."
+        ...,
+        description="Timestamp when the order was created.",
     )
     updated_at: datetime = Field(
-        ..., description="Timestamp when the order was last updated."
+        ...,
+        description="Timestamp when the order was last updated.",
     )
     order_type: OrderTypeResponse
     principal: UserResponse
-    performed: Optional[UserResponse] = None
-    order_machine: Optional[MachineResponse] = None
-    attachments: List[AttachmentResponse] = []
-    checklist_items: List[OrderChecklistItemResponse] = []
+    performed: UserResponse | None = None
+    order_machine: MachineResponse | None = None
+    attachments: list[AttachmentResponse] = []
+    checklist_items: list[OrderChecklistItemResponse] = []
     model_config = {"from_attributes": True}

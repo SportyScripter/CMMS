@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
+
 from sqlalchemy import Column, DateTime
 
 
 class TimestampMixin:
-    """
-    Provides common timestamp columns (created_at, updated_at) for models.
+    """Provides common timestamp columns (created_at, updated_at) for models.
     Automatically handles setting the creation time and updating the modification time.
     """
 

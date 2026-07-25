@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
-from typing import List, Optional
+
 from models.role import Role
 from schemas.role import RoleCreate, RoleUpdate
 
 
-def get_role(db: Session, role_id: int) -> Optional[Role]:
+def get_role(db: Session, role_id: int) -> Role | None:
     return db.query(Role).filter(Role.id == role_id).first()
 
 
-def get_roles(db: Session, skip: int = 0, limit: int = 100) -> List[Role]:
+def get_roles(db: Session, skip: int = 0, limit: int = 100) -> list[Role]:
     return db.query(Role).offset(skip).limit(limit).all()
 
 

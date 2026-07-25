@@ -1,11 +1,10 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class MachineBase(BaseModel):
-    """
-    Base schema for Machine containing core attributes.
+    """Base schema for Machine containing core attributes.
     This schema is inherited by other machine-related schemas.
     """
 
@@ -32,12 +31,9 @@ class MachineBase(BaseModel):
 
 
 class MachineCreate(MachineBase):
-    """
-    Schema used for registering a new Machine in the CMMS.
+    """Schema used for registering a new Machine in the CMMS.
     Inherit all required fields directly from MachineBase.
     """
-
-    pass
 
 
 class MachineUpdate(BaseModel):
@@ -45,40 +41,44 @@ class MachineUpdate(BaseModel):
     All fields are optional to allow for partical updates (PATCH requests).
     """
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         max_length=255,
         description="Updated official designation or asset tag of the machine.",
     )
-    location: Optional[str] = Field(
+    location: str | None = Field(
         None,
         max_length=255,
         description="Updated physical location on the production floor.",
     )
-    qr_code: Optional[str] = Field(
+    qr_code: str | None = Field(
         None,
         max_length=255,
         description="Updated unique QR identifier for the machine.",
     )
-    status: Optional[str] = Field(
-        None, max_length=50, description="Updated operational state of the machine."
+    status: str | None = Field(
+        None,
+        max_length=50,
+        description="Updated operational state of the machine.",
     )
 
 
 class MachineResponse(MachineBase):
-    """
-    Schema used for returning Machine data in API responses.
+    """Schema used for returning Machine data in API responses.
     Includes database-generated fields like 'id' and timestamps.
     """
 
     id: int = Field(
-        ..., description="The unique identifier of the machine in the database."
+        ...,
+        description="The unique identifier of the machine in the database.",
     )
     created_at: datetime = Field(
-        ..., description="Timestamp when the machine record was created."
+        ...,
+        description="Timestamp when the machine record was created.",
     )
     updated_at: datetime = Field(
-        ..., description="Timestamp when the machine record was last updated."
+        ...,
+        description="Timestamp when the machine record was last updated.",
     )
 
     model_config = {"from_attributes": True}

@@ -1,12 +1,13 @@
-from db.database import Base
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.orm import relationship
+
+from db.database import Base
 
 
 class Machine(Base):
-    """
-    Represents a physical machine or piece of equipment on the production floor.
+    """Represents a physical machine or piece of equipment on the production floor.
 
     This is a core entity in the CMMS. Machines are identified by a unique QR code
     and can have multiple reported failures, compatible spare parts, and scheduled
@@ -15,7 +16,7 @@ class Machine(Base):
 
     __tablename__ = "machines"
     __table_args__ = {
-        "comment": "Core inventory of physical machines and production equipment"
+        "comment": "Core inventory of physical machines and production equipment",
     }
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

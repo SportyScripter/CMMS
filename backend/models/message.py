@@ -1,13 +1,14 @@
 from datetime import datetime
-from db.database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
+from db.database import Base
 from models.mixins import TimestampMixin
 
 
 class Message(Base, TimestampMixin):
-    """
-    Represents internal communications within the CMMS.
+    """Represents internal communications within the CMMS.
 
     Messages support threading via parent_message_id, allowing users to reply
     to specific communications. This table tracks the sender, the content,
@@ -52,15 +53,21 @@ class Message(Base, TimestampMixin):
 
     # Relationships
     sender = relationship(
-        "User", back_populates="sent_messages", foreign_keys=[sender_id]
+        "User",
+        back_populates="sent_messages",
+        foreign_keys=[sender_id],
     )
 
     # Threading: Link to replies
     replies = relationship("Message", back_populates="parent_message", remote_side=[id])
     parent_message = relationship(
-        "Message", back_populates="replies", remote_side=[parent_message_id]
+        "Message",
+        back_populates="replies",
+        remote_side=[parent_message_id],
     )
 
     recipients = relationship(
-        "MessageRecipient", back_populates="message", cascade="all, delete-orphan"
+        "MessageRecipient",
+        back_populates="message",
+        cascade="all, delete-orphan",
     )

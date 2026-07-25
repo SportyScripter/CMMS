@@ -1,27 +1,28 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
-from models.user import User
-from schemas.department import DepartmentCreate, DepartmentUpdate, DepartmentResponse
-from crud import crud_departments
 from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from crud import crud_departments
+from models.user import User
+from schemas.department import DepartmentCreate, DepartmentResponse, DepartmentUpdate
 
 router = APIRouter()
 
 
 @router.post(
-    "/", response_model=DepartmentResponse, status_code=status.HTTP_201_CREATED
+    "/",
+    response_model=DepartmentResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 def create_department(
     department_in: DepartmentCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_MACHINES),
 ) -> Any:
-    """
-    Create a new department.
-    """
+    """Create a new department."""
     if crud_departments.get_department_by_name(db, name=department_in.name):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -30,16 +31,14 @@ def create_department(
     return crud_departments.create_department(db=db, department_in=department_in)
 
 
-@router.get("/", response_model=List[DepartmentResponse])
+@router.get("/", response_model=list[DepartmentResponse])
 def get_departments(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_READ_ONLY),
 ) -> Any:
-    """
-    Retrieve a list of departments.
-    """
+    """Retrieve a list of departments."""
     return crud_departments.get_departments(db=db, skip=skip, limit=limit)
 
 
@@ -49,9 +48,7 @@ def get_department(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_READ_ONLY),
 ) -> Any:
-    """
-    Retrieve a department by its ID.
-    """
+    """Retrieve a department by its ID."""
     department = crud_departments.get_department(db=db, department_id=department_id)
     if not department:
         raise HTTPException(
@@ -68,12 +65,11 @@ def update_department(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_MACHINES),
 ) -> Any:
-    """
-    Update a department by its ID.
-    """
+    """Update a department by its ID."""
     if department_in.name is not None:
         existing_dept = crud_departments.get_department_by_name(
-            db, name=department_in.name
+            db,
+            name=department_in.name,
         )
         if existing_dept and existing_dept.id != department_id:
             raise HTTPException(
@@ -82,11 +78,14 @@ def update_department(
             )
 
     db_department = crud_departments.update_department(
-        db=db, department_id=department_id, department_update=department_in
+        db=db,
+        department_id=department_id,
+        department_update=department_in,
     )
     if not db_department:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Department not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Department not found",
         )
     return db_department
 
@@ -99,10 +98,12 @@ def delete_department(
 ) -> Any:
     """Delete a specific department."""
     db_department = crud_departments.delete_department(
-        db=db, department_id=department_id
+        db=db,
+        department_id=department_id,
     )
     if not db_department:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Department not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Department not found",
         )
     return db_department

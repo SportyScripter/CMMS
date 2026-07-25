@@ -1,11 +1,11 @@
-from db.database import Base
-from sqlalchemy import Column, Integer, ForeignKey, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
+
+from db.database import Base
 
 
 class MessageRecipient(Base):
-    """
-    Association object linking messages to their intended recipients.
+    """Association object linking messages to their intended recipients.
 
     This Many-to-Many table allows a single message to be broadcast to multiple
     users simultaneously. Crucially, it tracks the individual 'read' status for
@@ -14,7 +14,7 @@ class MessageRecipient(Base):
 
     __tablename__ = "message_recipients"
     __table_args__ = {
-        "comment": "Association table tracking message delivery and read status per user"
+        "comment": "Association table tracking message delivery and read status per user",
     }
 
     message_id = Column(

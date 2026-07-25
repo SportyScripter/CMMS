@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
-from models.part import Part
+
 from models.failure_part import FailurePart
+from models.part import Part
 from schemas.failure_part import FailurePartCreate, FailurePartUpdate
 
 
@@ -12,20 +12,20 @@ def create_failure_part(db: Session, failure_part_in: FailurePartCreate) -> Fail
         raise ValueError("Part not found in inventory.")
     if db_part.quantity < failure_part_in.quantity_used:
         raise ValueError(
-            f"Not enough stock. Available: {db_part.quantity}, Requested: {failure_part_in.quantity_used}"
+            f"Not enough stock. Available: {db_part.quantity}, Requested: {failure_part_in.quantity_used}",
         )
     db_part.quantity -= failure_part_in.quantity_used
     db_failure_part = FailurePart(**failure_part_in.model_dump())
     db.add(db_failure_part)
     db.commit()
     return get_failure_part(
-        db, failure_id=db_failure_part.failure_id, part_id=db_failure_part.part_id
+        db,
+        failure_id=db_failure_part.failure_id,
+        part_id=db_failure_part.part_id,
     )
 
 
-def get_failure_part(
-    db: Session, failure_id: int, part_id: int
-) -> Optional[FailurePart]:
+def get_failure_part(db: Session, failure_id: int, part_id: int) -> FailurePart | None:
     """Retrieve a specific part consumption record for a failure."""
     return (
         db.query(FailurePart)
@@ -35,7 +35,7 @@ def get_failure_part(
     )
 
 
-def get_failure_parts_by_failure(db: Session, failure_id: int) -> List[FailurePart]:
+def get_failure_parts_by_failure(db: Session, failure_id: int) -> list[FailurePart]:
     """Retrieve all part consumption records for a specific failure."""
     return (
         db.query(FailurePart)
@@ -46,8 +46,11 @@ def get_failure_parts_by_failure(db: Session, failure_id: int) -> List[FailurePa
 
 
 def update_failure_part(
-    db: Session, failure_id: int, part_id: int, failure_part_in: FailurePartUpdate
-) -> Optional[FailurePart]:
+    db: Session,
+    failure_id: int,
+    part_id: int,
+    failure_part_in: FailurePartUpdate,
+) -> FailurePart | None:
     """Update part consumption quantity and adjust warehouse stock accordingly."""
     db_failure_part = get_failure_part(db, failure_id, part_id)
     if not db_failure_part:
@@ -60,7 +63,7 @@ def update_failure_part(
         difference = failure_part_in.quantity_used - db_failure_part.quantity_used
         if db_part.quantity < difference:
             raise ValueError(
-                f"Not enough stock to increase quantity. Available: {db_part.quantity}"
+                f"Not enough stock to increase quantity. Available: {db_part.quantity}",
             )
         db_part.quantity -= difference
         db_failure_part.quantity_used = failure_part_in.quantity_used
@@ -70,8 +73,10 @@ def update_failure_part(
 
 
 def delete_failure_part(
-    db: Session, failure_id: int, part_id: int
-) -> Optional[FailurePart]:
+    db: Session,
+    failure_id: int,
+    part_id: int,
+) -> FailurePart | None:
     """Remove a part consumption record and return the parts to the warehouse."""
     db_failure_part = get_failure_part(db, failure_id, part_id)
     if not db_failure_part:

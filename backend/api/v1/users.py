@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import Any
 
-from api.dependencies import get_db, get_current_user
-from schemas.user import UserCreate, UserUpdate, UserResponse
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from api.dependencies import get_current_user, get_db
+from core.permissions import ALLOW_MANAGE_USERS
 from crud import crud_users
 from models.user import User
-from core.permissions import ALLOW_MANAGE_USERS
+from schemas.user import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()
 
@@ -29,7 +30,8 @@ def create_user(
 
 @router.get("/me", response_model=UserResponse)
 def read_user_me(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> Any:
     """Read information about the current user."""
     return current_user
@@ -45,7 +47,8 @@ def read_user(
     user = crud_users.get_user(db, user_id=user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
     return user
 
@@ -60,7 +63,8 @@ def read_users(
     users = crud_users.get_users(db)
     if users is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No users found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No users found",
         )
     return users
 
@@ -76,7 +80,8 @@ def update_user(
     user = crud_users.get_user(db, user_id=user_id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
     return crud_users.update_user(db=db, db_user=user, user_id=user_id)
 
@@ -87,9 +92,7 @@ def delete_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_USERS),
 ) -> Any:
-    """
-    Delete a specific user ID (only if the current user has the required role
-    """
+    """Delete a specific user ID (only if the current user has the required role"""
     user = crud_users.get_user(db, user_id=user_id)
     if current_user.id == user_id:
         raise HTTPException(
@@ -98,7 +101,8 @@ def delete_user(
         )
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
     db.delete(user)
     db.commit()

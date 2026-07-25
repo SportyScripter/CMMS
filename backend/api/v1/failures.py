@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
-from models.user import User
-from schemas.failure import FailureCreate, FailureUpdate, FailureResponse
+from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
 from crud import crud_failures
-from core.permissions import ALLOW_READ_ONLY, ALLOW_MANAGE_MACHINES
+from models.user import User
+from schemas.failure import FailureCreate, FailureResponse, FailureUpdate
 
 router = APIRouter()
 
@@ -17,16 +18,14 @@ def create_failure(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_READ_ONLY),
 ) -> Any:
-    """
-    Create a new failure.
-    """
+    """Create a new failure."""
     failure_in.submitter_id = (
         current_user.id
     )  # Set the submitter_id to the current user's ID
     return crud_failures.create_failure(db=db, failure_in=failure_in)
 
 
-@router.get("/", response_model=List[FailureResponse])
+@router.get("/", response_model=list[FailureResponse])
 def get_failures(
     skip: int = 0,
     limit: int = 100,
@@ -62,7 +61,9 @@ def update_failure(
 ) -> Any:
     """Update a failure by its ID."""
     db_failure = crud_failures.update_failure(
-        db=db, failure_id=failure_id, failure_update=failure_in
+        db=db,
+        failure_id=failure_id,
+        failure_update=failure_in,
     )
     if not db_failure:
         raise HTTPException(

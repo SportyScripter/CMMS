@@ -1,14 +1,14 @@
-import sys
 import os
+import sys
 
 sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
+from crud import crud_roles, crud_users
 from db.database import SessionLocal
 from schemas.role import RoleCreate
 from schemas.user import UserCreate
-from crud import crud_roles, crud_users
 
 
 def seed_admin():
@@ -20,7 +20,8 @@ def seed_admin():
         admin_role_description = "Super Admin role with all permissions"
         roles = crud_roles.get_roles(db)
         admin_role = next(
-            (role for role in roles if role.name == admin_role_name), None
+            (role for role in roles if role.name == admin_role_name),
+            None,
         )
 
         if not admin_role:
@@ -50,7 +51,7 @@ def seed_admin():
             print("Admin user created successfully.")
         else:
             print(f"Admin user with SAP number '{admin_sap_number}' already exists.")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"An error occurred during seeding: {e}")
     finally:
         db.close()

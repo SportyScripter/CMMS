@@ -1,12 +1,12 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
 from schemas.role import RoleMinimal
 
 
 class UserBase(BaseModel):
-    """
-    Base schema for User containing common attributes.
+    """Base schema for User containing common attributes.
     This schema is inherited by other user-related schemas.
     """
 
@@ -17,7 +17,9 @@ class UserBase(BaseModel):
     )
     name: str = Field(..., max_length=50, description="The given name of the employee.")
     lastname: str = Field(
-        ..., max_length=50, description="The surname of the employee."
+        ...,
+        max_length=50,
+        description="The surname of the employee.",
     )
     is_active: bool = Field(
         default=False,
@@ -26,8 +28,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    """
-    Schema used by Administrator or other authorized personel to register a new employee (User) in the CMMS.
+    """Schema used by Administrator or other authorized personel to register a new employee (User) in the CMMS.
     Inherit from UserBase and adds the required password and role_id fields.
     """
 
@@ -37,26 +38,30 @@ class UserCreate(UserBase):
         description="The raw password for the user, which must be hashed before saving to the DB.",
     )
     role_id: int = Field(
-        ..., description="The internal databese ID of the Role assigned to this user."
+        ...,
+        description="The internal databese ID of the Role assigned to this user.",
     )
 
 
 class UserUpdate(BaseModel):
-    """
-    Schema used for updating an existing User's information.
+    """Schema used for updating an existing User's information.
     All fiields are optional to allow for partical updates (PATCH requests).
     """
 
-    sap_number: Optional[str] = Field(
-        None, max_length=20, description="Updated SAP number."
+    sap_number: str | None = Field(
+        None,
+        max_length=20,
+        description="Updated SAP number.",
     )
-    name: Optional[str] = Field(None, max_length=50, description="Updated given name.")
-    lastname: Optional[str] = Field(None, max_length=50, description="Updated surname.")
-    is_active: Optional[bool] = Field(None, description="Updated active status.")
-    password: Optional[str] = Field(
-        None, min_length=8, description="Updated raw password."
+    name: str | None = Field(None, max_length=50, description="Updated given name.")
+    lastname: str | None = Field(None, max_length=50, description="Updated surname.")
+    is_active: bool | None = Field(None, description="Updated active status.")
+    password: str | None = Field(
+        None,
+        min_length=8,
+        description="Updated raw password.",
     )
-    role_id: Optional[int] = Field(None, description="Updated role ID.")
+    role_id: int | None = Field(None, description="Updated role ID.")
 
 
 class UserResponse(UserBase):
@@ -67,10 +72,12 @@ class UserResponse(UserBase):
     id: int = Field(..., description="The unique identifier od the user.")
     role_id: int = Field(..., description="The ID of the Role assigmed to the user.")
     created_at: datetime = Field(
-        ..., description="Timestamp of when the user was created."
+        ...,
+        description="Timestamp of when the user was created.",
     )
     updated_at: datetime = Field(
-        ..., description="Timestamp of the last update to the user profile."
+        ...,
+        description="Timestamp of the last update to the user profile.",
     )
     role: RoleMinimal = Field(..., description="Details of the assigned role")
     model_config = {"from_attributes": True}

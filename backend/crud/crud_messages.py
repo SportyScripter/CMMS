@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
 
 from models.message import Message
 from models.message_recipient import MessageRecipient
@@ -21,7 +20,7 @@ def create_message(db: Session, message_in: MessageCreate) -> Message:
     return get_message(db, message_id=db_message.id)
 
 
-def get_message(db: Session, message_id: int) -> Optional[Message]:
+def get_message(db: Session, message_id: int) -> Message | None:
     """Retrieve a specific message with sender and recipients fully loaded"""
     return (
         db.query(Message)
@@ -35,8 +34,11 @@ def get_message(db: Session, message_id: int) -> Optional[Message]:
 
 
 def get_inbox_for_user(
-    db: Session, user_id: int, skip: int = 0, limit: int = 100
-) -> List[Message]:
+    db: Session,
+    user_id: int,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[Message]:
     """Retrieve all messages received by a specific user (Inbox)."""
     return (
         db.query(Message)
@@ -54,8 +56,11 @@ def get_inbox_for_user(
 
 
 def get_outbox_for_user(
-    db: Session, user_id: int, skip: int = 0, limit: int = 100
-) -> List[Message]:
+    db: Session,
+    user_id: int,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[Message]:
     """Retrieve all messages sent by a specific user (Outbox)."""
     return (
         db.query(Message)
@@ -71,9 +76,7 @@ def get_outbox_for_user(
     )
 
 
-def mark_message_as_read(
-    db: Session, message_id: int, user_id: int
-) -> Optional[Message]:
+def mark_message_as_read(db: Session, message_id: int, user_id: int) -> Message | None:
     """Mark a specific message as read for a specific user."""
     db_recipient = (
         db.query(MessageRecipient)
@@ -108,7 +111,7 @@ def delete_message_for_recipient(db: Session, message_id: int, user_id: int) -> 
     return False
 
 
-def delete_message(db: Session, message_id: int) -> Optional[Message]:
+def delete_message(db: Session, message_id: int) -> Message | None:
     """Completely delete a message from the database (for sender/admin)."""
     db_message = get_message(db, message_id)
     if not db_message:

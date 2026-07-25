@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
+from core.permissions import ALLOW_READ_ONLY
+from crud import crud_messages
 from models.user import User
 from schemas.message import MessageCreate, MessageResponse
-from crud import crud_messages
-from core.permissions import ALLOW_READ_ONLY
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ def create_message(
     return crud_messages.create_message(db=db, message_in=message_in)
 
 
-@router.get("/inbox", response_model=List[MessageResponse])
+@router.get("/inbox", response_model=list[MessageResponse])
 def get_inbox(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_READ_ONLY),
@@ -31,11 +32,14 @@ def get_inbox(
 ) -> Any:
     """Retrieve all messages received by the currently authenticated user."""
     return crud_messages.get_inbox_for_user(
-        db=db, user_id=current_user.id, skip=skip, limit=limit
+        db=db,
+        user_id=current_user.id,
+        skip=skip,
+        limit=limit,
     )
 
 
-@router.get("/outbox", response_model=List[MessageResponse])
+@router.get("/outbox", response_model=list[MessageResponse])
 def get_outbox(
     skip: int = 0,
     limit: int = 100,
@@ -44,7 +48,10 @@ def get_outbox(
 ) -> Any:
     """Retrieve all messages sent by the currently authenticated user."""
     return crud_messages.get_outbox_for_user(
-        db=db, user_id=current_user.id, skip=skip, limit=limit
+        db=db,
+        user_id=current_user.id,
+        skip=skip,
+        limit=limit,
     )
 
 
@@ -58,7 +65,8 @@ def get_message(
     db_message = crud_messages.get_message(db=db, message_id=message_id)
     if not db_message:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Message not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Message not found",
         )
     return db_message
 
@@ -71,7 +79,9 @@ def mark_as_read(
 ) -> Any:
     """Mark a specific message as read for the currently authenticated user."""
     result = crud_messages.mark_message_as_read(
-        db=db, message_id=message_id, user_id=current_user.id
+        db=db,
+        message_id=message_id,
+        user_id=current_user.id,
     )
     if not result:
         raise HTTPException(
@@ -89,7 +99,9 @@ def delete_from_inbox(
 ) -> Any:
     """Remove a message from the currently authenticated user's inbox."""
     success = crud_messages.delete_message_for_recipient(
-        db=db, message_id=message_id, user_id=current_user.id
+        db=db,
+        message_id=message_id,
+        user_id=current_user.id,
     )
     if not success:
         raise HTTPException(
@@ -109,7 +121,8 @@ def delete_message_globally(
     db_message = crud_messages.get_message(db=db, message_id=message_id)
     if not db_message:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Message not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Message not found",
         )
 
     if db_message.sender_id != current_user.id:

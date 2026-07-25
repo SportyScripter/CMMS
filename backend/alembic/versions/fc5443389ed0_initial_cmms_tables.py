@@ -6,16 +6,17 @@ Create Date: 2026-07-09 17:12:12.870101
 
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
+
+import sqlalchemy as sa
 
 from alembic import op  # type: ignore
-import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "fc5443389ed0"
-down_revision: Union[str, Sequence[str], None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -25,7 +26,10 @@ def upgrade() -> None:
         "departments",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
-            "name", sa.String(), nullable=False, comment="Name of the department"
+            "name",
+            sa.String(),
+            nullable=False,
+            comment="Name of the department",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
@@ -37,10 +41,16 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("name", sa.String(), nullable=False, comment="Name of the machine"),
         sa.Column(
-            "location", sa.String(), nullable=False, comment="Location of the machine"
+            "location",
+            sa.String(),
+            nullable=False,
+            comment="Location of the machine",
         ),
         sa.Column(
-            "qr_code", sa.String(), nullable=False, comment="QR code of the machine"
+            "qr_code",
+            sa.String(),
+            nullable=False,
+            comment="QR code of the machine",
         ),
         sa.Column(
             "status",
@@ -70,7 +80,10 @@ def upgrade() -> None:
         "order_types",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
-            "name", sa.String(), nullable=False, comment="Name of the order type"
+            "name",
+            sa.String(),
+            nullable=False,
+            comment="Name of the order type",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
@@ -81,14 +94,20 @@ def upgrade() -> None:
         "part_categories",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column(
-            "name", sa.String(), nullable=False, comment="Name of the part category"
+            "name",
+            sa.String(),
+            nullable=False,
+            comment="Name of the part category",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
         comment="Table for part categories",
     )
     op.create_index(
-        op.f("ix_part_categories_id"), "part_categories", ["id"], unique=False
+        op.f("ix_part_categories_id"),
+        "part_categories",
+        ["id"],
+        unique=False,
     )
     op.create_table(
         "roles",
@@ -142,7 +161,10 @@ def upgrade() -> None:
             comment="Documentation of the part (nullable)",
         ),
         sa.Column(
-            "qr_code", sa.String(), nullable=False, comment="QR code of the part"
+            "qr_code",
+            sa.String(),
+            nullable=False,
+            comment="QR code of the part",
         ),
         sa.ForeignKeyConstraint(
             ["category_id"],
@@ -159,10 +181,16 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("name", sa.String(), nullable=False, comment="Name of the user"),
         sa.Column(
-            "lastname", sa.String(), nullable=False, comment="Last name of the user"
+            "lastname",
+            sa.String(),
+            nullable=False,
+            comment="Last name of the user",
         ),
         sa.Column(
-            "sap_number", sa.String(), nullable=False, comment="SAP number of the user"
+            "sap_number",
+            sa.String(),
+            nullable=False,
+            comment="SAP number of the user",
         ),
         sa.Column(
             "role_id",
@@ -273,10 +301,16 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("parent_message_id", sa.Integer(), nullable=True),
         sa.Column(
-            "subject", sa.String(), nullable=False, comment="Subject of the message"
+            "subject",
+            sa.String(),
+            nullable=False,
+            comment="Subject of the message",
         ),
         sa.Column(
-            "content", sa.String(), nullable=False, comment="Content of the message"
+            "content",
+            sa.String(),
+            nullable=False,
+            comment="Content of the message",
         ),
         sa.Column("sender_id", sa.Integer(), nullable=False),
         sa.Column("role_id", sa.Integer(), nullable=True),
@@ -392,7 +426,10 @@ def upgrade() -> None:
         comment="Table for order calendar entries",
     )
     op.create_index(
-        op.f("ix_order_calendar_id"), "order_calendar", ["id"], unique=False
+        op.f("ix_order_calendar_id"),
+        "order_calendar",
+        ["id"],
+        unique=False,
     )
     op.create_table(
         "part_compatibilities",
@@ -557,7 +594,8 @@ def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(
-        op.f("ix_order_checklist_items_id"), table_name="order_checklist_items"
+        op.f("ix_order_checklist_items_id"),
+        table_name="order_checklist_items",
     )
     op.drop_table("order_checklist_items")
     op.drop_table("message_recipients")

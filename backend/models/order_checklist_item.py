@@ -1,11 +1,11 @@
-from db.database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
+from db.database import Base
 
 
 class OrderChecklistItem(Base):
-    """
-    Represents an individual step or requirement within a maintenance checklist.
+    """Represents an individual step or requirement within a maintenance checklist.
 
     Checklist items allow breaking down a maintenance order into granular tasks.
     Each item can be tracked for completion status independently, ensuring that
@@ -14,7 +14,7 @@ class OrderChecklistItem(Base):
 
     __tablename__ = "order_checklist_items"
     __table_args__ = {
-        "comment": "Granular task items belonging to a maintenance order checklist"
+        "comment": "Granular task items belonging to a maintenance order checklist",
     }
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

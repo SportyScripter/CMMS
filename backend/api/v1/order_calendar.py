@@ -1,22 +1,25 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
+from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from crud import crud_orders_calendar
 from models.user import User
 from schemas.order_calendar import (
     OrderCalendarCreate,
-    OrderCalendarUpdate,
     OrderCalendarResponse,
+    OrderCalendarUpdate,
 )
-from crud import crud_orders_calendar
-from core.permissions import ALLOW_READ_ONLY, ALLOW_MANAGE_MACHINES
 
 router = APIRouter()
 
 
 @router.post(
-    "/", response_model=OrderCalendarResponse, status_code=status.HTTP_201_CREATED
+    "/",
+    response_model=OrderCalendarResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 def create_order(
     order_in: OrderCalendarCreate,
@@ -28,7 +31,7 @@ def create_order(
     return crud_orders_calendar.create_order(db=db, order_in=order_in)
 
 
-@router.get("/", response_model=List[OrderCalendarResponse])
+@router.get("/", response_model=list[OrderCalendarResponse])
 def get_orders(
     skip: int = 0,
     limit: int = 100,
@@ -49,7 +52,8 @@ def get_order(
     db_order = crud_orders_calendar.get_order(db=db, order_id=order_id)
     if not db_order:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
         )
     return db_order
 
@@ -63,11 +67,14 @@ def update_order(
 ) -> Any:
     """Update an order (e.g., assign technician, change status, update scheduled date)."""
     db_order = crud_orders_calendar.update_order(
-        db=db, order_id=order_id, order_update=order_in
+        db=db,
+        order_id=order_id,
+        order_update=order_in,
     )
     if not db_order:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
         )
     return db_order
 
@@ -82,6 +89,7 @@ def delete_order(
     db_order = crud_orders_calendar.delete_order(db=db, order_id=order_id)
     if not db_order:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order not found",
         )
     return db_order

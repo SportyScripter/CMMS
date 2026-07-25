@@ -1,18 +1,18 @@
-from schemas.user import UserResponse
 from pydantic import BaseModel, Field
-from typing import Optional
+
+from schemas.user import UserResponse
 
 
 class MessageRecipientBase(BaseModel):
-    """
-    Base schema for MessageRecipient containing delivery attributes.
-    """
+    """Base schema for MessageRecipient containing delivery attributes."""
 
     message_id: int = Field(
-        ..., description="Reference to the specific message broadcasted."
+        ...,
+        description="Reference to the specific message broadcasted.",
     )
     recipient_id: int = Field(
-        ..., description="Reference to the targeted user receiving the message."
+        ...,
+        description="Reference to the targeted user receiving the message.",
     )
     is_read: bool = Field(
         default=False,
@@ -21,26 +21,19 @@ class MessageRecipientBase(BaseModel):
 
 
 class MessageRecipientCreate(MessageRecipientBase):
-    """
-    Schema used for assigning a message to a recipient.
-    """
-
-    pass
+    """Schema used for assigning a message to a recipient."""
 
 
 class MessageRecipientUpdate(BaseModel):
-    """
-    Schema used for updating the read status of a receiving message.
+    """Schema used for updating the read status of a receiving message.
     Typically used to mark a message as read.
     """
 
-    is_read: Optional[bool] = Field(None, description="Updated read status.")
+    is_read: bool | None = Field(None, description="Updated read status.")
 
 
 class MessageRecipientResponse(MessageRecipientBase):
-    """
-    Schema used for returning message recipient data in API responses.
-    """
+    """Schema used for returning message recipient data in API responses."""
 
     recipient: UserResponse
     model_config = {"from_attributes": True}

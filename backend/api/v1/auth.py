@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+
 from api.dependencies import get_db
-from core.security import verify_password, create_access_token
+from core.security import create_access_token, verify_password
 from crud import crud_users
 from schemas.token import Token
 
@@ -11,7 +12,8 @@ router = APIRouter()
 
 @router.post("/login", response_model=Token)
 def login_for_access_token(
-    db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()
+    db: Session = Depends(get_db),
+    form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     """OAuth2 compatible token login, get an access token for future requests"""
     user = crud_users.get_user_by_sap_number(db, sap_number=form_data.username)

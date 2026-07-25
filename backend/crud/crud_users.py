@@ -1,21 +1,21 @@
 from sqlalchemy.orm import Session
-from typing import List, Optional
+
+from core.security import get_password_hash
 from models.user import User
 from schemas.user import UserCreate, UserUpdate
-from core.security import get_password_hash
 
 
-def get_user(db: Session, user_id: int) -> Optional[User]:
+def get_user(db: Session, user_id: int) -> User | None:
     """Retrieve a user by their ID from the database."""
     return db.query(User).filter(User.id == user_id).first()
 
 
-def get_user_by_sap_number(db: Session, sap_number: str) -> Optional[User]:
+def get_user_by_sap_number(db: Session, sap_number: str) -> User | None:
     """Retrieve a user by their SAP number from the database."""
     return db.query(User).filter(User.sap_number == sap_number).first()
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
+def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
     """Retrieve a list of users from the database with optional pagination."""
     return db.query(User).offset(skip).limit(limit).all()
 
