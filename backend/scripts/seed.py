@@ -50,7 +50,7 @@ def seed_admin():
             print("Admin user created successfully.")
         else:
             print(f"Admin user with SAP number '{admin_sap_number}' already exists.")
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         print(f"An error occurred during seeding: {e}")
     finally:
         db.close()
