@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class MachineBase(BaseModel):
@@ -45,22 +45,22 @@ class MachineUpdate(BaseModel):
     All fields are optional to allow for partical updates (PATCH requests).
     """
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         max_length=255,
         description="Updated official designation or asset tag of the machine.",
     )
-    location: Optional[str] = Field(
+    location: str | None = Field(
         None,
         max_length=255,
         description="Updated physical location on the production floor.",
     )
-    qr_code: Optional[str] = Field(
+    qr_code: str | None = Field(
         None,
         max_length=255,
         description="Updated unique QR identifier for the machine.",
     )
-    status: Optional[str] = Field(
+    status: str | None = Field(
         None, max_length=50, description="Updated operational state of the machine."
     )
 

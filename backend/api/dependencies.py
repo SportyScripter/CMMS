@@ -1,13 +1,14 @@
-from typing import Generator, List
-from db.database import SessionLocal
+from collections.abc import Generator
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from core.security import SECRET_KEY, ALGORITHM
+from core.security import ALGORITHM, SECRET_KEY
 from crud import crud_users
+from db.database import SessionLocal
 from models.user import User
 from schemas.token import TokenPayload
 
@@ -50,7 +51,7 @@ def get_current_user(
 
 
 class RoleChecker:
-    def __init__(self, allowed_roles: List[str]):
+    def __init__(self, allowed_roles: list[str]):
         """
         Initializes a RoleChecker instance to verify if a user has the required role(s) for access control.
         RoleChecker used list of roles to check if user has any of the required roles.

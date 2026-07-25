@@ -1,7 +1,9 @@
-from db.database import Base
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.orm import relationship
+
+from db.database import Base
 
 
 class Machine(Base):

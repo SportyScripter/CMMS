@@ -1,20 +1,21 @@
 from fastapi import APIRouter
+
 from api.v1 import (
-    roles,
-    auth,
-    users,
-    machines,
-    parts,
-    part_categories,
-    part_compatibilities,
-    departments,
-    failures,
-    failure_parts,
     attachments,
-    order_types,
+    auth,
+    departments,
+    failure_parts,
+    failures,
+    machines,
+    messages,
     order_calendar,
     order_checklist_items,
-    messages,
+    order_types,
+    part_categories,
+    part_compatibilities,
+    parts,
+    roles,
+    users,
 )
 
 api_router = APIRouter()

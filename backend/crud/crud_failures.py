@@ -1,9 +1,8 @@
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
 
 from models.failure import Failure
-from schemas.failure import FailureCreate, FailureUpdate
 from models.failure_part import FailurePart
+from schemas.failure import FailureCreate, FailureUpdate
 
 
 def create_failure(db: Session, failure_in: FailureCreate) -> Failure:
@@ -15,7 +14,7 @@ def create_failure(db: Session, failure_in: FailureCreate) -> Failure:
     return failure
 
 
-def get_failure(db: Session, failure_id: int) -> Optional[Failure]:
+def get_failure(db: Session, failure_id: int) -> Failure | None:
     """Retrieve a failure by its ID."""
     return (
         db.query(Failure)
@@ -32,7 +31,7 @@ def get_failure(db: Session, failure_id: int) -> Optional[Failure]:
     )
 
 
-def get_failures(db: Session, skip: int = 0, limit: int = 100) -> List[Failure]:
+def get_failures(db: Session, skip: int = 0, limit: int = 100) -> list[Failure]:
     """Retrieve a list of failures."""
     return (
         db.query(Failure)
@@ -50,7 +49,7 @@ def get_failures(db: Session, skip: int = 0, limit: int = 100) -> List[Failure]:
     )
 
 
-def get_failures_by_machine(db: Session, machine_id: int) -> List[Failure]:
+def get_failures_by_machine(db: Session, machine_id: int) -> list[Failure]:
     """Retrieve a list of failures for a specific machine."""
     return (
         db.query(Failure)
@@ -67,7 +66,7 @@ def get_failures_by_machine(db: Session, machine_id: int) -> List[Failure]:
     )
 
 
-def get_failures_by_department(db: Session, department_id: int) -> List[Failure]:
+def get_failures_by_department(db: Session, department_id: int) -> list[Failure]:
     """Retrieve a list of failures for a specific department."""
     return (
         db.query(Failure)
@@ -85,7 +84,7 @@ def get_failures_by_department(db: Session, department_id: int) -> List[Failure]
 
 def update_failure(
     db: Session, failure_id: int, failure_update: FailureUpdate
-) -> Optional[Failure]:
+) -> Failure | None:
     """Update a failure by its ID."""
     failure = get_failure(db, failure_id)
     if not failure:
@@ -99,7 +98,7 @@ def update_failure(
     return get_failure(db, failure_id=failure_id)
 
 
-def delete_failure(db: Session, failure_id: int) -> Optional[Failure]:
+def delete_failure(db: Session, failure_id: int) -> Failure | None:
     """Delete a failure by its ID."""
     failure = get_failure(db, failure_id)
     if not failure:

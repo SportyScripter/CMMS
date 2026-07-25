@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
-from models.user import User
-from schemas.failure import FailureCreate, FailureUpdate, FailureResponse
+from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
 from crud import crud_failures
-from core.permissions import ALLOW_READ_ONLY, ALLOW_MANAGE_MACHINES
+from models.user import User
+from schemas.failure import FailureCreate, FailureResponse, FailureUpdate
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ def create_failure(
     return crud_failures.create_failure(db=db, failure_in=failure_in)
 
 
-@router.get("/", response_model=List[FailureResponse])
+@router.get("/", response_model=list[FailureResponse])
 def get_failures(
     skip: int = 0,
     limit: int = 100,

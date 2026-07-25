@@ -1,8 +1,9 @@
-from schemas.user import UserResponse
-from schemas.message_recipient import MessageRecipientResponse
-from pydantic import BaseModel, Field
-from typing import List, Optional
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
+from schemas.message_recipient import MessageRecipientResponse
+from schemas.user import UserResponse
 
 
 class MessageBase(BaseModel):
@@ -10,16 +11,16 @@ class MessageBase(BaseModel):
     Base schema for Message containing core communication attributes.
     """
 
-    parent_message_id: Optional[int] = Field(
+    parent_message_id: int | None = Field(
         None, description="Reference to a parent message to support threading/replies."
     )
-    recipient_ids: List[int] = Field(
+    recipient_ids: list[int] = Field(
         default=[], description="List of user IDs who should receive this message."
     )
     subject: str = Field(..., description="Topic or summary of the message.")
     content: str = Field(..., description="Main body text of the message.")
     sender_id: int = Field(..., description="User who sent the message.")
-    role_id: Optional[int] = Field(
+    role_id: int | None = Field(
         None, description="Optional role-based broadcast target."
     )
 
@@ -38,9 +39,9 @@ class MessageUpdate(BaseModel):
     Fields are optional to allow for partial updates (PATCH requests).
     """
 
-    subject: Optional[str] = Field(None, description="Updated topic or summary.")
-    content: Optional[str] = Field(None, description="Updated main body text.")
-    role_id: Optional[int] = Field(
+    subject: str | None = Field(None, description="Updated topic or summary.")
+    content: str | None = Field(None, description="Updated main body text.")
+    role_id: int | None = Field(
         None, description="Updated role-based broadcast target."
     )
 
@@ -62,6 +63,6 @@ class MessageResponse(MessageBase):
         ..., description="Timestamp when the message record was last updated."
     )
     sender: UserResponse
-    recipients: List[MessageRecipientResponse] = []
+    recipients: list[MessageRecipientResponse] = []
 
     model_config = {"from_attributes": True}

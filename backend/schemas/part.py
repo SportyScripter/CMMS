@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class PartBase(BaseModel):
@@ -11,7 +10,7 @@ class PartBase(BaseModel):
         ...,
         description="Links to the category (e.g., 'Bearings', 'Electrical Components').",
     )
-    producer: Optional[str] = Field(
+    producer: str | None = Field(
         None, max_length=100, description="Manufacturer or supplier of the part."
     )
     name: str = Field(
@@ -33,12 +32,12 @@ class PartBase(BaseModel):
         ..., max_length=100, description="Specific warehouse aisle/shelf identifier."
     )
     price: float = Field(..., description="Unit cost of the part.")
-    url_address: Optional[str] = Field(
+    url_address: str | None = Field(
         None,
         max_length=255,
         description="External URL for reordering or supplier reference.",
     )
-    docs: Optional[str] = Field(
+    docs: str | None = Field(
         None,
         max_length=255,
         description="Path or link to technical documentation/datasheets.",
@@ -65,44 +64,44 @@ class PartUpdate(BaseModel):
     All fields are optional to allow partial updates (PATCH requests).
     """
 
-    category_id: Optional[int] = Field(None, description="Updated category ID.")
-    producer: Optional[str] = Field(
+    category_id: int | None = Field(None, description="Updated category ID.")
+    producer: str | None = Field(
         None,
         max_length=100,
         description="Updated manufacturer or supplier of the part.",
     )
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None,
         max_length=100,
         description="Updated descriptive name or part number identifier.",
     )
-    type: Optional[str] = Field(
+    type: str | None = Field(
         None, max_length=100, description="Updated classification of part type."
     )
-    quantity: Optional[int] = Field(
+    quantity: int | None = Field(
         None, description="Updated current physical stock level in the warehouse."
     )
-    min_quantity: Optional[int] = Field(
+    min_quantity: int | None = Field(
         None,
         description="Updated threshold level for triggering automatic restocking notifications.",
     )
-    location: Optional[str] = Field(
+    location: str | None = Field(
         None,
         max_length=100,
         description="Updated specific warehouse aisle/shelf identifier.",
     )
-    price: Optional[float] = Field(None, description="Updated unit cost of the part.")
-    url_address: Optional[str] = Field(
+    price: float | None = Field(None, description="Updated unit cost of the part.")
+    url_address: str | None = Field(
         None,
         max_length=255,
         description="Updated external URL for reordering or supplier reference.",
     )
-    docs: Optional[str] = Field(
+    docs: str | None = Field(
         None,
         max_length=255,
         description="Updated path or link to technical documentation/datasheets.",
     )
-    qr_code: Optional[str] = Field(
+    qr_code: str | None = Field(
         None,
         max_length=100,
         description="Updated unique identifier for mobile warehouse management.",

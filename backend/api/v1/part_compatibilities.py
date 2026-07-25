@@ -1,15 +1,16 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
+from core.permissions import ALLOW_CHECK_PARTS, ALLOW_MANAGE_PARTS
+from crud import crud_part_compatibilities
 from models.user import User
 from schemas.part_compatibility import (
     PartCompatibilityCreate,
     PartCompatibilityResponse,
 )
-from crud import crud_part_compatibilities
-from core.permissions import ALLOW_MANAGE_PARTS, ALLOW_CHECK_PARTS
 
 router = APIRouter()
 
@@ -36,7 +37,7 @@ def create_part_compatibility(
     )
 
 
-@router.get("/machine/{machine_id}", response_model=List[PartCompatibilityResponse])
+@router.get("/machine/{machine_id}", response_model=list[PartCompatibilityResponse])
 def get_part_compatibilities_by_machine(
     machine_id: int,
     db: Session = Depends(get_db),
@@ -48,7 +49,7 @@ def get_part_compatibilities_by_machine(
     )
 
 
-@router.get("/part/{part_id}", response_model=List[PartCompatibilityResponse])
+@router.get("/part/{part_id}", response_model=list[PartCompatibilityResponse])
 def get_part_compatibilities_by_part(
     part_id: int,
     db: Session = Depends(get_db),

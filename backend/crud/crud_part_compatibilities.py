@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
+
 from models.part_compatibility import PartCompatibility
 from schemas.part_compatibility import PartCompatibilityCreate
 
@@ -17,7 +17,7 @@ def create_part_compatibility(
 
 def get_compatibility(
     db: Session, part_id: int, machine_id: int
-) -> Optional[PartCompatibility]:
+) -> PartCompatibility | None:
     """Check if a specific part is compatible with a specific machine."""
     return (
         db.query(PartCompatibility)
@@ -34,7 +34,7 @@ def get_compatibility(
 
 def get_compatibilities_by_machine(
     db: Session, machine_id: int
-) -> List[PartCompatibility]:
+) -> list[PartCompatibility]:
     """Get all part compatibilities for a specific machine."""
     return (
         db.query(PartCompatibility)
@@ -46,7 +46,7 @@ def get_compatibilities_by_machine(
     )
 
 
-def get_compatibilities_by_part(db: Session, part_id: int) -> List[PartCompatibility]:
+def get_compatibilities_by_part(db: Session, part_id: int) -> list[PartCompatibility]:
     """Get all machine compatibilities for a specific part."""
     return (
         db.query(PartCompatibility)
@@ -60,7 +60,7 @@ def get_compatibilities_by_part(db: Session, part_id: int) -> List[PartCompatibi
 
 def delete_compatibility(
     db: Session, part_id: int, machine_id: int
-) -> Optional[PartCompatibility]:
+) -> PartCompatibility | None:
     """Delete a specific part compatibility from the database."""
     db_comp = get_compatibility(db, part_id, machine_id)
     if db_comp:

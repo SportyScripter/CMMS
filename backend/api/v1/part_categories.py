@@ -1,16 +1,17 @@
-from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
-from typing import Any, List
+from typing import Any
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from api.dependencies import get_db
+from core.permissions import ALLOW_CHECK_PARTS, ALLOW_EDIT_PARTS, ALLOW_MANAGE_PARTS
+from crud import crud_part_categories
 from models.user import User
 from schemas.part_category import (
     PartCategoryCreate,
-    PartCategoryUpdate,
     PartCategoryResponse,
+    PartCategoryUpdate,
 )
-from crud import crud_part_categories
-from core.permissions import ALLOW_MANAGE_PARTS, ALLOW_CHECK_PARTS, ALLOW_EDIT_PARTS
-from api.dependencies import get_db
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ def create_part_category(
     )
 
 
-@router.get("/", response_model=List[PartCategoryResponse])
+@router.get("/", response_model=list[PartCategoryResponse])
 def get_part_categories(
     db: Session = Depends(get_db),
     skip: int = 0,

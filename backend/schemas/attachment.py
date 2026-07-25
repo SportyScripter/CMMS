@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, Field
 
 
 class AttachmentBase(BaseModel):
@@ -8,10 +8,10 @@ class AttachmentBase(BaseModel):
     Base schema for Attachment containing core file metadata.
     """
 
-    failure_id: Optional[int] = Field(
+    failure_id: int | None = Field(
         None, description="Link the file to a specific failure report."
     )
-    order_id: Optional[int] = Field(
+    order_id: int | None = Field(
         None, description="Link the file to a scheduled maintenance order."
     )
     file_path: str = Field(..., description="Storage path or URI of the physical file.")
@@ -31,13 +31,13 @@ class AttachmentUpdate(BaseModel):
     Fields are optional to allow partial updates.
     """
 
-    failure_id: Optional[int] = Field(
+    failure_id: int | None = Field(
         None, description="Updated link to a failure report."
     )
-    order_id: Optional[int] = Field(
+    order_id: int | None = Field(
         None, description="Updated link to a maintenance order."
     )
-    file_path: Optional[str] = Field(None, description="Updated storage path or URI.")
+    file_path: str | None = Field(None, description="Updated storage path or URI.")
 
 
 class AttachmentResponse(AttachmentBase):

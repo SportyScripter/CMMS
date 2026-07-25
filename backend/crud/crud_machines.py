@@ -1,25 +1,25 @@
 from sqlalchemy.orm import Session
+
 from models.machine import Machine
 from schemas.machine import MachineCreate, MachineUpdate
-from typing import List, Optional
 
 
-def get_machine(db: Session, machine_id: int) -> Optional[Machine]:
+def get_machine(db: Session, machine_id: int) -> Machine | None:
     """Retrieve a machine by its ID from the database."""
     return db.query(Machine).filter(Machine.id == machine_id).first()
 
 
-def get_machine_by_qr_code(db: Session, qr_code: str) -> Optional[Machine]:
+def get_machine_by_qr_code(db: Session, qr_code: str) -> Machine | None:
     """Retrieve a machine by its QR code from the database."""
     return db.query(Machine).filter(Machine.qr_code == qr_code).first()
 
 
-def get_machine_by_name(db: Session, name: str) -> Optional[Machine]:
+def get_machine_by_name(db: Session, name: str) -> Machine | None:
     """Retrieve a machine by their name from the database."""
     return db.query(Machine).filter(Machine.name == name).first()
 
 
-def get_machines(db: Session, skip: int = 0, limit: int = 100) -> List[Machine]:
+def get_machines(db: Session, skip: int = 0, limit: int = 100) -> list[Machine]:
     """Retrieve a list of machines from the databasse with optional pagination."""
     return db.query(Machine).offset(skip).limit(limit).all()
 

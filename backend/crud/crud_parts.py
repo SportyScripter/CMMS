@@ -1,25 +1,25 @@
 from sqlalchemy.orm import Session
+
 from models.part import Part
 from schemas.part import PartCreate, PartUpdate
-from typing import List, Optional
 
 
-def get_part(db: Session, part_id: int) -> Optional[Part]:
+def get_part(db: Session, part_id: int) -> Part | None:
     """Retrieve a part by its ID from the database."""
     return db.query(Part).filter(Part.id == part_id).first()
 
 
-def get_part_by_qr_code(db: Session, qr_code: str) -> Optional[Part]:
+def get_part_by_qr_code(db: Session, qr_code: str) -> Part | None:
     """Retrieve a part by its QR code from the database."""
     return db.query(Part).filter(Part.qr_code == qr_code).first()
 
 
-def get_parts_by_name(db: Session, name: str) -> List[Part]:
+def get_parts_by_name(db: Session, name: str) -> list[Part]:
     """Retrieve a part by its name from the database."""
     return db.query(Part).filter(Part.name == name).all()
 
 
-def get_parts(db: Session, skip: int = 0, limit: int = 100) -> List[Part]:
+def get_parts(db: Session, skip: int = 0, limit: int = 100) -> list[Part]:
     """Retrieve a list of parts from the database with optional pagination."""
     return db.query(Part).offset(skip).limit(limit).all()
 

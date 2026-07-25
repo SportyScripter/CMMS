@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
 
 from models.order_calendar import OrderCalendar
 from schemas.order_calendar import OrderCalendarCreate, OrderCalendarUpdate
@@ -14,7 +13,7 @@ def create_order(db: Session, order_in: OrderCalendarCreate) -> OrderCalendar:
     return order_calendar
 
 
-def get_order(db: Session, order_id: int) -> Optional[OrderCalendar]:
+def get_order(db: Session, order_id: int) -> OrderCalendar | None:
     """Retrieve an order entry by its ID."""
     return (
         db.query(OrderCalendar)
@@ -31,7 +30,7 @@ def get_order(db: Session, order_id: int) -> Optional[OrderCalendar]:
     )
 
 
-def get_orders(db: Session, skip: int = 0, limit: int = 100) -> List[OrderCalendar]:
+def get_orders(db: Session, skip: int = 0, limit: int = 100) -> list[OrderCalendar]:
     """Retrieve a list of order entries."""
     return (
         db.query(OrderCalendar)
@@ -49,7 +48,7 @@ def get_orders(db: Session, skip: int = 0, limit: int = 100) -> List[OrderCalend
     )
 
 
-def get_orders_by_machine(db: Session, machine_id: int) -> List[OrderCalendar]:
+def get_orders_by_machine(db: Session, machine_id: int) -> list[OrderCalendar]:
     """Retrieve a list of order entries for a specific machine."""
     return (
         db.query(OrderCalendar)
@@ -66,7 +65,7 @@ def get_orders_by_machine(db: Session, machine_id: int) -> List[OrderCalendar]:
     )
 
 
-def get_orders_by_technician(db: Session, technician_id: int) -> List[OrderCalendar]:
+def get_orders_by_technician(db: Session, technician_id: int) -> list[OrderCalendar]:
     """Retrieve a list of order entries assigned to a specific technician."""
     return (
         db.query(OrderCalendar)
@@ -85,7 +84,7 @@ def get_orders_by_technician(db: Session, technician_id: int) -> List[OrderCalen
 
 def update_order(
     db: Session, order_id: int, order_update: OrderCalendarUpdate
-) -> Optional[OrderCalendar]:
+) -> OrderCalendar | None:
     """Update an existing order entry in the database."""
     db_order = get_order(db, order_id)
     if not db_order:
@@ -98,7 +97,7 @@ def update_order(
     return db_order
 
 
-def delete_order(db: Session, order_id: int) -> Optional[OrderCalendar]:
+def delete_order(db: Session, order_id: int) -> OrderCalendar | None:
     """Delete an order record from the database."""
     db_order = get_order(db, order_id)
     if not db_order:

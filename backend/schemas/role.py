@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class RoleBase(BaseModel):
@@ -11,7 +10,7 @@ class RoleBase(BaseModel):
     name: str = Field(
         ..., max_length=50, description="The unique name of the system role."
     )
-    description: Optional[str] = Field(
+    description: str | None = Field(
         None,
         max_length=255,
         description="Detailed description of what permissions and duties this role entails.",
@@ -33,8 +32,8 @@ class RoleUpdate(BaseModel):
     Fields are optional to allow partial updates.
     """
 
-    name: Optional[str] = Field(None, max_length=50, description="Updated role name")
-    description: Optional[str] = Field(
+    name: str | None = Field(None, max_length=50, description="Updated role name")
+    description: str | None = Field(
         None, max_length=255, description="Updated description"
     )
 

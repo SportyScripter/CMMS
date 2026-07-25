@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
-from models.part import Part
+
 from models.failure_part import FailurePart
+from models.part import Part
 from schemas.failure_part import FailurePartCreate, FailurePartUpdate
 
 
@@ -23,9 +23,7 @@ def create_failure_part(db: Session, failure_part_in: FailurePartCreate) -> Fail
     )
 
 
-def get_failure_part(
-    db: Session, failure_id: int, part_id: int
-) -> Optional[FailurePart]:
+def get_failure_part(db: Session, failure_id: int, part_id: int) -> FailurePart | None:
     """Retrieve a specific part consumption record for a failure."""
     return (
         db.query(FailurePart)
@@ -35,7 +33,7 @@ def get_failure_part(
     )
 
 
-def get_failure_parts_by_failure(db: Session, failure_id: int) -> List[FailurePart]:
+def get_failure_parts_by_failure(db: Session, failure_id: int) -> list[FailurePart]:
     """Retrieve all part consumption records for a specific failure."""
     return (
         db.query(FailurePart)
@@ -47,7 +45,7 @@ def get_failure_parts_by_failure(db: Session, failure_id: int) -> List[FailurePa
 
 def update_failure_part(
     db: Session, failure_id: int, part_id: int, failure_part_in: FailurePartUpdate
-) -> Optional[FailurePart]:
+) -> FailurePart | None:
     """Update part consumption quantity and adjust warehouse stock accordingly."""
     db_failure_part = get_failure_part(db, failure_id, part_id)
     if not db_failure_part:
@@ -71,7 +69,7 @@ def update_failure_part(
 
 def delete_failure_part(
     db: Session, failure_id: int, part_id: int
-) -> Optional[FailurePart]:
+) -> FailurePart | None:
     """Remove a part consumption record and return the parts to the warehouse."""
     db_failure_part = get_failure_part(db, failure_id, part_id)
     if not db_failure_part:

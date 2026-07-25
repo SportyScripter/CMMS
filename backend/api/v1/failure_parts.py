@@ -1,16 +1,17 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
+from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from crud import crud_failure_parts
 from models.user import User
 from schemas.failure_part import (
     FailurePartCreate,
-    FailurePartUpdate,
     FailurePartResponse,
+    FailurePartUpdate,
 )
-from crud import crud_failure_parts
-from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
 
 router = APIRouter()
 
@@ -40,7 +41,7 @@ def create_failure_part(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@router.get("/", response_model=List[FailurePartResponse])
+@router.get("/", response_model=list[FailurePartResponse])
 def get_failure_parts(
     failure_id: int,
     db: Session = Depends(get_db),

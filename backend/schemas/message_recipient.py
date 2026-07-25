@@ -1,6 +1,6 @@
-from schemas.user import UserResponse
 from pydantic import BaseModel, Field
-from typing import Optional
+
+from schemas.user import UserResponse
 
 
 class MessageRecipientBase(BaseModel):
@@ -34,7 +34,7 @@ class MessageRecipientUpdate(BaseModel):
     Typically used to mark a message as read.
     """
 
-    is_read: Optional[bool] = Field(None, description="Updated read status.")
+    is_read: bool | None = Field(None, description="Updated read status.")
 
 
 class MessageRecipientResponse(MessageRecipientBase):

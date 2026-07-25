@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+
 from schemas.part import PartResponse
 
 
@@ -31,7 +31,7 @@ class FailurePartUpdate(BaseModel):
     Usually used to correct the quantity used.
     """
 
-    quantity_used: Optional[int] = Field(
+    quantity_used: int | None = Field(
         None, description="Updated number of units consumed."
     )
 

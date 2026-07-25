@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
-from models.user import User
-from schemas.order_type import OrderTypeCreate, OrderTypeUpdate, OrderTypeResponse
-from crud import crud_order_types
 from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from crud import crud_order_types
+from models.user import User
+from schemas.order_type import OrderTypeCreate, OrderTypeResponse, OrderTypeUpdate
 
 router = APIRouter()
 
@@ -29,7 +30,7 @@ def create_order_type(
     return crud_order_types.create_order_type(db=db, order_type_in=order_type_in)
 
 
-@router.get("/", response_model=List[OrderTypeResponse])
+@router.get("/", response_model=list[OrderTypeResponse])
 def read_order_types(
     skip: int = 0,
     limit: int = 100,

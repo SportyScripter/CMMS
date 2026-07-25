@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import Any
 
-from api.dependencies import get_db, get_current_user
-from schemas.user import UserCreate, UserUpdate, UserResponse
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from api.dependencies import get_current_user, get_db
+from core.permissions import ALLOW_MANAGE_USERS
 from crud import crud_users
 from models.user import User
-from core.permissions import ALLOW_MANAGE_USERS
+from schemas.user import UserCreate, UserResponse, UserUpdate
 
 router = APIRouter()
 

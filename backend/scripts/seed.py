@@ -1,14 +1,14 @@
-import sys
 import os
+import sys
 
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
+from crud import crud_roles, crud_users
 from db.database import SessionLocal
 from schemas.role import RoleCreate
 from schemas.user import UserCreate
-from crud import crud_roles, crud_users
 
 
 def seed_admin():

@@ -1,11 +1,12 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
 from datetime import datetime
-from schemas.user import UserResponse
-from schemas.machine import MachineResponse
+
+from pydantic import BaseModel, Field
+
+from schemas.attachment import AttachmentResponse
 from schemas.department import DepartmentResponse
 from schemas.failure_part import FailurePartResponse
-from schemas.attachment import AttachmentResponse
+from schemas.machine import MachineResponse
+from schemas.user import UserResponse
 
 
 class FailureBase(BaseModel):
@@ -45,27 +46,27 @@ class FailureUpdate(BaseModel):
     All fields are optional to allow partial updates (PATCH requests).
     """
 
-    machine_id: Optional[int] = Field(None, description="Updated machine reference.")
-    department_id: Optional[int] = Field(
+    machine_id: int | None = Field(None, description="Updated machine reference.")
+    department_id: int | None = Field(
         None, description="Updated responsible department reference."
     )
-    status: Optional[str] = Field(
+    status: str | None = Field(
         None, max_length=50, description="Updated lifecycle state."
     )
-    recipient_id: Optional[int] = Field(
+    recipient_id: int | None = Field(
         None, description="Reference to the mechanic assigned to fix the issue."
     )
-    failure_description: Optional[str] = Field(
+    failure_description: str | None = Field(
         None, description="Updated problem description."
     )
-    repair_description: Optional[str] = Field(
+    repair_description: str | None = Field(
         None,
         description="Technical details of the actions taken to resolve the failure.",
     )
-    comment: Optional[str] = Field(
+    comment: str | None = Field(
         None, description="Additional notes or feedback from the maintenance team."
     )
-    end_date: Optional[datetime] = Field(
+    end_date: datetime | None = Field(
         None, description="Timestamp when the repair was completed."
     )
 
@@ -78,14 +79,14 @@ class FailureResponse(FailureBase):
 
     id: int = Field(..., description="The unique internal identifier of the failure.")
     submitter_id: int = Field(..., description="User ID who reported the issue.")
-    recipient_id: Optional[int] = Field(
+    recipient_id: int | None = Field(
         None, description="Machanic ID assigned to the issue."
     )
-    repair_description: Optional[str] = Field(
+    repair_description: str | None = Field(
         None, description="Technical details of the repair."
     )
-    comment: Optional[str] = Field(None, description="Additional notes.")
-    end_date: Optional[datetime] = Field(
+    comment: str | None = Field(None, description="Additional notes.")
+    end_date: datetime | None = Field(
         None, description="Timestamp when the repair was completed and closed."
     )
     created_at: datetime = Field(
@@ -95,9 +96,9 @@ class FailureResponse(FailureBase):
         ..., description="Timestamp of the last update to the failure record."
     )
     submitter: UserResponse
-    recipient: Optional[UserResponse] = None
+    recipient: UserResponse | None = None
     machine: MachineResponse
     department: DepartmentResponse
-    used_parts: List[FailurePartResponse] = []
-    attachments: List[AttachmentResponse] = []
+    used_parts: list[FailurePartResponse] = []
+    attachments: list[AttachmentResponse] = []
     model_config = {"from_attributes": True}

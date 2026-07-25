@@ -1,6 +1,7 @@
-from db.database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, Double
+from sqlalchemy import Column, Double, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
+from db.database import Base
 
 
 class Part(Base):

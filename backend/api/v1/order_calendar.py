@@ -1,16 +1,17 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
+from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from crud import crud_orders_calendar
 from models.user import User
 from schemas.order_calendar import (
     OrderCalendarCreate,
-    OrderCalendarUpdate,
     OrderCalendarResponse,
+    OrderCalendarUpdate,
 )
-from crud import crud_orders_calendar
-from core.permissions import ALLOW_READ_ONLY, ALLOW_MANAGE_MACHINES
 
 router = APIRouter()
 
@@ -28,7 +29,7 @@ def create_order(
     return crud_orders_calendar.create_order(db=db, order_in=order_in)
 
 
-@router.get("/", response_model=List[OrderCalendarResponse])
+@router.get("/", response_model=list[OrderCalendarResponse])
 def get_orders(
     skip: int = 0,
     limit: int = 100,

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class PartCategoryBase(BaseModel):
@@ -27,7 +26,7 @@ class PartCategoryUpdate(BaseModel):
     Fields are optional to allow partial updates (PATCH requests).
     """
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None, max_length=100, description="Updated part category name."
     )
 

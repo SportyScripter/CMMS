@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class DepartmentBase(BaseModel):
@@ -29,7 +28,7 @@ class DepartmentUpdate(BaseModel):
     Field are optional to allow for partial updates.
     """
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None, max_length=100, description="Updated department name."
     )
 

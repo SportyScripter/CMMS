@@ -1,6 +1,7 @@
-from db.database import Base
-from sqlalchemy import Column, Integer, ForeignKey, Boolean
+from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
+
+from db.database import Base
 
 
 class MessageRecipient(Base):

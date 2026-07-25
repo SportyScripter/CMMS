@@ -1,16 +1,17 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
+from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from crud import crud_order_checklist_items
 from models.user import User
 from schemas.order_checklist_item import (
     OrderChecklistItemCreate,
-    OrderChecklistItemUpdate,
     OrderChecklistItemResponse,
+    OrderChecklistItemUpdate,
 )
-from crud import crud_order_checklist_items
-from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
 
 router = APIRouter()
 
@@ -27,7 +28,7 @@ def create_checklist_item(
     return crud_order_checklist_items.create_checklist_item(db=db, item_in=item_in)
 
 
-@router.get("/order/{order_id}", response_model=List[OrderChecklistItemResponse])
+@router.get("/order/{order_id}", response_model=list[OrderChecklistItemResponse])
 def get_checklist_items_by_order(
     order_id: int,
     db: Session = Depends(get_db),

@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, Field
+
 from schemas.role import RoleMinimal
 
 
@@ -47,16 +48,16 @@ class UserUpdate(BaseModel):
     All fiields are optional to allow for partical updates (PATCH requests).
     """
 
-    sap_number: Optional[str] = Field(
+    sap_number: str | None = Field(
         None, max_length=20, description="Updated SAP number."
     )
-    name: Optional[str] = Field(None, max_length=50, description="Updated given name.")
-    lastname: Optional[str] = Field(None, max_length=50, description="Updated surname.")
-    is_active: Optional[bool] = Field(None, description="Updated active status.")
-    password: Optional[str] = Field(
+    name: str | None = Field(None, max_length=50, description="Updated given name.")
+    lastname: str | None = Field(None, max_length=50, description="Updated surname.")
+    is_active: bool | None = Field(None, description="Updated active status.")
+    password: str | None = Field(
         None, min_length=8, description="Updated raw password."
     )
-    role_id: Optional[int] = Field(None, description="Updated role ID.")
+    role_id: int | None = Field(None, description="Updated role ID.")
 
 
 class UserResponse(UserBase):

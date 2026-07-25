@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
-from models.user import User
-from schemas.machine import MachineCreate, MachineUpdate, MachineResponse
-from crud import crud_machines
-from core.permissions import ALLOW_MANAGE_MACHINES
 from api.dependencies import get_current_user, get_db
+from core.permissions import ALLOW_MANAGE_MACHINES
+from crud import crud_machines
+from models.user import User
+from schemas.machine import MachineCreate, MachineResponse, MachineUpdate
 
 router = APIRouter()
 
@@ -31,7 +32,7 @@ def create_machine(
     return crud_machines.create_machine(db=db, machine_in=machine_in)
 
 
-@router.get("/", response_model=List[MachineResponse])
+@router.get("/", response_model=list[MachineResponse])
 def read_machines(
     skip: int = 0,
     limit: int = 100,

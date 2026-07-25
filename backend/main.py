@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from api.v1.api_router import api_router
 from db.database import Base, engine
 from scripts.seed import seed_admin
-from api.v1.api_router import api_router
 
 Base.metadata.create_all(bind=engine)
 

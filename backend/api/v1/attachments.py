@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from typing import Any
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
 from api.dependencies import get_db
-from models.user import User
-from schemas.attachment import AttachmentCreate, AttachmentUpdate, AttachmentResponse
+from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
 from crud import crud_attachments
-from core.permissions import ALLOW_READ_ONLY, ALLOW_MANAGE_MACHINES
+from models.user import User
+from schemas.attachment import AttachmentCreate, AttachmentResponse, AttachmentUpdate
 
 router = APIRouter()
 

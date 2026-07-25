@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class OrderTypeBase(BaseModel):
@@ -29,7 +28,7 @@ class OrderTypeUpdate(BaseModel):
     Fields are optional to allow for partial updates (PATCH requests).
     """
 
-    name: Optional[str] = Field(
+    name: str | None = Field(
         None, max_length=100, description="Updated order type name."
     )
 

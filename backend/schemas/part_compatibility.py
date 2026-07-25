@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
-from typing import Optional
-from schemas.part import PartResponse
+
 from schemas.machine import MachineResponse
+from schemas.part import PartResponse
 
 
 class PartCompatibilityBase(BaseModel):
@@ -28,10 +28,10 @@ class PartCompatibilityUpdate(BaseModel):
     Schema used for updating an existing compatibility mapping.
     """
 
-    part_id: Optional[int] = Field(
+    part_id: int | None = Field(
         None, description="Updated reference to the spare part."
     )
-    machine_id: Optional[int] = Field(
+    machine_id: int | None = Field(
         None, description="Updated reference to the compatible machine."
     )
 

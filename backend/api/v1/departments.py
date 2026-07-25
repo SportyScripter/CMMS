@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
-from models.user import User
-from schemas.department import DepartmentCreate, DepartmentUpdate, DepartmentResponse
-from crud import crud_departments
 from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from crud import crud_departments
+from models.user import User
+from schemas.department import DepartmentCreate, DepartmentResponse, DepartmentUpdate
 
 router = APIRouter()
 
@@ -30,7 +31,7 @@ def create_department(
     return crud_departments.create_department(db=db, department_in=department_in)
 
 
-@router.get("/", response_model=List[DepartmentResponse])
+@router.get("/", response_model=list[DepartmentResponse])
 def get_departments(
     skip: int = 0,
     limit: int = 100,

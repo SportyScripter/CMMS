@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
+from core.permissions import ALLOW_READ_ONLY
+from crud import crud_messages
 from models.user import User
 from schemas.message import MessageCreate, MessageResponse
-from crud import crud_messages
-from core.permissions import ALLOW_READ_ONLY
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ def create_message(
     return crud_messages.create_message(db=db, message_in=message_in)
 
 
-@router.get("/inbox", response_model=List[MessageResponse])
+@router.get("/inbox", response_model=list[MessageResponse])
 def get_inbox(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_READ_ONLY),
@@ -35,7 +36,7 @@ def get_inbox(
     )
 
 
-@router.get("/outbox", response_model=List[MessageResponse])
+@router.get("/outbox", response_model=list[MessageResponse])
 def get_outbox(
     skip: int = 0,
     limit: int = 100,

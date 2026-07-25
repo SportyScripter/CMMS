@@ -1,12 +1,13 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Any, List
 
 from api.dependencies import get_db
-from models.user import User
-from schemas.part import PartCreate, PartUpdate, PartResponse
+from core.permissions import ALLOW_CHECK_PARTS, ALLOW_EDIT_PARTS, ALLOW_MANAGE_PARTS
 from crud import crud_parts
-from core.permissions import ALLOW_MANAGE_PARTS, ALLOW_CHECK_PARTS, ALLOW_EDIT_PARTS
+from models.user import User
+from schemas.part import PartCreate, PartResponse, PartUpdate
 
 router = APIRouter()
 
@@ -33,7 +34,7 @@ def create_part(
     return crud_parts.create_part(db=db, part_in=part_in)
 
 
-@router.get("/", response_model=List[PartResponse])
+@router.get("/", response_model=list[PartResponse])
 def read_parts(
     skip: int = 0,
     limit: int = 100,
@@ -59,7 +60,7 @@ def read_part_by_id(
     return db_part
 
 
-@router.get("/name/{name}", response_model=List[PartResponse])
+@router.get("/name/{name}", response_model=list[PartResponse])
 def read_part_by_name(
     name: str,
     db: Session = Depends(get_db),

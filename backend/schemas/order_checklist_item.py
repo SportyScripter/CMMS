@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
 
 
 class OrderChecklistItemBase(BaseModel):
@@ -18,7 +17,7 @@ class OrderChecklistItemBase(BaseModel):
         max_length=50,
         description="Completion status (e.g., 'pending', 'completed', 'not_applicable').",
     )
-    comments: Optional[str] = Field(
+    comments: str | None = Field(
         None,
         description="Technician's notes or findings specific to this checklist item.",
     )
@@ -39,18 +38,18 @@ class OrderChecklistItemUpdate(BaseModel):
     Fields are optional to allow for partial updates (PATCH requests).
     """
 
-    order_calendar_id: Optional[int] = Field(
+    order_calendar_id: int | None = Field(
         None, description="Updated parent order reference."
     )
-    task_description: Optional[str] = Field(
+    task_description: str | None = Field(
         None, description="Updated instructions for this checklist step."
     )
-    status: Optional[str] = Field(
+    status: str | None = Field(
         None,
         max_length=50,
         description="Updated completion status.",
     )
-    comments: Optional[str] = Field(
+    comments: str | None = Field(
         None, description="Updated technician's notes or findings."
     )
 
