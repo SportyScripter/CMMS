@@ -2,19 +2,21 @@ from pydantic import BaseModel, Field
 
 
 class PartBase(BaseModel):
-    """
-    Base schema for Part containing common attributes.
-    """
+    """Base schema for Part containing common attributes."""
 
     category_id: int = Field(
         ...,
         description="Links to the category (e.g., 'Bearings', 'Electrical Components').",
     )
     producer: str | None = Field(
-        None, max_length=100, description="Manufacturer or supplier of the part."
+        None,
+        max_length=100,
+        description="Manufacturer or supplier of the part.",
     )
     name: str = Field(
-        ..., max_length=100, description="Descriptive name or part number indentifier."
+        ...,
+        max_length=100,
+        description="Descriptive name or part number indentifier.",
     )
     type: str = Field(
         ...,
@@ -22,14 +24,17 @@ class PartBase(BaseModel):
         description="Classification of part type (e.g., consumables, strategic spare).",
     )
     quantity: int = Field(
-        ..., description="Current physical stock level in the warehouse."
+        ...,
+        description="Current physical stock level in the warehouse.",
     )
     min_quantity: int = Field(
         ...,
         description="Threshold level for triggering automatic restocking notifications.",
     )
     location: str = Field(
-        ..., max_length=100, description="Specific warehouse aisle/shelf identifier."
+        ...,
+        max_length=100,
+        description="Specific warehouse aisle/shelf identifier.",
     )
     price: float = Field(..., description="Unit cost of the part.")
     url_address: str | None = Field(
@@ -50,17 +55,13 @@ class PartBase(BaseModel):
 
 
 class PartCreate(PartBase):
-    """
-    Schema used for creating a new Part.
+    """Schema used for creating a new Part.
     Inherits all required fields directly from PartBase.
     """
 
-    pass
-
 
 class PartUpdate(BaseModel):
-    """
-    Schema used for updating an existing Part.
+    """Schema used for updating an existing Part.
     All fields are optional to allow partial updates (PATCH requests).
     """
 
@@ -76,10 +77,13 @@ class PartUpdate(BaseModel):
         description="Updated descriptive name or part number identifier.",
     )
     type: str | None = Field(
-        None, max_length=100, description="Updated classification of part type."
+        None,
+        max_length=100,
+        description="Updated classification of part type.",
     )
     quantity: int | None = Field(
-        None, description="Updated current physical stock level in the warehouse."
+        None,
+        description="Updated current physical stock level in the warehouse.",
     )
     min_quantity: int | None = Field(
         None,
@@ -109,8 +113,7 @@ class PartUpdate(BaseModel):
 
 
 class PartResponse(PartBase):
-    """
-    Schema used for returning Part data in API responses.
+    """Schema used for returning Part data in API responses.
     Includes the database-generated ID.
     """
 

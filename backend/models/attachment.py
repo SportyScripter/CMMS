@@ -7,8 +7,7 @@ from db.database import Base
 
 
 class Attachment(Base):
-    """
-    Represents a digital file (e.g., photo, PDF manual, document) uploaded to the CMMS.
+    """Represents a digital file (e.g., photo, PDF manual, document) uploaded to the CMMS.
 
     Attachments can be linked either to a reported Failure (e.g., a photo of a broken part)
     or to a scheduled Order Calendar entry (e.g., a scanned maintenance protocol).
@@ -16,7 +15,7 @@ class Attachment(Base):
 
     __tablename__ = "attachments"
     __table_args__ = {
-        "comment": "Stores metadata and file paths for user-uploaded documents"
+        "comment": "Stores metadata and file paths for user-uploaded documents",
     }
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -33,7 +32,9 @@ class Attachment(Base):
         comment="Links the file to a scheduled maintenance order",
     )
     file_path = Column(
-        String, nullable=False, comment="Storage path or URI of the physical file"
+        String,
+        nullable=False,
+        comment="Storage path or URI of the physical file",
     )
     uploaded_at = Column(
         DateTime,

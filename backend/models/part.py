@@ -5,8 +5,7 @@ from db.database import Base
 
 
 class Part(Base):
-    """
-    Represents a spare part stored in the warehouse.
+    """Represents a spare part stored in the warehouse.
 
     This model tracks stock levels, locations, and pricing for each component.
     It links to PartCategory for classification, PartCompatibility for machine mapping,
@@ -15,7 +14,7 @@ class Part(Base):
 
     __tablename__ = "parts"
     __table_args__ = {
-        "comment": "Comprehensive inventory of spare parts and warehouse stock metadata"
+        "comment": "Comprehensive inventory of spare parts and warehouse stock metadata",
     }
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
@@ -47,7 +46,9 @@ class Part(Base):
     )
 
     quantity = Column(
-        Integer, nullable=False, comment="Current physical stock level in the warehouse"
+        Integer,
+        nullable=False,
+        comment="Current physical stock level in the warehouse",
     )
 
     min_quantity = Column(
@@ -57,7 +58,9 @@ class Part(Base):
     )
 
     location = Column(
-        String, nullable=False, comment="Specific warehouse aisle/shelf identifier"
+        String,
+        nullable=False,
+        comment="Specific warehouse aisle/shelf identifier",
     )
 
     price = Column(Double, nullable=False, comment="Unit cost of the part")

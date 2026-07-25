@@ -32,7 +32,10 @@ def get_inbox(
 ) -> Any:
     """Retrieve all messages received by the currently authenticated user."""
     return crud_messages.get_inbox_for_user(
-        db=db, user_id=current_user.id, skip=skip, limit=limit
+        db=db,
+        user_id=current_user.id,
+        skip=skip,
+        limit=limit,
     )
 
 
@@ -45,7 +48,10 @@ def get_outbox(
 ) -> Any:
     """Retrieve all messages sent by the currently authenticated user."""
     return crud_messages.get_outbox_for_user(
-        db=db, user_id=current_user.id, skip=skip, limit=limit
+        db=db,
+        user_id=current_user.id,
+        skip=skip,
+        limit=limit,
     )
 
 
@@ -59,7 +65,8 @@ def get_message(
     db_message = crud_messages.get_message(db=db, message_id=message_id)
     if not db_message:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Message not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Message not found",
         )
     return db_message
 
@@ -72,7 +79,9 @@ def mark_as_read(
 ) -> Any:
     """Mark a specific message as read for the currently authenticated user."""
     result = crud_messages.mark_message_as_read(
-        db=db, message_id=message_id, user_id=current_user.id
+        db=db,
+        message_id=message_id,
+        user_id=current_user.id,
     )
     if not result:
         raise HTTPException(
@@ -90,7 +99,9 @@ def delete_from_inbox(
 ) -> Any:
     """Remove a message from the currently authenticated user's inbox."""
     success = crud_messages.delete_message_for_recipient(
-        db=db, message_id=message_id, user_id=current_user.id
+        db=db,
+        message_id=message_id,
+        user_id=current_user.id,
     )
     if not success:
         raise HTTPException(
@@ -110,7 +121,8 @@ def delete_message_globally(
     db_message = crud_messages.get_message(db=db, message_id=message_id)
     if not db_message:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Message not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Message not found",
         )
 
     if db_message.sender_id != current_user.id:

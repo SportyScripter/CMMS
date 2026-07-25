@@ -6,8 +6,7 @@ from models.mixins import TimestampMixin
 
 
 class User(Base, TimestampMixin):
-    """
-    Represents a registered employee within the CMMS.
+    """Represents a registered employee within the CMMS.
 
     Users are identified by a unique SAP number and assigned a role that dictates
     their system permissions. This model tracks authentication data, personal info,
@@ -17,13 +16,15 @@ class User(Base, TimestampMixin):
 
     __tablename__ = "users"
     __table_args__ = {
-        "comment": "Registry of system users and their authentication data"
+        "comment": "Registry of system users and their authentication data",
     }
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
     password = Column(
-        String, nullable=False, comment="Securely hashed password for authentication"
+        String,
+        nullable=False,
+        comment="Securely hashed password for authentication",
     )
 
     is_active = Column(
@@ -37,7 +38,10 @@ class User(Base, TimestampMixin):
     lastname = Column(String, nullable=False, comment="Surname of the employee")
 
     sap_number = Column(
-        String, unique=True, nullable=False, comment="Unique identifier from SAP system"
+        String,
+        unique=True,
+        nullable=False,
+        comment="Unique identifier from SAP system",
     )
 
     role_id = Column(
@@ -51,11 +55,15 @@ class User(Base, TimestampMixin):
     role = relationship("Role", back_populates="users")
 
     submitted_failures = relationship(
-        "Failure", back_populates="submitter", foreign_keys="[Failure.submitter_id]"
+        "Failure",
+        back_populates="submitter",
+        foreign_keys="[Failure.submitter_id]",
     )
 
     received_failures = relationship(
-        "Failure", back_populates="recipient", foreign_keys="[Failure.recipient_id]"
+        "Failure",
+        back_populates="recipient",
+        foreign_keys="[Failure.recipient_id]",
     )
 
     principal_calendar_entries = relationship(

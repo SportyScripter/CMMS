@@ -5,22 +5,30 @@ REQUIRE_ADMIN = RoleChecker(["Super Admin"])
 
 # Users with the following roles can create new users
 ALLOW_MANAGE_USERS = RoleChecker(
-    ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider"]
+    ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider"],
 )
 
 # Users with the following roles can edit production orders (example)
 ALLOW_MANAGE_ORDERS = RoleChecker(
-    ["Super Admin", "Kierownik", "Manager", "Mistrz Zmiany"]
+    ["Super Admin", "Kierownik", "Manager", "Mistrz Zmiany"],
 )
 
 # All logged-in employees (e.g., for reading data)
 ALLOW_READ_ONLY = RoleChecker(
-    ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider", "Mechanik", "Elektryk"]
+    [
+        "Super Admin",
+        "Kierownik",
+        "Dyrektor",
+        "Manager",
+        "Lider",
+        "Mechanik",
+        "Elektryk",
+    ],
 )
 
 # Users with the following roles can manage machines
 ALLOW_MANAGE_MACHINES = RoleChecker(
-    ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider"]
+    ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider"],
 )
 
 # Users with the following roles can manage parts
@@ -35,9 +43,9 @@ ALLOW_CHECK_PARTS = RoleChecker(
         "Mechanik",
         "Elektryk",
         "Magazynier",
-    ]
+    ],
 )
 
 ALLOW_EDIT_PARTS = RoleChecker(
-    ["Super Admin", "Kierownik", "Manager", "Magazynier", "Elektryk", "Mechanik"]
+    ["Super Admin", "Kierownik", "Manager", "Magazynier", "Elektryk", "Mechanik"],
 )

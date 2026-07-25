@@ -83,7 +83,9 @@ def get_orders_by_technician(db: Session, technician_id: int) -> list[OrderCalen
 
 
 def update_order(
-    db: Session, order_id: int, order_update: OrderCalendarUpdate
+    db: Session,
+    order_id: int,
+    order_update: OrderCalendarUpdate,
 ) -> OrderCalendar | None:
     """Update an existing order entry in the database."""
     db_order = get_order(db, order_id)

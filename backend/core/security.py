@@ -23,14 +23,15 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(
-    subject: str | Any, expires_delta: timedelta | None = None
+    subject: str | Any,
+    expires_delta: timedelta | None = None,
 ) -> str:
-    "Generate a JWT access token for a given subject (user identifier)."
+    """Generate a JWT access token for a given subject (user identifier)."""
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
         )
     to_encode = {"exp": expire, "sub": str(subject)}
     encode_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

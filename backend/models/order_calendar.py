@@ -6,8 +6,7 @@ from models.mixins import TimestampMixin
 
 
 class OrderCalendar(Base, TimestampMixin):
-    """
-    Represents a scheduled maintenance task or production event.
+    """Represents a scheduled maintenance task or production event.
 
     This model acts as the central hub for planning work. It links a specific
     OrderType to a machine and assigns responsible users (principal for the
@@ -27,7 +26,9 @@ class OrderCalendar(Base, TimestampMixin):
     )
 
     description = Column(
-        String, nullable=False, comment="Summary of the work to be performed"
+        String,
+        nullable=False,
+        comment="Summary of the work to be performed",
     )
 
     principal_id = Column(
@@ -73,15 +74,20 @@ class OrderCalendar(Base, TimestampMixin):
     order_type = relationship("OrderType", back_populates="calendar_entries")
 
     principal = relationship(
-        "User", foreign_keys=[principal_id], back_populates="principal_calendar_entries"
+        "User",
+        foreign_keys=[principal_id],
+        back_populates="principal_calendar_entries",
     )
 
     performed = relationship(
-        "User", foreign_keys=[performed_id], back_populates="performed_calendar_entries"
+        "User",
+        foreign_keys=[performed_id],
+        back_populates="performed_calendar_entries",
     )
 
     order_machine = relationship("Machine", back_populates="calendar_entries")
     checklist_items = relationship(
-        "OrderChecklistItem", back_populates="order_calendar"
+        "OrderChecklistItem",
+        back_populates="order_calendar",
     )
     attachments = relationship("Attachment", back_populates="order_calendar")

@@ -34,7 +34,9 @@ def get_attachment_by_order(db: Session, order_id: int) -> list[Attachment]:
 
 
 def update_attachment(
-    db: Session, attachment_id: int, attachment_in: AttachmentUpdate
+    db: Session,
+    attachment_id: int,
+    attachment_in: AttachmentUpdate,
 ) -> Attachment | None:
     """Update an existing attachment record."""
     db_attachment = get_attachment(db, attachment_id)

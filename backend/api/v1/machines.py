@@ -53,7 +53,8 @@ def read_machine(
     db_machine = crud_machines.get_machine(db, machine_id=machine_id)
     if not db_machine:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Machine not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Machine not found",
         )
     return db_machine
 
@@ -69,11 +70,13 @@ def update_machine(
     machine = crud_machines.get_machine(db, machine_id=machine_id)
     if not machine:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Machine not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Machine not found",
         )
     if machine_in.qr_code:
         existing_machine = crud_machines.get_machine_by_qr_code(
-            db, qr_code=machine_in.qr_code
+            db,
+            qr_code=machine_in.qr_code,
         )
         if existing_machine and existing_machine.id != machine_id:
             raise HTTPException(
@@ -88,7 +91,9 @@ def update_machine(
                 detail="Another machine with this name already exists",
             )
     return crud_machines.update_machine(
-        db=db, db_machine=machine, machine_in=machine_in
+        db=db,
+        db_machine=machine,
+        machine_in=machine_in,
     )
 
 
@@ -102,6 +107,7 @@ def delete_machine(
     machine = crud_machines.get_machine(db, machine_id=machine_id)
     if not machine:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Machine not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Machine not found",
         )
     return crud_machines.delete_machine(db=db, db_machine=machine)

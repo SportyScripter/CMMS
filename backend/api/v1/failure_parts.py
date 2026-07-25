@@ -17,7 +17,9 @@ router = APIRouter()
 
 
 @router.post(
-    "/", response_model=FailurePartResponse, status_code=status.HTTP_201_CREATED
+    "/",
+    response_model=FailurePartResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 def create_failure_part(
     failure_part_in: FailurePartCreate,
@@ -26,7 +28,9 @@ def create_failure_part(
 ) -> Any:
     """Log consumed parts against a specific failure and automatically deduct inventory."""
     existing_record = crud_failure_parts.get_failure_part(
-        db=db, failure_id=failure_part_in.failure_id, part_id=failure_part_in.part_id
+        db=db,
+        failure_id=failure_part_in.failure_id,
+        part_id=failure_part_in.part_id,
     )
     if existing_record:
         raise HTTPException(
@@ -35,7 +39,8 @@ def create_failure_part(
         )
     try:
         return crud_failure_parts.create_failure_part(
-            db=db, failure_part_in=failure_part_in
+            db=db,
+            failure_part_in=failure_part_in,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -86,7 +91,9 @@ def delete_failure_part(
 ) -> Any:
     """Delete a specific part consumption record for a failure."""
     db_failure_part = crud_failure_parts.delete_failure_part(
-        db, failure_id=failure_id, part_id=part_id
+        db,
+        failure_id=failure_id,
+        part_id=part_id,
     )
     if not db_failure_part:
         raise HTTPException(

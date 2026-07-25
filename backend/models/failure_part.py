@@ -5,8 +5,7 @@ from db.database import Base
 
 
 class FailurePart(Base):
-    """
-    Association object representing the consumption of spare parts for a specific failure.
+    """Association object representing the consumption of spare parts for a specific failure.
 
     This Many-to-Many link table not only connects a Failure to a Part but also
     tracks the exact quantity of the part removed from inventory during the repair process.
@@ -14,7 +13,7 @@ class FailurePart(Base):
 
     __tablename__ = "failure_parts"
     __table_args__ = {
-        "comment": "Association table tracking inventory consumed during failure repairs"
+        "comment": "Association table tracking inventory consumed during failure repairs",
     }
 
     failure_id = Column(

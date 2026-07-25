@@ -27,7 +27,9 @@ api_router.include_router(roles.router, prefix="/roles", tags=["Roles"])
 api_router.include_router(machines.router, prefix="/machines", tags=["Machines"])
 api_router.include_router(parts.router, prefix="/parts", tags=["Parts"])
 api_router.include_router(
-    part_categories.router, prefix="/part-categories", tags=["Part Categories"]
+    part_categories.router,
+    prefix="/part-categories",
+    tags=["Part Categories"],
 )
 api_router.include_router(
     part_compatibilities.router,
@@ -35,20 +37,30 @@ api_router.include_router(
     tags=["Part Compatibilities"],
 )
 api_router.include_router(
-    departments.router, prefix="/departments", tags=["Departments"]
+    departments.router,
+    prefix="/departments",
+    tags=["Departments"],
 )
 api_router.include_router(failures.router, prefix="/failures", tags=["Failures"])
 api_router.include_router(
-    failure_parts.router, prefix="/failure-parts", tags=["Failure Parts"]
+    failure_parts.router,
+    prefix="/failure-parts",
+    tags=["Failure Parts"],
 )
 api_router.include_router(
-    attachments.router, prefix="/attachments", tags=["Attachments"]
+    attachments.router,
+    prefix="/attachments",
+    tags=["Attachments"],
 )
 api_router.include_router(
-    order_types.router, prefix="/order-types", tags=["Order Types"]
+    order_types.router,
+    prefix="/order-types",
+    tags=["Order Types"],
 )
 api_router.include_router(
-    order_calendar.router, prefix="/order-calendar", tags=["Order Calendar"]
+    order_calendar.router,
+    prefix="/order-calendar",
+    tags=["Order Calendar"],
 )
 api_router.include_router(
     order_checklist_items.router,

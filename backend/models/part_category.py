@@ -5,8 +5,7 @@ from db.database import Base
 
 
 class PartCategory(Base):
-    """
-    Lookup table for classifying spare parts.
+    """Lookup table for classifying spare parts.
 
     Categorizing parts (e.g., 'Bearings', 'Sensors', 'Electrical Components', 'Fasteners')
     allows for better inventory management, efficient stock level reporting,
@@ -15,7 +14,7 @@ class PartCategory(Base):
 
     __tablename__ = "part_categories"
     __table_args__ = {
-        "comment": "Dictionary of spare part categories for inventory organization"
+        "comment": "Dictionary of spare part categories for inventory organization",
     }
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

@@ -18,9 +18,7 @@ def create_failure(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_READ_ONLY),
 ) -> Any:
-    """
-    Create a new failure.
-    """
+    """Create a new failure."""
     failure_in.submitter_id = (
         current_user.id
     )  # Set the submitter_id to the current user's ID
@@ -63,7 +61,9 @@ def update_failure(
 ) -> Any:
     """Update a failure by its ID."""
     db_failure = crud_failures.update_failure(
-        db=db, failure_id=failure_id, failure_update=failure_in
+        db=db,
+        failure_id=failure_id,
+        failure_update=failure_in,
     )
     if not db_failure:
         raise HTTPException(

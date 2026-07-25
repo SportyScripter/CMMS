@@ -17,7 +17,9 @@ router = APIRouter()
 
 
 @router.post(
-    "/", response_model=OrderChecklistItemResponse, status_code=status.HTTP_201_CREATED
+    "/",
+    response_model=OrderChecklistItemResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 def create_checklist_item(
     item_in: OrderChecklistItemCreate,
@@ -36,7 +38,8 @@ def get_checklist_items_by_order(
 ) -> Any:
     """Retrieve the full checklist for a specific maintenance order."""
     return crud_order_checklist_items.get_checklist_items_by_order(
-        db=db, order_id=order_id
+        db=db,
+        order_id=order_id,
     )
 
 
@@ -49,7 +52,9 @@ def update_checklist_item(
 ) -> Any:
     """Update a checklist item (e.g., mark as 'completed' or add notes)."""
     db_item = crud_order_checklist_items.update_checklist_item(
-        db, item_id=item_id, item_in=item_in
+        db,
+        item_id=item_id,
+        item_in=item_in,
     )
     if not db_item:
         raise HTTPException(

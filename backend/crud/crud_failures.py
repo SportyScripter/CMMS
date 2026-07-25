@@ -83,7 +83,9 @@ def get_failures_by_department(db: Session, department_id: int) -> list[Failure]
 
 
 def update_failure(
-    db: Session, failure_id: int, failure_update: FailureUpdate
+    db: Session,
+    failure_id: int,
+    failure_update: FailureUpdate,
 ) -> Failure | None:
     """Update a failure by its ID."""
     failure = get_failure(db, failure_id)

@@ -29,7 +29,9 @@ def get_departments(db: Session, skip: int = 0, limit: int = 100) -> list[Depart
 
 
 def update_department(
-    db: Session, department_id: int, department_update: DepartmentUpdate
+    db: Session,
+    department_id: int,
+    department_update: DepartmentUpdate,
 ) -> Department | None:
     """Update a department by its ID."""
     db_department = get_department(db, department_id)

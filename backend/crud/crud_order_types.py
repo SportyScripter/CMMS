@@ -29,7 +29,9 @@ def get_order_types(db: Session, skip: int = 0, limit: int = 100) -> list[OrderT
 
 
 def update_order_type(
-    db: Session, order_type_id: int, order_type_in: OrderTypeUpdate
+    db: Session,
+    order_type_id: int,
+    order_type_in: OrderTypeUpdate,
 ) -> OrderType | None:
     """Update an existing order type in the database."""
     db_order_type = db.query(OrderType).filter(OrderType.id == order_type_id).first()

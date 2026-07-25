@@ -12,14 +12,16 @@ def create_failure_part(db: Session, failure_part_in: FailurePartCreate) -> Fail
         raise ValueError("Part not found in inventory.")
     if db_part.quantity < failure_part_in.quantity_used:
         raise ValueError(
-            f"Not enough stock. Available: {db_part.quantity}, Requested: {failure_part_in.quantity_used}"
+            f"Not enough stock. Available: {db_part.quantity}, Requested: {failure_part_in.quantity_used}",
         )
     db_part.quantity -= failure_part_in.quantity_used
     db_failure_part = FailurePart(**failure_part_in.model_dump())
     db.add(db_failure_part)
     db.commit()
     return get_failure_part(
-        db, failure_id=db_failure_part.failure_id, part_id=db_failure_part.part_id
+        db,
+        failure_id=db_failure_part.failure_id,
+        part_id=db_failure_part.part_id,
     )
 
 
@@ -44,7 +46,10 @@ def get_failure_parts_by_failure(db: Session, failure_id: int) -> list[FailurePa
 
 
 def update_failure_part(
-    db: Session, failure_id: int, part_id: int, failure_part_in: FailurePartUpdate
+    db: Session,
+    failure_id: int,
+    part_id: int,
+    failure_part_in: FailurePartUpdate,
 ) -> FailurePart | None:
     """Update part consumption quantity and adjust warehouse stock accordingly."""
     db_failure_part = get_failure_part(db, failure_id, part_id)
@@ -58,7 +63,7 @@ def update_failure_part(
         difference = failure_part_in.quantity_used - db_failure_part.quantity_used
         if db_part.quantity < difference:
             raise ValueError(
-                f"Not enough stock to increase quantity. Available: {db_part.quantity}"
+                f"Not enough stock to increase quantity. Available: {db_part.quantity}",
             )
         db_part.quantity -= difference
         db_failure_part.quantity_used = failure_part_in.quantity_used
@@ -68,7 +73,9 @@ def update_failure_part(
 
 
 def delete_failure_part(
-    db: Session, failure_id: int, part_id: int
+    db: Session,
+    failure_id: int,
+    part_id: int,
 ) -> FailurePart | None:
     """Remove a part consumption record and return the parts to the warehouse."""
     db_failure_part = get_failure_part(db, failure_id, part_id)

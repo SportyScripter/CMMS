@@ -5,7 +5,8 @@ from schemas.part_compatibility import PartCompatibilityCreate
 
 
 def create_part_compatibility(
-    db: Session, part_compatibility_in: PartCompatibilityCreate
+    db: Session,
+    part_compatibility_in: PartCompatibilityCreate,
 ) -> PartCompatibility:
     """Create a new part compatibility in the database."""
     db_comp = PartCompatibility(**part_compatibility_in.model_dump())
@@ -16,13 +17,16 @@ def create_part_compatibility(
 
 
 def get_compatibility(
-    db: Session, part_id: int, machine_id: int
+    db: Session,
+    part_id: int,
+    machine_id: int,
 ) -> PartCompatibility | None:
     """Check if a specific part is compatible with a specific machine."""
     return (
         db.query(PartCompatibility)
         .options(
-            joinedload(PartCompatibility.part), joinedload(PartCompatibility.machine)
+            joinedload(PartCompatibility.part),
+            joinedload(PartCompatibility.machine),
         )
         .filter(
             PartCompatibility.part_id == part_id,
@@ -33,13 +37,15 @@ def get_compatibility(
 
 
 def get_compatibilities_by_machine(
-    db: Session, machine_id: int
+    db: Session,
+    machine_id: int,
 ) -> list[PartCompatibility]:
     """Get all part compatibilities for a specific machine."""
     return (
         db.query(PartCompatibility)
         .options(
-            joinedload(PartCompatibility.part), joinedload(PartCompatibility.machine)
+            joinedload(PartCompatibility.part),
+            joinedload(PartCompatibility.machine),
         )
         .filter(PartCompatibility.machine_id == machine_id)
         .all()
@@ -51,7 +57,8 @@ def get_compatibilities_by_part(db: Session, part_id: int) -> list[PartCompatibi
     return (
         db.query(PartCompatibility)
         .options(
-            joinedload(PartCompatibility.part), joinedload(PartCompatibility.machine)
+            joinedload(PartCompatibility.part),
+            joinedload(PartCompatibility.machine),
         )
         .filter(PartCompatibility.part_id == part_id)
         .all()
@@ -59,7 +66,9 @@ def get_compatibilities_by_part(db: Session, part_id: int) -> list[PartCompatibi
 
 
 def delete_compatibility(
-    db: Session, part_id: int, machine_id: int
+    db: Session,
+    part_id: int,
+    machine_id: int,
 ) -> PartCompatibility | None:
     """Delete a specific part compatibility from the database."""
     db_comp = get_compatibility(db, part_id, machine_id)

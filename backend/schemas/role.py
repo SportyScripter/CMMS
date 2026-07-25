@@ -2,13 +2,14 @@ from pydantic import BaseModel, Field
 
 
 class RoleBase(BaseModel):
-    """
-    Base schema for Role containing common attributes.
+    """Base schema for Role containing common attributes.
     Examples of roles: 'Maintenance Manager', 'Electrical Manager', 'Production Foreman', 'Director', 'Mechanic', 'Electrician'.
     """
 
     name: str = Field(
-        ..., max_length=50, description="The unique name of the system role."
+        ...,
+        max_length=50,
+        description="The unique name of the system role.",
     )
     description: str | None = Field(
         None,
@@ -18,23 +19,21 @@ class RoleBase(BaseModel):
 
 
 class RoleCreate(RoleBase):
-    """
-    Schema used by Administrator to create a new Role in the system.
+    """Schema used by Administrator to create a new Role in the system.
     Inherits all required fields directly from RoleBase.
     """
 
-    pass
-
 
 class RoleUpdate(BaseModel):
-    """
-    Schema used for updating an existing Role.
+    """Schema used for updating an existing Role.
     Fields are optional to allow partial updates.
     """
 
     name: str | None = Field(None, max_length=50, description="Updated role name")
     description: str | None = Field(
-        None, max_length=255, description="Updated description"
+        None,
+        max_length=255,
+        description="Updated description",
     )
 
 
@@ -45,13 +44,13 @@ class RoleMinimal(BaseModel):
 
 
 class RoleResponse(RoleBase):
-    """
-    Schema used for returning Role data in API responses.
+    """Schema used for returning Role data in API responses.
     Includes database-generated fields like 'id' and timestamps.
     """
 
     id: int = Field(
-        ..., description="The unique identifier of the role in the database."
+        ...,
+        description="The unique identifier of the role in the database.",
     )
 
     model_config = {"from_attributes": True}

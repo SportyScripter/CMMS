@@ -34,7 +34,10 @@ def get_message(db: Session, message_id: int) -> Message | None:
 
 
 def get_inbox_for_user(
-    db: Session, user_id: int, skip: int = 0, limit: int = 100
+    db: Session,
+    user_id: int,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[Message]:
     """Retrieve all messages received by a specific user (Inbox)."""
     return (
@@ -53,7 +56,10 @@ def get_inbox_for_user(
 
 
 def get_outbox_for_user(
-    db: Session, user_id: int, skip: int = 0, limit: int = 100
+    db: Session,
+    user_id: int,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[Message]:
     """Retrieve all messages sent by a specific user (Outbox)."""
     return (

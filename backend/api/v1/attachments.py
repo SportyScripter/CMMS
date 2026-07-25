@@ -13,16 +13,16 @@ router = APIRouter()
 
 
 @router.post(
-    "/", response_model=AttachmentResponse, status_code=status.HTTP_201_CREATED
+    "/",
+    response_model=AttachmentResponse,
+    status_code=status.HTTP_201_CREATED,
 )
 def create_attachment(
     attachment_in: AttachmentCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_MACHINES),
 ) -> Any:
-    """
-    Create a new attachment.
-    """
+    """Create a new attachment."""
     if not attachment_in.failure_id and not attachment_in.order_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -37,13 +37,12 @@ def get_attachment(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_READ_ONLY),
 ) -> Any:
-    """
-    Retrieve a specific attachment by its ID.
-    """
+    """Retrieve a specific attachment by its ID."""
     db_attachment = crud_attachments.get_attachment(db=db, attachment_id=attachment_id)
     if not db_attachment:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Attachment not found."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attachment not found.",
         )
     return db_attachment
 
@@ -55,16 +54,17 @@ def update_attachment(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_MACHINES),
 ) -> Any:
-    """
-    Update an existing attachment.
-    """
+    """Update an existing attachment."""
     db_attachment = crud_attachments.get_attachment(db=db, attachment_id=attachment_id)
     if not db_attachment:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Attachment not found."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attachment not found.",
         )
     return crud_attachments.update_attachment(
-        db=db, db_attachment=db_attachment, attachment_in=attachment_in
+        db=db,
+        db_attachment=db_attachment,
+        attachment_in=attachment_in,
     )
 
 
@@ -74,14 +74,14 @@ def delete_attachment(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_MACHINES),
 ) -> Any:
-    """
-    Delete a specific attachment by its ID.
-    """
+    """Delete a specific attachment by its ID."""
     db_attachment = crud_attachments.delete_attachment(
-        db=db, attachment_id=attachment_id
+        db=db,
+        attachment_id=attachment_id,
     )
     if not db_attachment:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Attachment not found."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attachment not found.",
         )
     return db_attachment

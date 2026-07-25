@@ -34,7 +34,9 @@ def create_machine(db: Session, machine_in: MachineCreate) -> Machine:
 
 
 def update_machine(
-    db: Session, db_machine: Machine, machine_in: MachineUpdate
+    db: Session,
+    db_machine: Machine,
+    machine_in: MachineUpdate,
 ) -> Machine:
     """Update an existing machine's information in the database."""
     update_data = machine_in.model_dump(exclude_unset=True)

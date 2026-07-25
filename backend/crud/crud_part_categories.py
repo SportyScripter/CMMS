@@ -5,7 +5,8 @@ from schemas.part_category import PartCategoryCreate, PartCategoryUpdate
 
 
 def create_part_category(
-    db: Session, part_category_in: PartCategoryCreate
+    db: Session,
+    part_category_in: PartCategoryCreate,
 ) -> PartCategory:
     """Create a new part category in the database."""
     db_part_category = PartCategory(**part_category_in.model_dump())
@@ -26,14 +27,18 @@ def get_part_category_by_name(db: Session, name: str) -> PartCategory | None:
 
 
 def get_part_categories(
-    db: Session, skip: int = 0, limit: int = 100
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
 ) -> list[PartCategory]:
     """Retrieve a list of part categories from the database with optional pagination."""
     return db.query(PartCategory).offset(skip).limit(limit).all()
 
 
 def update_part_category(
-    db: Session, part_category_id: int, part_category_update: PartCategoryUpdate
+    db: Session,
+    part_category_id: int,
+    part_category_update: PartCategoryUpdate,
 ) -> PartCategory | None:
     """Update an existing part category's information in the database."""
     db_part_category = get_part_category(db, part_category_id)

@@ -2,7 +2,7 @@ import os
 import sys
 
 sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
 from crud import crud_roles, crud_users
@@ -20,7 +20,8 @@ def seed_admin():
         admin_role_description = "Super Admin role with all permissions"
         roles = crud_roles.get_roles(db)
         admin_role = next(
-            (role for role in roles if role.name == admin_role_name), None
+            (role for role in roles if role.name == admin_role_name),
+            None,
         )
 
         if not admin_role:

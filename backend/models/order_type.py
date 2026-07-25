@@ -5,8 +5,7 @@ from db.database import Base
 
 
 class OrderType(Base):
-    """
-    Lookup table for classifying maintenance tasks.
+    """Lookup table for classifying maintenance tasks.
 
     Order types define the nature of the work performed (e.g., 'Preventive',
     'Corrective', 'Calibration', 'Inspection'). Standardizing these values
@@ -15,7 +14,7 @@ class OrderType(Base):
 
     __tablename__ = "order_types"
     __table_args__ = {
-        "comment": "Dictionary of standardized maintenance order categories"
+        "comment": "Dictionary of standardized maintenance order categories",
     }
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)

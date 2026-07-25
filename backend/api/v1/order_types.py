@@ -20,7 +20,8 @@ def create_order_type(
 ) -> Any:
     """Create a new order type."""
     existing_order_type = crud_order_types.get_order_type_by_name(
-        db, order_type_in.name
+        db,
+        order_type_in.name,
     )
     if existing_order_type:
         raise HTTPException(
@@ -67,7 +68,8 @@ def update_order_type(
     """Update a specific order type."""
     if order_type_in.name is not None:
         existing_type = crud_order_types.get_order_type_by_name(
-            db, name=order_type_in.name
+            db,
+            name=order_type_in.name,
         )
         if existing_type and existing_type.id != order_type_id:
             raise HTTPException(
@@ -76,11 +78,14 @@ def update_order_type(
             )
 
     db_order_type = crud_order_types.update_order_type(
-        db=db, order_type_id=order_type_id, order_type_in=order_type_in
+        db=db,
+        order_type_id=order_type_id,
+        order_type_in=order_type_in,
     )
     if not db_order_type:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Order type not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order type not found",
         )
     return db_order_type
 
@@ -93,10 +98,12 @@ def delete_order_type(
 ) -> Any:
     """Delete a specific order type."""
     db_order_type = crud_order_types.delete_order_type(
-        db=db, order_type_id=order_type_id
+        db=db,
+        order_type_id=order_type_id,
     )
     if not db_order_type:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Order type not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Order type not found",
         )
     return db_order_type
