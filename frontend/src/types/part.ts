@@ -6,6 +6,7 @@ export interface PartCategory  {
 export interface Part {
     id: number;
     category_id: number;
+    producer: string ;
     name: string;
     type: string;
     quantity: number;

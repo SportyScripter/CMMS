@@ -34,6 +34,7 @@ export const PartListPage = () => {
   const [filterQr, setFilterQr] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [filterProducer, setFilterProducer] = useState("");
 
   const [selectedPart, setSelectedPart] = useState<Part | null>(null);
 
@@ -68,6 +69,9 @@ export const PartListPage = () => {
     new Set(availablePartsForType.map((p) => p.type)),
   );
   const filteredParts = parts.filter((part) => {
+    const matchProducer = (part.producer || "")
+      .toLowerCase()
+      .includes(filterProducer.toLowerCase());
     const matchName = part.name
       .toLowerCase()
       .includes(filterName.toLowerCase());
@@ -76,13 +80,14 @@ export const PartListPage = () => {
       ? part.category_id === Number(filterCategory)
       : true;
     const matchType = filterType ? part.type === filterType : true;
-    return matchName && matchQr && matchCategory && matchType;
+    return matchName && matchQr && matchCategory && matchType && matchProducer;
   });
   const clearFilters = () => {
     setFilterName("");
     setFilterQr("");
     setFilterCategory("");
     setFilterType("");
+    setFilterProducer("");
   };
 
   return (
@@ -146,6 +151,18 @@ export const PartListPage = () => {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">
+                Prducent / Dostawca
+              </label>
+              <input
+                type="text"
+                value={filterProducer}
+                onChange={(e) => setFilterProducer(e.target.value)}
+                placeholder="np. Balluff"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
                 Nazwa części
@@ -235,6 +252,7 @@ export const PartListPage = () => {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100 text-sm font-semibold text-gray-600">
                   <th className="px-6 py-4 w-12 text-center">#</th>
+                  <th className="px-6 py-4">producent</th>
                   <th className="px-6 py-4">Nazwa</th>
                   <th className="px-6 py-4">Typ</th>
                   <th className="px-6 py-4">Kategoria</th>
@@ -254,6 +272,9 @@ export const PartListPage = () => {
                     >
                       <td className="px-6 py-4 text-center font-medium text-gray-400">
                         {index + 1}
+                      </td>
+                      <td className="px-6 py-4 font-semibold text-gray-900">
+                        {part.producer || <span className="italic text-gray-300">Brak</span>}
                       </td>
 
                       <td className="px-6 py-4 font-semibold text-gray-900">
@@ -277,7 +298,10 @@ export const PartListPage = () => {
                           </span>
                           {isLowStock && (
                             <span title="Stan krytyczny!">
-                                <AlertTriangle className="w-4 h-4 text-red-500 ml-2" aria-label="Stan krytyczny!" />
+                              <AlertTriangle
+                                className="w-4 h-4 text-red-500 ml-2"
+                                aria-label="Stan krytyczny!"
+                              />
                             </span>
                           )}
                         </div>
@@ -322,6 +346,12 @@ export const PartListPage = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 gap-y-4 gap-x-8">
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Producent</p>
+                  <p className="font-semibold text-gray-900">
+                    {selectedPart.producer}
+                  </p>
+                </div>
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Nazwa</p>
                   <p className="font-semibold text-gray-900">
