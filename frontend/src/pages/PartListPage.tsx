@@ -490,6 +490,7 @@ export const PartListPage = () => {
               <PartEditModal
                 part={selectedPart}
                 categories={categories}
+                setCategories={setCategories} 
                 onClose={() => setIsEditModalOpen(false)}
                 onUpdated={async () => {
                   setIsLoading(true);
