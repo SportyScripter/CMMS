@@ -4,7 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.dependencies import get_db
-from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from core.permissions import (
+    ALLOW_READ_ONLY,
+    ALLOW_MANAGE_FAILURES,
+)
 from crud import crud_failure_parts
 from models.user import User
 from schemas.failure_part import (
@@ -24,7 +27,7 @@ router = APIRouter()
 def create_failure_part(
     failure_part_in: FailurePartCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_MANAGE_FAILURES),
 ) -> Any:
     """Log consumed parts against a specific failure and automatically deduct inventory."""
     existing_record = crud_failure_parts.get_failure_part(
@@ -62,7 +65,7 @@ def update_failure_part(
     part_id: int,
     failure_part_in: FailurePartUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_MANAGE_FAILURES),
 ) -> Any:
     """Update the quantity of a part consumed and adjust inventory."""
     try:
@@ -87,7 +90,7 @@ def delete_failure_part(
     failure_id: int,
     part_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_MANAGE_FAILURES),
 ) -> Any:
     """Delete a specific part consumption record for a failure."""
     db_failure_part = crud_failure_parts.delete_failure_part(
