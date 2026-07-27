@@ -63,18 +63,41 @@ def update_failure(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_FAILURES),
 ) -> Any:
-    """Update a failure by its ID."""
-    db_failure = crud_failures.update_failure(
-        db=db,
-        failure_id=failure_id,
-        failure_update=failure_in,
-    )
+    """Update a failure by its ID with Role-Based Access Control."""
+    db_failure = crud_failures.get_failure(db=db, failure_id=failure_id)
     if not db_failure:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Failure with ID '{failure_id}' not found.",
         )
-    return db_failure
+    user_role = current_user.role.name
+    service_roles = ["Super Admin", "Admin", "Kierownik", "Mechanik", "Elektryk"]
+    if user_role not in service_roles:
+        if db_failure.submitter_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Brak dostępu: Możesz edytować tylko własne zgłoszenia.",
+            )
+        if db_failure.status not in ["Pending", "CRITICAL", "WARNING"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Brak dostępu: Nie możesz edytować zgłoszenia, które jest już w trakcie naprawy lub zamknięte.",
+            )
+        if failure_in.status and failure_in.status not in [
+            "Pending",
+            "CRITICAL",
+            "WARNING",
+        ]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Brak uprawnień: Operatorzy nie mogą zamykać awarii ani zmieniać statusu na serwisowy.",
+            )
+    updated_failure = crud_failures.update_failure(
+        db=db,
+        failure_id=failure_id,
+        failure_update=failure_in,
+    )
+    return updated_failure
 
 
 @router.delete("/{failure_id}", response_model=FailureResponse)
