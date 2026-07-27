@@ -23,6 +23,7 @@ ALLOW_READ_ONLY = RoleChecker(
         "Lider",
         "Mechanik",
         "Elektryk",
+        "Operator",
     ],
 )
 
@@ -31,8 +32,17 @@ ALLOW_MANAGE_MACHINES = RoleChecker(
     ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider"],
 )
 
+# Users with the following roles can manage failures
+ALLOW_MANAGE_FAILURES = RoleChecker(
+    ["Machanik", "Elektryk", "Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider"]
+)
+ALLOW_MANAGE_DELETE_FAILURES = RoleChecker(
+    ["Super Admin", "Kierownik", "Dyrektor", "Manager", "Lider", "Elektryk", "Mechanik"]
+)
 # Users with the following roles can manage parts
-ALLOW_MANAGE_PARTS = RoleChecker(["Super Admin", "Kierownik", "Magazynier"])
+ALLOW_MANAGE_PARTS = RoleChecker(
+    ["Super Admin", "Kierownik", "Magazynier", "Elektryk", "Mechanik"]
+)
 
 ALLOW_CHECK_PARTS = RoleChecker(
     [

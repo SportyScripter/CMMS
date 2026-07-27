@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.dependencies import get_db
-from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from core.permissions import (
+    ALLOW_READ_ONLY,
+    ALLOW_MANAGE_FAILURES,
+    ALLOW_MANAGE_DELETE_FAILURES,
+)
 from crud import crud_failures
 from models.user import User
 from schemas.failure import FailureCreate, FailureResponse, FailureUpdate
@@ -57,7 +61,7 @@ def update_failure(
     failure_id: int,
     failure_in: FailureUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_MANAGE_FAILURES),
 ) -> Any:
     """Update a failure by its ID."""
     db_failure = crud_failures.update_failure(
@@ -77,7 +81,7 @@ def update_failure(
 def delete_failure(
     failure_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_MANAGE_DELETE_FAILURES),
 ) -> Any:
     """Delete a failure by its ID."""
     db_failure = crud_failures.delete_failure(db=db, failure_id=failure_id)
