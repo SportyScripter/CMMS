@@ -9,7 +9,6 @@ from crud import crud_users
 from models.user import User
 from schemas.user import UserCreate, UserResponse, UserUpdate
 
-
 router = APIRouter()
 
 
