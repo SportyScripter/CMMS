@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, ShieldPlus, Search, Users,ShieldUser} from "lucide-react";
+import { UserPlus, ShieldPlus, Search, Users, ShieldUser, Building2 } from "lucide-react";
 
+// --- ADMIN ACTIONS CONFIGURATION ---
+// Defines the navigation cards available on the administration dashboard.
 const adminActions = [
   {
     title: "Dodaj rolę",
@@ -37,14 +39,25 @@ const adminActions = [
     color: "text-indigo-600",
     bgColor: "bg-indigo-100",
   },
+  {
+    title: "Wydziały Produkcyjne",
+    description:
+      "Zarządzaj strukturą departamentów i wydziałów w fabryce.",
+    icon: Building2,
+    href: "/departments/manage", 
+    color: "text-amber-600",
+    bgColor: "bg-amber-100",
+  },
 ];
 
 export const UsersDashboard = () => {
   return (
     <div className="max-w-6xl mx-auto">
+      
+      {/* --- DASHBOARD HEADER --- */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          Zarządzanie Użytkownikami
+          Zarządzanie Użytkownikami i Strukturą
         </h1>
         <p className="mt-2 text-sm text-gray-600">
           Wybierz akcję, którą chcesz wykonać. Moduł dostępny tylko dla
@@ -52,6 +65,7 @@ export const UsersDashboard = () => {
         </p>
       </div>
 
+      {/* --- ACTIONS GRID --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {adminActions.map((action) => (
           <Link
@@ -60,11 +74,15 @@ export const UsersDashboard = () => {
             className="group block bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-blue-200 overflow-hidden active:scale-95 cursor-pointer"
           >
             <div className="p-6 flex items-start">
+              
+              {/* Action Icon with Dynamic Colors */}
               <div
                 className={`p-4 rounded-xl ${action.bgColor} ${action.color} group-hover:scale-110 transition-transform duration-300`}
               >
                 <action.icon className="w-8 h-8" />
               </div>
+              
+              {/* Action Title and Description */}
               <div className="ml-5 flex-1">
                 <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
                   {action.title}
@@ -73,10 +91,12 @@ export const UsersDashboard = () => {
                   {action.description}
                 </p>
               </div>
+
             </div>
           </Link>
         ))}
       </div>
+
     </div>
   );
 };

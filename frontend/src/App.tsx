@@ -13,6 +13,7 @@ import { MachineCreatePage } from './pages/MachineCreatePage';
 import {PartListPage} from './pages/PartListPage';
 import {PartCreatePage} from './pages/PartCreatePage';
 import {FailureListPage} from './pages/FailureListPage';
+import {DepartmentManagementPage} from './pages/DepartmentManagementPage';
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
@@ -54,6 +55,7 @@ const AppRoutes = () => {
         <Route path="users/roles/list" element={<RoleListPage />} />
         <Route path="users/list" element={<UserListPage />} />
         <Route path="users/create" element={<CreateUserPage />} />
+        <Route path="/departments/manage" element={<DepartmentManagementPage />} />
       </Route>
     </Routes>
   );
