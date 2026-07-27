@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { api } from "../api/axiosConfig";
 import { Failure, Department } from "../types/failure";
 import { Machine } from "../types/machine";
@@ -7,32 +7,48 @@ import { AddFailureModal } from "../components/failures/AddFailureModal";
 import { FailureDetailsModal } from "../components/failures/FailureDetailsModal";
 import {
   AlertTriangle,
-  Search,
   Filter,
   Plus,
   Clock,
   Wrench,
   Loader2,
+  Archive,
+  History,
+  List,
+  AlertCircle,
+  Play,
+  Calendar,
 } from "lucide-react";
 
 export const FailureListPage = () => {
+  // --- API DATA STATES ---
+  // Stores data fetched from the backend (failures, machines, departments)
   const [failures, setFailures] = useState<Failure[]>([]);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Modals state
+  // --- MODAL STATES ---
+  // Controls the visibility of the Add/Edit modals and stores the selected failure ID
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedFailureId, setSelectedFailureId] = useState<number | null>(
     null,
   );
 
-  // Filters state
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState("ACTIVE"); // ACTIVE = not resolved
-  const [filterDept, setFilterDept] = useState("");
+  // --- FILTER STATES ---
+  // viewMode: Toggles between active tickets and resolved history
+  const [viewMode, setViewMode] = useState<"active" | "history">("active");
+  // machineFilter & departmentFilter: Global dropdown filters
+  const [machineFilter, setMachineFilter] = useState("ALL");
+  const [departmentFilter, setDepartmentFilter] = useState("ALL");
+  // statusFilter: Active view status badges (NEW, CRITICAL, etc.)
+  const [statusFilter, setStatusFilter] = useState("ALL"); // ALL, NEW, CRITICAL, WARNING, IN_PROGRESS
+  // dateFrom & dateTo: History view date range filters
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
-  // Timer state to force re-render every minute for accurate downtime
+  // --- TIMER STATE ---
+  // Forces a component re-render every 60 seconds to keep downtime calculations accurate
   const [tick, setTick] = useState(0);
 
   const fetchData = async () => {
@@ -55,43 +71,12 @@ export const FailureListPage = () => {
 
   useEffect(() => {
     fetchData();
-    // Update the UI every 60 seconds to refresh downtime calculations
     const interval = setInterval(() => setTick((t) => t + 1), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // --- FILTERING & SORTING LOGIC ---
-  const activeStatuses = [
-    "Pending",
-    "Close",
-    "CRITICAL",
-    "WARNING",
-    "ACCEPTED",
-    "IN_PROGRESS",
-  ];
-
-  const filteredAndSortedFailures = failures
-    .filter((f) => {
-      // Filter by status
-      if (filterStatus === "ACTIVE") return activeStatuses.includes(f.status);
-      if (filterStatus && f.status !== filterStatus) return false;
-      // Filter by department
-      if (filterDept && f.department_id.toString() !== filterDept) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      // 1st Priority: CRITICAL (Awaria) always goes to the top
-      const aIsCritical = a.status === "CRITICAL";
-      const bIsCritical = b.status === "CRITICAL";
-      if (aIsCritical && !bIsCritical) return -1;
-      if (!aIsCritical && bIsCritical) return 1;
-
-      // 2nd Priority: Longest downtime (oldest created_at comes first)
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateA - dateB;
-    });
-
+  // --- TABLE STYLING HELPERS ---
+  // Returns appropriate Tailwind CSS badge colors based on the failure status
   const getStatusStyle = (status: string) => {
     switch (status) {
       case "Pending":
@@ -112,7 +97,7 @@ export const FailureListPage = () => {
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
-
+  // Returns background hover colors for table rows based on status priority
   const getRowStyle = (status: string) => {
     switch (status) {
       case "Pending":
@@ -133,7 +118,7 @@ export const FailureListPage = () => {
         return "bg-white hover:bg-gray-50";
     }
   };
-
+  // Translates raw backend status strings into human-readable Polish labels
   const translateStatus = (status: string) => {
     switch (status) {
       case "Pending":
@@ -155,77 +140,265 @@ export const FailureListPage = () => {
     }
   };
 
+  // --- INTEGRATED FILTERING & SORTING LOGIC ---
+  // This useMemo hook recalculates the list only when data or filter states change.
+  const filteredAndSortedFailures = useMemo(() => {
+    // STEP 1: FILTERING
+    const filtered = failures.filter((f) => {
+      // 1A. Filter by View Mode (Active vs. History)
+      // Active view hides RESOLVED, History view only shows RESOLVED
+      if (viewMode === "active" && f.status === "RESOLVED") return false;
+      if (viewMode === "history" && f.status !== "RESOLVED") return false;
+
+      // 1B. Apply Global Filters (Machine and Department dropdowns)
+      if (machineFilter !== "ALL" && f.machine_id.toString() !== machineFilter)
+        return false;
+      if (
+        departmentFilter !== "ALL" &&
+        f.department_id.toString() !== departmentFilter
+      )
+        return false;
+
+      // 1C. Apply Status Filters (Only applicable in the 'active' view)
+      if (viewMode === "active" && statusFilter !== "ALL") {
+        if (
+          statusFilter === "NEW" &&
+          !["Pending", "ACCEPTED"].includes(f.status)
+        )
+          return false;
+        if (statusFilter === "CRITICAL" && f.status !== "CRITICAL")
+          return false;
+        if (statusFilter === "WARNING" && f.status !== "WARNING") return false;
+        if (statusFilter === "IN_PROGRESS" && f.status !== "IN_PROGRESS")
+          return false;
+      }
+
+      // 1D. Apply Date Range Filters (Only applicable in the 'history' view)
+      if (viewMode === "history") {
+        const failureDate = new Date(f.end_date || f.created_at).getTime();
+
+        if (dateFrom) {
+          const from = new Date(dateFrom).getTime();
+          if (failureDate < from) return false;
+        }
+        if (dateTo) {
+          // Set to the very end of the selected "To" date (23:59:59) to include all records from that day
+          const to = new Date(dateTo);
+          to.setHours(23, 59, 59, 999);
+          if (failureDate > to.getTime()) return false;
+        }
+      }
+
+      return true;
+    });
+
+    // STEP 2: SORTING
+    return filtered.sort((a, b) => {
+      // Priority 1: CRITICAL failures always take precedence at the top of the list
+      const aIsCritical = a.status === "CRITICAL";
+      const bIsCritical = b.status === "CRITICAL";
+      if (aIsCritical && !bIsCritical) return -1;
+      if (!aIsCritical && bIsCritical) return 1;
+
+      // Priority 2: Older tickets appear first (meaning they have the longest downtime)
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return dateA - dateB;
+    });
+  }, [
+    failures,
+    viewMode,
+    machineFilter,
+    departmentFilter,
+    statusFilter,
+    dateFrom,
+    dateTo,
+  ]);
+
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      {/* --- MAIN HEADER --- */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <AlertTriangle className="w-8 h-8 text-red-600 mr-3" />
-            Zgłoszenia Awarii
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+            {viewMode === "active" ? (
+              <>
+                <Wrench className="w-6 h-6 mr-3 text-blue-600" /> Aktywne
+                Zgłoszenia
+              </>
+            ) : (
+              <>
+                <Archive className="w-6 h-6 mr-3 text-gray-600" /> Historia
+                Zgłoszeń (Zamknięte)
+              </>
+            )}
           </h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Zarządzaj bieżącymi awariami i przestojami maszyn.
+          <p className="mt-1 text-sm text-gray-500">
+            Zarządzaj awariami i przestojami. Znaleziono:{" "}
+            {filteredAndSortedFailures.length} wpisów.
           </p>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center px-4 py-2 border border-gray-200 bg-white text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-          >
-            <Filter className="w-4 h-4 mr-2" /> Filtruj
-          </button>
+
+        <div className="flex items-center gap-4">
+          {/* Active / History View Toggle Buttons */}
+          <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
+            <button
+              onClick={() => setViewMode("active")}
+              className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === "active"
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <Clock className="w-4 h-4 mr-2" /> Bieżące
+            </button>
+            <button
+              onClick={() => setViewMode("history")}
+              className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === "history"
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <History className="w-4 h-4 mr-2" /> Historia
+            </button>
+          </div>
+
+          {/* Add New Failure Button */}
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-sm"
           >
-            <Plus className="w-5 h-5 mr-1" /> Zgłoś Awarię
+            <Plus className="w-4 h-4 mr-2" /> Zgłoś Awarię
           </button>
         </div>
       </div>
 
-      {/* Filters Section */}
-      {isFilterOpen && (
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 animate-in slide-in-from-top-2">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Status zgłoszenia
-              </label>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+      {/* --- FILTER BAR --- */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col xl:flex-row gap-4 justify-between">
+        {/* LEFT SIDE: Status Badges OR Date Pickers (depending on current view mode) */}
+        <div className="flex-1">
+          {viewMode === "active" ? (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setStatusFilter("ALL")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                  statusFilter === "ALL"
+                    ? "bg-gray-800 text-white border-gray-800"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
               >
-                <option value="ACTIVE">Tylko bieżące (Niezakończone)</option>
-                <option value="CRITICAL">Awaria Krytyczna</option>
-                <option value="IN_PROGRESS">W trakcie naprawy</option>
-                <option value="RESOLVED">Historia (Zakończone)</option>
-                <option value="">Wszystkie statusy</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">
-                Departament
-              </label>
-              <select
-                value={filterDept}
-                onChange={(e) => setFilterDept(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              >
-                <option value="">Wszystkie departamenty</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
+                <List className="w-4 h-4 inline mr-1.5" /> Wszystkie
+              </button>
 
-      {/* Table Data */}
+              <button
+                onClick={() => setStatusFilter("NEW")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                  statusFilter === "NEW"
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                }`}
+              >
+                Nowe / Oczekujące
+              </button>
+
+              <button
+                onClick={() => setStatusFilter("CRITICAL")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                  statusFilter === "CRITICAL"
+                    ? "bg-red-600 text-white border-red-600"
+                    : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                }`}
+              >
+                <AlertCircle className="w-4 h-4 inline mr-1.5" /> Awaria
+              </button>
+
+              <button
+                onClick={() => setStatusFilter("WARNING")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                  statusFilter === "WARNING"
+                    ? "bg-amber-500 text-white border-amber-500"
+                    : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                }`}
+              >
+                <AlertTriangle className="w-4 h-4 inline mr-1.5" /> Utrudniona
+                Prod.
+              </button>
+
+              <button
+                onClick={() => setStatusFilter("IN_PROGRESS")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+                  statusFilter === "IN_PROGRESS"
+                    ? "bg-indigo-600 text-white border-indigo-600"
+                    : "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100"
+                }`}
+              >
+                <Play className="w-4 h-4 inline mr-1.5" /> W trakcie
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-lg border border-gray-200 w-fit">
+              <div className="flex items-center">
+                <Calendar className="w-4 h-4 text-gray-500 mr-2 ml-1" />
+                <span className="text-sm font-medium text-gray-700 mr-2">
+                  Od:
+                </span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="px-2 py-1.5 text-sm border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex items-center">
+                <span className="text-sm font-medium text-gray-700 mr-2">
+                  Do:
+                </span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="px-2 py-1.5 text-sm border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT SIDE: Global Department and Machine Dropdowns */}
+        <div className="flex items-center gap-3 border-t xl:border-t-0 xl:border-l border-gray-200 pt-4 xl:pt-0 xl:pl-4">
+          <div className="flex items-center">
+            <Filter className="w-4 h-4 text-gray-400 mr-2" />
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none font-medium"
+            >
+              <option value="ALL">Wszystkie Departamenty</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <select
+            value={machineFilter}
+            onChange={(e) => setMachineFilter(e.target.value)}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 outline-none font-medium"
+          >
+            <option value="ALL">Wszystkie Maszyny</option>
+            {machines.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* --- DATA TABLE --- */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="flex justify-center p-12">
@@ -235,10 +408,14 @@ export const FailureListPage = () => {
           <div className="text-center py-12">
             <AlertTriangle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-lg font-medium text-gray-900">
-              Brak aktywnych awarii
+              {viewMode === "active"
+                ? "Brak aktywnych awarii"
+                : "Brak historii dla podanych kryteriów"}
             </p>
             <p className="text-gray-500">
-              Wszystkie maszyny pracują poprawnie.
+              {viewMode === "active"
+                ? "Wszystkie maszyny pracują poprawnie."
+                : "Spróbuj zmienić filtry lub zakres dat."}
             </p>
           </div>
         ) : (
@@ -288,7 +465,9 @@ export const FailureListPage = () => {
                       </p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <div className="inline-flex items-center text-red-600 font-bold bg-red-50 px-2 py-1 rounded-lg">
+                      <div
+                        className={`inline-flex items-center font-bold px-2 py-1 rounded-lg ${failure.status === "RESOLVED" ? "text-gray-500 bg-gray-50" : "text-red-600 bg-red-50"}`}
+                      >
                         <Clock className="w-4 h-4 mr-1.5" />
                         {calculateDowntime(
                           failure.created_at,
