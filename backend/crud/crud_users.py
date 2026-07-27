@@ -38,7 +38,7 @@ def update_user(db: Session, db_user: User, user_in: UserUpdate) -> User:
     if "password" in update_data:
         password = update_data.pop("password")
         hashed_password = get_password_hash(password)
-        update_data["hashed_password"] = hashed_password
+        update_data["password"] = hashed_password
 
     for field, value in update_data.items():
         setattr(db_user, field, value)

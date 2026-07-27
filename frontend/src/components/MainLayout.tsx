@@ -13,13 +13,13 @@ import {
 import clsx from 'clsx';
 
 const navigation = [
-  { name: 'Pulpit', href: '/', icon: LayoutDashboard, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
-  { name: 'Maszyny', href: '/machines', icon: Settings, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
-  { name: 'Awarie', href: '/failures', icon: Wrench, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
-  { name: 'Kalendarz Zleceń', href: '/calendar', icon: CalendarClock, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
-  { name: 'Magazyn', href: '/parts', icon: Package, allowedRoles: ['Super Admin', 'Kierownik','Technik','Mechanik','Elektryk'] },
-  { name: 'Wiadomości', href: '/messages', icon: MessageSquare, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk'] },
-  { name: 'Użytkownicy', href: '/users', icon: IdCard, allowedRoles: ['Super Admin','Kierownik','Administrator'] },
+  { name: 'Pulpit', href: '/', icon: LayoutDashboard, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk','Automatyk'] },
+  { name: 'Maszyny', href: '/machines', icon: Settings, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk','Automatyk'] },
+  { name: 'Awarie', href: '/failures', icon: Wrench, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk','Automatyk'] },
+  { name: 'Kalendarz Zleceń', href: '/calendar', icon: CalendarClock, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk','Automatyk'] },
+  { name: 'Magazyn', href: '/parts', icon: Package, allowedRoles: ['Super Admin', 'Kierownik','Technik','Mechanik','Elektryk','Automatyk'] },
+  { name: 'Wiadomości', href: '/messages', icon: MessageSquare, allowedRoles: ['Super Admin', 'Kierownik','Technik','Operator','Mechanik','Elektryk','Automatyk'] },
+  { name: 'Panel Zarządzania', href: '/users', icon: IdCard, allowedRoles: ['Super Admin','Kierownik','Administrator'] },
 ];
 
 export const MainLayout = () => {

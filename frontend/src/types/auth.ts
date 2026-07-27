@@ -5,9 +5,7 @@ export interface User {
     lastname : string,
     role_id : number,
     is_active : boolean,
-    role: {
-    name: string;
-  };
+    role: Role;
 }
 
 export interface Role {
