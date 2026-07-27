@@ -26,6 +26,7 @@ ALLOW_READ_ONLY = RoleChecker(
         "Elektryk",
         "Magazynier",
         "Operator",
+        "Automatyk",
     ]
 )
 
@@ -44,6 +45,7 @@ ALLOW_MANAGE_FAILURES = RoleChecker(
         "Lider",
         "Mechanik",
         "Elektryk",
+        "Automatyk",
         "Operator",
     ]
 )
@@ -58,6 +60,7 @@ ALLOW_MANAGE_DELETE_FAILURES = RoleChecker(
         "Mechanik",
         "Elektryk",
         "Operator",
+        "Automatyk",
     ]
 )
 
@@ -69,6 +72,7 @@ ALLOW_MANAGE_PARTS = RoleChecker(
         "Magazynier",
         "Mechanik",
         "Elektryk",
+        "Automatyk",
     ]
 )
 
@@ -82,6 +86,7 @@ ALLOW_CHECK_PARTS = RoleChecker(
         "Mechanik",
         "Elektryk",
         "Operator",
+        "Automatyk",
     ]
 )
 
@@ -93,5 +98,6 @@ ALLOW_EDIT_PARTS = RoleChecker(
         "Magazynier",
         "Mechanik",
         "Elektryk",
+        "Automatyk",
     ]
 )

@@ -1,6 +1,6 @@
 from typing import Any
-
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from api.dependencies import get_current_user, get_db
@@ -9,7 +9,12 @@ from crud import crud_users
 from models.user import User
 from schemas.user import UserCreate, UserResponse, UserUpdate
 
+
 router = APIRouter()
+
+
+class UserPasswordUpdate(BaseModel):
+    password: str
 
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -76,14 +81,14 @@ def update_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_USERS),
 ) -> Any:
-    """Update information about a specific user ID (only if the current user has the required role)."""
+    """Update information about a specific user ID."""
     user = crud_users.get_user(db, user_id=user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    return crud_users.update_user(db=db, db_user=user, user_id=user_id)
+    return crud_users.update_user(db=db, db_user=user, user_in=user_update)
 
 
 @router.delete("/{user_id}", response_model=UserResponse)
@@ -92,7 +97,7 @@ def delete_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(ALLOW_MANAGE_USERS),
 ) -> Any:
-    """Delete a specific user ID (only if the current user has the required role"""
+    """Delete a specific user ID (only if the current user has the required role)."""
     user = crud_users.get_user(db, user_id=user_id)
     if current_user.id == user_id:
         raise HTTPException(
@@ -107,3 +112,21 @@ def delete_user(
     db.delete(user)
     db.commit()
     return user
+
+
+@router.post("/{user_id}/change-password", response_model=UserResponse)
+def change_user_password(
+    user_id: int,
+    password_data: UserPasswordUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(ALLOW_MANAGE_USERS),
+) -> Any:
+    """Change the password for a specific user ID."""
+    user = crud_users.get_user(db, user_id=user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    user_update = UserUpdate(password=password_data.password)
+    return crud_users.update_user(db=db, db_user=user, user_in=user_update)
