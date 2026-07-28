@@ -14,6 +14,7 @@ import {PartListPage} from './pages/PartListPage';
 import {PartCreatePage} from './pages/PartCreatePage';
 import {FailureListPage} from './pages/FailureListPage';
 import {DepartmentManagementPage} from './pages/DepartmentManagementPage';
+import {OrderCalendarPage} from './pages/OrderCalendarPage';
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
@@ -46,7 +47,7 @@ const AppRoutes = () => {
         <Route path="machines" element={<MachineListPage />} />
         <Route path="machines/create" element={<MachineCreatePage />} />
         <Route path="failures" element={<FailureListPage />} />
-        <Route path="calendar" element={<div><h1 className="text-2xl font-bold mb-4">Kalendarz</h1></div>} />
+        <Route path="/calendar" element={<OrderCalendarPage />} />
         <Route path="/parts" element={<PartListPage />} />
         <Route path="/parts/create" element={<PartCreatePage />} />   
         <Route path="messages" element={<div><h1 className="text-2xl font-bold mb-4">Wiadomości</h1></div>} />
