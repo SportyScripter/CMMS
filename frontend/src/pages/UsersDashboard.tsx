@@ -52,7 +52,7 @@ const adminActions = [
 
 export const UsersDashboard = () => {
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-auto mx-auto space-y-1 p-2">
       
       {/* --- DASHBOARD HEADER --- */}
       <div className="mb-8">
