@@ -216,14 +216,14 @@ export const FailureListPage = () => {
   ]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-2 max-w-full mx-auto space-y-2">
       {/* --- MAIN HEADER --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
             {viewMode === "active" ? (
               <>
-                <Wrench className="w-6 h-6 mr-3 text-blue-600" /> Aktywne
+                <Wrench className="w-8 h-8 mr-3 text-blue-600" /> Aktywne
                 Zgłoszenia
               </>
             ) : (
@@ -267,7 +267,7 @@ export const FailureListPage = () => {
           {/* Add New Failure Button */}
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-sm"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center shadow-sm"
           >
             <Plus className="w-4 h-4 mr-2" /> Zgłoś Awarię
           </button>

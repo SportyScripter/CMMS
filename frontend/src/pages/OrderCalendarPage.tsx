@@ -125,7 +125,7 @@ export const OrderCalendarPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-auto mx-auto space-y-1 p-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
@@ -138,9 +138,6 @@ export const OrderCalendarPage = () => {
         </div>
 
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors flex items-center">
-            <Settings2 className="w-4 h-4 mr-2" /> Typy zleceń
-          </button>
           <button
             onClick={() => setIsAddOrderModalOpen(true)}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center shadow-sm"

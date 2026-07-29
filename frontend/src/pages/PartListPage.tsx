@@ -111,15 +111,9 @@ export const PartListPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto relative">
+    <div className="max-w-auto mx-auto space-y-1 p-2">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div className="flex items-center">
-          <Link
-            to="/"
-            className="mr-4 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-          >
-            <ArrowLeft className="w-20 h-20 text-blue-400 hover:text-blue-600" />
-          </Link>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <PackageSearch className="w-8 h-8 text-blue-600 mr-3" />

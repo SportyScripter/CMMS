@@ -1,3 +1,5 @@
+import { Machine } from "./machine";
+
 export interface Order {
   id: number;
   description: string;
@@ -24,4 +26,12 @@ export interface AddOrderModalProps {
 export interface OrderType {
   id: number;
   name: string;
+}
+
+export interface AddChecklistItemsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAdd: (tasks: string[]) => void;
+  machines: Machine[];
+  orderTypes: OrderType[];
 }
