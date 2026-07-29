@@ -101,3 +101,41 @@ ALLOW_EDIT_PARTS = RoleChecker(
         "Automatyk",
     ]
 )
+
+# Users with the following roles can manage order calendar
+ALLOW_MANAGE_ORDER_CALENDAR = RoleChecker(
+    [
+        "Super Admin",
+        "Kierownik",
+        "Dyrektor",
+        "Manager",
+        "Lider",
+        "Mechanik",
+        "Elektryk",
+    ]
+)
+
+ALLOW_POST_AND_DELETE_ORDER_CALENDAR = RoleChecker(
+    [
+        "Super Admin",
+        "Kierownik",
+        "Dyrektor",
+        "Manager",
+        "Lider",
+    ]
+)
+
+ALLOW_READ_ONLY_ORDER_CALENDAR = RoleChecker(
+    [
+        "Super Admin",
+        "Kierownik",
+        "Dyrektor",
+        "Manager",
+        "Lider",
+        "Mechanik",
+        "Elektryk",
+        "Magazynier",
+        "Operator",
+        "Automatyk",
+    ]
+)

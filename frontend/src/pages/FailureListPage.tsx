@@ -427,6 +427,9 @@ export const FailureListPage = () => {
                   <th className="px-6 py-4">Maszyna</th>
                   <th className="px-6 py-4">Zgłaszający</th>
                   <th className="px-6 py-4">Opis problemu</th>
+                  {viewMode === "history" && (
+                    <th className="px-6 py-4">Wykonał</th>
+                  )}
                   <th className="px-6 py-4 text-center">Czas postoju</th>
                   <th className="px-6 py-4 text-center">Akcja</th>
                 </tr>
@@ -464,6 +467,14 @@ export const FailureListPage = () => {
                         {failure.failure_description}
                       </p>
                     </td>
+                    {viewMode === "history" && (
+                      <td className="px-6 py-4">
+                        {failure.recipient?.name} {failure.recipient?.lastname}
+                        <span className="block text-xs text-gray-400">
+                          {new Date(failure.created_at).toLocaleString("pl-PL")}
+                        </span>
+                      </td>
+                    )}
                     <td className="px-6 py-4 text-center">
                       <div
                         className={`inline-flex items-center font-bold px-2 py-1 rounded-lg ${failure.status === "RESOLVED" ? "text-gray-500 bg-gray-50" : "text-red-600 bg-red-50"}`}

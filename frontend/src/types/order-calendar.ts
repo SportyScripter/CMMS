@@ -35,3 +35,10 @@ export interface AddChecklistItemsModalProps {
   machines: Machine[];
   orderTypes: OrderType[];
 }
+
+export interface OrderDetailsChecklistModalProps {
+  orderId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdated: () => void;
+}

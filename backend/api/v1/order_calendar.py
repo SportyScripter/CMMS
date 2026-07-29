@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.dependencies import get_db
-from core.permissions import ALLOW_MANAGE_MACHINES, ALLOW_READ_ONLY
+from core.permissions import (
+    ALLOW_MANAGE_ORDER_CALENDAR,
+    ALLOW_READ_ONLY_ORDER_CALENDAR,
+    ALLOW_POST_AND_DELETE_ORDER_CALENDAR,
+)
 from crud import crud_orders_calendar
 from models.user import User
 from schemas.order_calendar import (
@@ -24,7 +28,7 @@ router = APIRouter()
 def create_order(
     order_in: OrderCalendarCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_POST_AND_DELETE_ORDER_CALENDAR),
 ) -> Any:
     """Schedule a new maintenance order. The principal_id is automatically set to the current user."""
     order_in.principal_id = current_user.id
@@ -36,7 +40,7 @@ def get_orders(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_READ_ONLY),
+    current_user: User = Depends(ALLOW_READ_ONLY_ORDER_CALENDAR),
 ) -> Any:
     """Retrieve a list of all scheduled orders."""
     return crud_orders_calendar.get_orders(db=db, skip=skip, limit=limit)
@@ -46,7 +50,7 @@ def get_orders(
 def get_order(
     order_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_READ_ONLY),
+    current_user: User = Depends(ALLOW_READ_ONLY_ORDER_CALENDAR),
 ) -> Any:
     """Retrieve a specific order by its ID."""
     db_order = crud_orders_calendar.get_order(db=db, order_id=order_id)
@@ -63,7 +67,7 @@ def update_order(
     order_id: int,
     order_in: OrderCalendarUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_MANAGE_ORDER_CALENDAR),
 ) -> Any:
     """Update an order (e.g., assign technician, change status, update scheduled date)."""
     db_order = crud_orders_calendar.update_order(
@@ -83,7 +87,7 @@ def update_order(
 def delete_order(
     order_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(ALLOW_MANAGE_MACHINES),
+    current_user: User = Depends(ALLOW_POST_AND_DELETE_ORDER_CALENDAR),
 ) -> Any:
     """Delete a specific order."""
     db_order = crud_orders_calendar.delete_order(db=db, order_id=order_id)

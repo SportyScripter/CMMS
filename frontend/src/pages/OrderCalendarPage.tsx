@@ -12,8 +12,24 @@ import {
 } from "lucide-react";
 import { Order } from "../types/order-calendar";
 import { AddOrderModal } from "../components/orders-calendar/AddOrderModal";
+import { OrderDetailsChecklistModal } from "../components/orders-calendar/OrderDetailsChecklistModal";
+import { useAuth } from "../context/AuthContext";
+import { User } from "../types/auth";
 
 export const OrderCalendarPage = () => {
+  // Get current user
+  const { user } = useAuth();
+  const currentUser = user as User;
+
+  // Check permissions (case-insensitive)
+  const userRole = currentUser?.role?.name?.toLowerCase() || "";
+  const canAddOrder = [
+    "admin",
+    "super admin",
+    "kierownik",
+    "dyrektor",
+  ].includes(userRole);
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [machines, setMachines] = useState<{ id: number; name: string }[]>([]);
   const [orderTypes, setOrderTypes] = useState<{ id: number; name: string }[]>(
@@ -21,7 +37,7 @@ export const OrderCalendarPage = () => {
   );
 
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(""); 
+  const [error, setError] = useState("");
 
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -62,7 +78,7 @@ export const OrderCalendarPage = () => {
 
   const getStartOfWeek = (date: Date) => {
     const d = new Date(date);
-    d.setHours(0, 0, 0, 0); 
+    d.setHours(0, 0, 0, 0);
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(d.setDate(diff));
@@ -119,6 +135,8 @@ export const OrderCalendarPage = () => {
       return "bg-emerald-50 border-emerald-300 text-emerald-900 border-l-4 border-l-emerald-500";
     if (status === "in_progress")
       return "bg-yellow-50 border-yellow-300 text-yellow-900 border-l-4 border-l-yellow-500";
+    if (status === "un_completed")
+      return "bg-red-50 border-red-300 text-red-900 border-l-4 border-l-red-500";
     if (isToday(new Date(scheduledDate)))
       return "bg-red-50 border-red-300 text-red-900 border-l-4 border-l-red-500";
     return "bg-gray-50 border-gray-200 text-gray-800 border-l-4 border-l-gray-400";
@@ -138,12 +156,14 @@ export const OrderCalendarPage = () => {
         </div>
 
         <div className="flex gap-3">
+          {canAddOrder && (
           <button
             onClick={() => setIsAddOrderModalOpen(true)}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center shadow-sm"
           >
             <Plus className="w-4 h-4 mr-2" /> Dodaj zlecenie
           </button>
+          )}
         </div>
       </div>
 
@@ -269,6 +289,15 @@ export const OrderCalendarPage = () => {
                       <span className="text-sm font-semibold mb-2 line-clamp-2">
                         {order.description}
                       </span>
+                      <span className="text-sm font-semibold mb-2 line-clamp-2">
+                        {order.status === "completed"
+                          ? "Wykonane"
+                          : order.status === "in_progress"
+                            ? "W trakcie"
+                            : order.status === "un_completed"
+                              ? "Nieukończone"
+                              : "Zaplanowane"}
+                      </span>
                       <div className="mt-auto text-xs opacity-70 font-medium">
                         {order.order_machine?.name || "Brak maszyny"}
                       </div>
@@ -298,9 +327,12 @@ export const OrderCalendarPage = () => {
         onUpdated={fetchData}
       />
 
-      {/* 
-        <OrderChecklistModal orderId={selectedOrderId} isOpen={selectedOrderId !== null} onClose={() => setSelectedOrderId(null)} onUpdated={fetchData} />
-      */}
+      <OrderDetailsChecklistModal
+        orderId={selectedOrderId}
+        isOpen={selectedOrderId !== null}
+        onClose={() => setSelectedOrderId(null)}
+        onUpdated={fetchData}
+      />
     </div>
   );
 };

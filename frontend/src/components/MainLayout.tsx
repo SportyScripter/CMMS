@@ -63,6 +63,7 @@ export const MainLayout = () => {
             </div>
             <div className="ml-3 overflow-hidden">
               <p className="text-sm font-medium text-white truncate">{user?.name} {user?.lastname}</p>
+              <p className="text-xs text-slate-400 truncate">Wydział: {user?.role?.name}</p>
               <p className="text-xs text-slate-400 truncate">SAP: {user?.sap_number}</p>
             </div>
           </div>
