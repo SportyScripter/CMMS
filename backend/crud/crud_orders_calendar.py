@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from models.order_calendar import OrderCalendar
 from schemas.order_calendar import OrderCalendarCreate, OrderCalendarUpdate
+from crud.crud_machines import recalculate_machine_status
 
 
 def create_order(db: Session, order_in: OrderCalendarCreate) -> OrderCalendar:
@@ -96,6 +97,8 @@ def update_order(
         setattr(db_order, field, value)
     db.commit()
     db.refresh(db_order)
+    if db_order.machine_id:
+        recalculate_machine_status(db, db_order.order_machine_id)
     return db_order
 
 
@@ -104,7 +107,8 @@ def delete_order(db: Session, order_id: int) -> OrderCalendar | None:
     db_order = get_order(db, order_id)
     if not db_order:
         return None
-
     db.delete(db_order)
     db.commit()
+    if db_order.machine_id:
+        recalculate_machine_status(db, db_order.order_machine_id)
     return db_order

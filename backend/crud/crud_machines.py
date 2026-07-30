@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 
 from models.machine import Machine
 from schemas.machine import MachineCreate, MachineUpdate
+from models.failure import Failure
+from models.order_calendar import OrderCalendar
 
 
 def get_machine(db: Session, machine_id: int) -> Machine | None:
@@ -53,3 +55,86 @@ def delete_machine(db: Session, db_machine: Machine) -> Machine:
     db.delete(db_machine)
     db.commit()
     return db_machine
+
+
+def recalculate_machine_status(db: Session, machine_id: int):
+    """
+    Recalculates and updates the main status of a machine based on ongoing failures and orders.
+    Priority hierarchy (from most critical to least critical).
+    """
+    machine = db.query(Machine).filter(Machine.id == machine_id).first()
+    if not machine:
+        return
+
+    # HIERARCHY 1: Production stopped (CRITICAL)
+    critical_failure = (
+        db.query(Failure)
+        .filter(Failure.machine_id == machine_id, Failure.status == "CRITICAL")
+        .first()
+    )
+
+    if critical_failure:
+        machine.status = "Awaria"
+        db.commit()
+        return
+
+    # HIERARCHY 2: Hindered production (WARNING)
+    warning_failure = (
+        db.query(Failure)
+        .filter(Failure.machine_id == machine_id, Failure.status == "WARNING")
+        .first()
+    )
+
+    if warning_failure:
+        machine.status = "Utrudniona produkcja"
+        db.commit()
+        return
+
+    # HIERARCHY 3: Failures in progress / blocked waiting for parts or service
+    active_repair = (
+        db.query(Failure)
+        .filter(
+            Failure.machine_id == machine_id,
+            Failure.status.in_(
+                ["IN_PROGRESS", "WAITING_FOR_PARTS", "WAITING_FOR_SERVICE", "ACCEPTED"]
+            ),
+        )
+        .first()
+    )
+
+    if active_repair:
+        machine.status = "W trakcie naprawy"
+        db.commit()
+        return
+
+    # HIERARCHY 4: New, unassigned tickets (Pending)
+    pending_failure = (
+        db.query(Failure)
+        .filter(Failure.machine_id == machine_id, Failure.status == "Pending")
+        .first()
+    )
+
+    if pending_failure:
+        machine.status = "Oczekujące (Nowe)"
+        db.commit()
+        return
+
+    # HIERARCHY 5: Active maintenance orders from the calendar
+    active_order = (
+        db.query(OrderCalendar)
+        .filter(
+            OrderCalendar.machine_id == machine_id,
+            OrderCalendar.status == "in_progress",
+        )
+        .first()
+    )
+
+    if active_order:
+        machine.status = "W trakcie przeglądu"
+        db.commit()
+        return
+
+    # HIERARCHY 6: Machine is fully operational (no active failures or maintenance)
+    # Failures are either 'RESOLVED' or 'Close', orders are 'completed'
+    machine.status = "Sprawna"
+    db.commit()
