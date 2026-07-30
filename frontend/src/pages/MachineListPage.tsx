@@ -55,19 +55,31 @@ export const MachineListPage = () => {
     new Set(machines.map((machine) => machine.status)),
   );
 
-  const filteredMachines = machines.filter((machine) => {
-    const matchName = machine.name
-      .toLowerCase()
-      .includes(filterName.toLowerCase());
-    const matchQr = machine.qr_code
-      .toLowerCase()
-      .includes(filterQr.toLowerCase());
-    const matchLocation =
-      filterLocation === "" || machine.location === filterLocation;
-    const matchStatus = filterStatus === "" || machine.status === filterStatus;
-
-    return matchName && matchQr && matchLocation && matchStatus;
-  });
+  const filteredMachines = machines
+    .filter((machine) => {
+      // 1. Filtering logic
+      const matchName = machine.name
+        .toLowerCase()
+        .includes(filterName.toLowerCase());
+      const matchQr = machine.qr_code
+        .toLowerCase()
+        .includes(filterQr.toLowerCase());
+      const matchLocation =
+        filterLocation === "" || machine.location === filterLocation;
+      const matchStatus =
+        filterStatus === "" || machine.status === filterStatus;
+      return matchName && matchQr && matchLocation && matchStatus;
+    })
+    .sort((a, b) => {
+      // 2. Sorting logic
+      // Sort by location first (alphabetically)
+      const locationComparison = a.location.localeCompare(b.location, "pl");
+      if (locationComparison !== 0) {
+        return locationComparison;
+      }
+      // If locations are the exact same, sort by machine name (alphabetically)
+      return a.name.localeCompare(b.name, "pl");
+    });
 
   const clearFilters = () => {
     setFilterName("");
@@ -76,20 +88,42 @@ export const MachineListPage = () => {
     setFilterStatus("");
   };
 
+  // Returns color styles for the machine card based on its main status
   const getCardColorStyles = (status: string) => {
     switch (status.toLocaleLowerCase()) {
-      case "operational":
+      // 1. Machine fully operational (Lowest priority)
       case "sprawna":
+      case "operational":
         return "bg-emerald-100 border-emerald-200 text-emerald-900";
-      case "out of service":
+
+      // 2. Critical production stop (Priority 1)
       case "awaria":
+      case "out of service":
         return "bg-red-200 border-red-300 text-red-900";
+
+      // 3. Machine is running but with issues (Priority 2)
+      case "utrudniona produkcja":
+      case "produkcja utrudniona": // Keeping both forms for backward compatibility
+        return "bg-orange-200 border-orange-300 text-orange-900";
+
+      // 4. Mechanic is already working on it / waiting for parts (Priority 3)
+      case "w trakcie naprawy":
+        return "bg-blue-100 border-blue-300 text-blue-900";
+
+      // 5. Ticket created, but not yet picked up (Priority 4)
+      case "oczekujące (nowe)":
+        return "bg-yellow-200 border-yellow-300 text-yellow-900";
+
+      // 6. Active calendar order / preventive maintenance (Priority 5)
+      case "w trakcie przeglądu":
       case "under maintenance":
-      case "produkcja utrudniona":
-        return "bg-amber-200 border-amber-300 text-amber-900";
-      case "off":
+        return "bg-indigo-100 border-indigo-300 text-indigo-900";
+
+      // 7. Machine turned off / out of use
       case "wyłączona":
-        return "bg-gray-200 border-gray-400 text-gray-500 grayscale opacity-90";
+      case "off":
+        return "bg-gray-200 border-gray-400 text-gray-600 grayscale opacity-90";
+
       default:
         return "bg-white border-gray-200 text-gray-900";
     }
@@ -126,7 +160,8 @@ export const MachineListPage = () => {
           {canManageMachines && (
             <Link
               to="/machines/create"
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Dodaj Maszynę
             </Link>

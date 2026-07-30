@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from models.failure import Failure
 from models.failure_part import FailurePart
 from schemas.failure import FailureCreate, FailureUpdate
+from crud.crud_machines import recalculate_machine_status
 
 
 def create_failure(db: Session, failure_in: FailureCreate) -> Failure:
@@ -11,6 +12,8 @@ def create_failure(db: Session, failure_in: FailureCreate) -> Failure:
     db.add(failure)
     db.commit()
     db.refresh(failure)
+    if failure.machine_id:
+        recalculate_machine_status(db, failure.machine_id)
     return failure
 
 
@@ -97,6 +100,8 @@ def update_failure(
     db.add(failure)
     db.commit()
     db.refresh(failure)
+    if failure.machine_id:
+        recalculate_machine_status(db, failure.machine_id)
     return get_failure(db, failure_id=failure_id)
 
 
@@ -107,4 +112,6 @@ def delete_failure(db: Session, failure_id: int) -> Failure | None:
         return None
     db.delete(failure)
     db.commit()
+    if failure.machine_id:
+        recalculate_machine_status(db, failure.machine_id)
     return failure
