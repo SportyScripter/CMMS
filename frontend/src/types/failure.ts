@@ -43,3 +43,10 @@ export interface Failure {
   used_parts: FailurePart[];
   attachments: Attachment[];
 }
+
+export interface FailureDetailsModalProps {
+  failureId: number | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdated: () => void;
+}

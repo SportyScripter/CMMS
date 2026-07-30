@@ -93,6 +93,10 @@ export const FailureListPage = () => {
         return "bg-indigo-100 text-indigo-800 border-indigo-200";
       case "RESOLVED":
         return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "WAITING_FOR_PARTS":
+        return "bg-purple-100 text-purple-800 border-purple-300";
+      case "WAITING_FOR_SERVICE":
+        return "bg-purple-100 text-purple-800 border-purple-300";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -114,6 +118,10 @@ export const FailureListPage = () => {
         return "bg-indigo-50 hover:bg-indigo-100";
       case "RESOLVED":
         return "bg-emerald-50 hover:bg-emerald-100";
+      case "WAITING_FOR_PARTS":
+        return "bg-purple-50 hover:bg-purple-100";
+      case "WAITING_FOR_SERVICE":
+        return "bg-purple-50 hover:bg-purple-100";
       default:
         return "bg-white hover:bg-gray-50";
     }
@@ -135,6 +143,10 @@ export const FailureListPage = () => {
         return "Zgłoszenie przyjęte";
       case "RESOLVED":
         return "Zakończone";
+      case "WAITING_FOR_PARTS":
+        return "Oczekiwanie na części";
+      case "WAITING_FOR_SERVICE":
+        return "Oczekiwanie na serwis zewnętrzny";
       default:
         return status;
     }
@@ -169,7 +181,10 @@ export const FailureListPage = () => {
         if (statusFilter === "CRITICAL" && f.status !== "CRITICAL")
           return false;
         if (statusFilter === "WARNING" && f.status !== "WARNING") return false;
-        if (statusFilter === "IN_PROGRESS" && f.status !== "IN_PROGRESS")
+       if (
+          statusFilter === "IN_PROGRESS" && 
+          !["IN_PROGRESS", "WAITING_FOR_PARTS", "WAITING_FOR_SERVICE"].includes(f.status)
+        )
           return false;
       }
 
@@ -328,7 +343,7 @@ export const FailureListPage = () => {
               <button
                 onClick={() => setStatusFilter("IN_PROGRESS")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                  statusFilter === "IN_PROGRESS"
+                  statusFilter === "IN_PROGRESS" 
                     ? "bg-indigo-600 text-white border-indigo-600"
                     : "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100"
                 }`}

@@ -14,22 +14,21 @@ import {
   UserCheck,
   Eye,
   Save,
+  Clock,
 } from "lucide-react";
 import { api } from "../../api/axiosConfig";
-import { Failure, Department } from "../../types/failure";
+import {
+  Failure,
+  Department,
+  FailureDetailsModalProps,
+} from "../../types/failure";
 import { Machine } from "../../types/machine";
 import { Part } from "../../types/part";
 import { useAuth } from "../../context/AuthContext";
 import { calculateDowntime } from "../../utils/dateUtils";
 import { PartSelectionModal } from "./PartSelectionModal";
 import { PartInfoModal } from "./PartInfoModal";
-
-interface FailureDetailsModalProps {
-  failureId: number | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdated: () => void;
-}
+import { StatusReasonModal } from "./StatusReasonModal";
 
 export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
   failureId,
@@ -42,7 +41,13 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
 
   // Check user permissions
   const isManager = ["Super Admin", "Admin", "Kierownik"].includes(role);
-  const isService = ["Super Admin", "Admin", "Kierownik", "Mechanik", "Elektryk"].includes(role);
+  const isService = [
+    "Super Admin",
+    "Admin",
+    "Kierownik",
+    "Mechanik",
+    "Elektryk",
+  ].includes(role);
 
   // Data states
   const [failure, setFailure] = useState<Failure | null>(null);
@@ -68,6 +73,10 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
   const [usedParts, setUsedParts] = useState<
     { part_id: number; quantity: number }[]
   >([]);
+  const [isReasonModalOpen, setIsReasonModalOpen] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<
+    "WAITING_FOR_PARTS" | "WAITING_FOR_SERVICE" | null
+  >(null);
 
   // Modals for parts selection & part inspection
   const [isPartModalOpen, setIsPartModalOpen] = useState(false);
@@ -134,17 +143,24 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
 
   // --- ACTIONS ---
 
-  // Update status (e.g., to ACCEPTED or IN_PROGRESS)
-  const handleStatusChange = async (newStatus: string) => {
+// Update status (e.g., to ACCEPTED, IN_PROGRESS, WAITING_FOR_PARTS)
+  const handleStatusChange = async (newStatus: string, reason?: string) => {
     setIsActionLoading(true);
     setError("");
     try {
-      await api.patch(`/failures/${failureId}`, {
+      const payload: any = {
         status: newStatus,
         recipient_id: user?.id,
-      });
+      };
+
+      if (reason) {
+        payload.repair_description = reason; 
+      }
+
+      await api.patch(`/failures/${failureId}`, payload);
+      
       onUpdated();
-      onClose();
+      onClose(); // Możesz też nie zamykać modala zgłoszenia, jeśli chcesz, żeby użytkownik widział, że status się zmienił
     } catch (err: any) {
       setError(err.response?.data?.detail || "Failed to update status.");
     } finally {
@@ -182,10 +198,14 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
 
   // Submitter deletes their own open failure report
   const handleDeleteSubmitter = async () => {
-    if (!window.confirm("Czy na pewno chcesz usunąć to zgłoszenie? Tej operacji nie można cofnąć.")) {
+    if (
+      !window.confirm(
+        "Czy na pewno chcesz usunąć to zgłoszenie? Tej operacji nie można cofnąć.",
+      )
+    ) {
       return;
     }
-    
+
     setIsActionLoading(true);
     setError("");
 
@@ -194,9 +214,20 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
       onUpdated();
       onClose(); // Zamknij modal po udanym usunięciu
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Nie udało się usunąć zgłoszenia.");
+      setError(
+        err.response?.data?.detail || "Nie udało się usunąć zgłoszenia.",
+      );
       setIsActionLoading(false);
     }
+  };
+
+  const handleReasonSubmit = async (reason: string) => {
+    if (!pendingStatus) return;
+
+    await handleStatusChange(pendingStatus, reason);
+
+    setIsReasonModalOpen(false);
+    setPendingStatus(null);
   };
 
   // Submit repair resolution (End repair & consume parts) or update closed ticket
@@ -274,7 +305,6 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in duration-200">
-        
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
           <h3 className="font-semibold text-gray-900 flex items-center text-lg">
@@ -302,7 +332,6 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                   <AlertCircle className="w-4 h-4 mr-2" /> {error}
                 </div>
               )}
-
               {/* Main Info Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
                 <div>
@@ -338,7 +367,6 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                   </p>
                 </div>
               </div>
-
               {/* SECTION: Issue Description & Submitter Editing */}
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -347,25 +375,29 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                   </p>
 
                   {/* Allow submitter to edit or delete if failure is still new */}
-                  {isSubmitter && ["Pending", "CRITICAL", "WARNING"].includes(failure.status) && !isSubmitterEditing && (
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setIsSubmitterEditing(true)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
-                      >
-                        <Edit2 className="w-3.5 h-3.5 mr-1" /> Edytuj
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleDeleteSubmitter}
-                        disabled={isActionLoading}
-                        className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center transition-colors disabled:opacity-50"
-                      >
-                        <Trash2 className="w-3.5 h-3.5 mr-1" /> Usuń
-                      </button>
-                    </div>
-                  )}
+                  {isSubmitter &&
+                    ["Pending", "CRITICAL", "WARNING"].includes(
+                      failure.status,
+                    ) &&
+                    !isSubmitterEditing && (
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setIsSubmitterEditing(true)}
+                          className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center transition-colors"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 mr-1" /> Edytuj
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleDeleteSubmitter}
+                          disabled={isActionLoading}
+                          className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center transition-colors disabled:opacity-50"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Usuń
+                        </button>
+                      </div>
+                    )}
                 </div>
 
                 {/* Submitter Edit Form */}
@@ -469,8 +501,7 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                     {failure.failure_description}
                   </div>
                 )}
-              </div> {/* <--- TUTAJ PRZENIESIONO ZAMKNIĘCIE SEKCJI */}
-
+              </div>{" "}
               {/* ACTION BUTTONS (For Mechanics / Service team) */}
               {!isResolving && failure.status !== "RESOLVED" && isService && (
                 <div className="border-t border-gray-100 pt-6">
@@ -478,29 +509,60 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                     Akcje dla serwisu:
                   </p>
                   <div className="flex flex-wrap gap-3">
+                    {/* ACCEPT FAILURE */}
                     {["Pending", "CRITICAL", "WARNING"].includes(
                       failure.status,
                     ) && (
                       <button
                         onClick={() => handleStatusChange("ACCEPTED")}
                         disabled={isActionLoading}
-                        className="flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium transition-colors text-sm"
+                        className="flex items-center px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
                       >
                         <CheckCircle2 className="w-4 h-4 mr-2" /> Przyjmij
                         zgłoszenie
                       </button>
                     )}
 
+                    {/* WAITING FOR PARTS */}
+                    {["ACCEPTED", "IN_PROGRESS"].includes(failure.status) && (
+                      <button
+                        onClick={() => {
+                          setPendingStatus("WAITING_FOR_PARTS");
+                          setIsReasonModalOpen(true);
+                        }}
+                        disabled={isActionLoading}
+                        className="flex items-center px-4 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                      >
+                        <Clock className="w-4 h-4 mr-2" /> Oczekiwanie na części
+                      </button>
+                    )}
+                    {/* WAITING FOR SERVICES */}
+                    {["ACCEPTED", "IN_PROGRESS"].includes(failure.status) && (
+                      <button
+                        onClick={() => {
+                          setPendingStatus("WAITING_FOR_SERVICE");
+                          setIsReasonModalOpen(true);
+                        }}
+                        disabled={isActionLoading}
+                        className="flex items-center px-4 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                      >
+                        <Clock className="w-4 h-4 mr-2" /> Oczekiwanie na serwis
+                        zewnętrzny
+                      </button>
+                    )}
+
+                    {/* STARTING REPAIR */}
                     {failure.status !== "IN_PROGRESS" && (
                       <button
                         onClick={() => handleStatusChange("IN_PROGRESS")}
                         disabled={isActionLoading}
-                        className="flex items-center px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium transition-colors text-sm"
+                        className="flex items-center px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
                       >
                         <Play className="w-4 h-4 mr-2" /> Rozpocznij naprawę
                       </button>
                     )}
 
+                    {/* ClOSE FAILURE */}
                     <button
                       onClick={() => setIsResolving(true)}
                       className="flex items-center px-4 py-2 bg-emerald-600 text-white hover:bg-emerald-700 rounded-lg font-medium transition-colors text-sm shadow-sm ml-auto"
@@ -510,7 +572,6 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                   </div>
                 </div>
               )}
-
               {/* RESOLUTION FORM (Closing or Editing a repair) */}
               {isResolving && isService && (
                 <form
@@ -637,7 +698,6 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                   </div>
                 </form>
               )}
-
               {/* VIEW RESOLVED FAILURE DETAILS */}
               {failure.status === "RESOLVED" && !isResolving && (
                 <div className="border-t border-gray-200 pt-6">
@@ -684,37 +744,46 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                     </div>
 
                     {/* Consumed Parts List with Click-to-View Feature */}
-                    {isService && failure.used_parts && failure.used_parts.length > 0 && (
-                      <div className="pt-2 border-t border-emerald-200/50">
-                        <p className="text-xs text-emerald-800 uppercase font-semibold mb-2">
-                          Zużyte części (Kliknij, aby zobaczyć szczegóły):
-                        </p>
-                        <div className="space-y-1.5">
-                          {failure.used_parts.map((up, idx) => (
-                            <div
-                              key={idx}
-                              onClick={() => setSelectedPartForInfo(up.part)}
-                              className="flex justify-between items-center bg-white/80 hover:bg-white p-2.5 rounded-lg border border-emerald-100/50 cursor-pointer transition-colors group shadow-sm"
-                            >
-                              <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 flex items-center">
-                                <Eye className="w-3.5 h-3.5 mr-2 text-gray-400 group-hover:text-blue-600" />
-                                {up.part.name}
-                              </span>
-                              <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-                                {up.quantity_used} szt.
-                              </span>
-                            </div>
-                          ))}
+                    {isService &&
+                      failure.used_parts &&
+                      failure.used_parts.length > 0 && (
+                        <div className="pt-2 border-t border-emerald-200/50">
+                          <p className="text-xs text-emerald-800 uppercase font-semibold mb-2">
+                            Zużyte części (Kliknij, aby zobaczyć szczegóły):
+                          </p>
+                          <div className="space-y-1.5">
+                            {failure.used_parts.map((up, idx) => (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedPartForInfo(up.part)}
+                                className="flex justify-between items-center bg-white/80 hover:bg-white p-2.5 rounded-lg border border-emerald-100/50 cursor-pointer transition-colors group shadow-sm"
+                              >
+                                <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 flex items-center">
+                                  <Eye className="w-3.5 h-3.5 mr-2 text-gray-400 group-hover:text-blue-600" />
+                                  {up.part.name}
+                                </span>
+                                <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                                  {up.quantity_used} szt.
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 </div>
               )}
             </div>
           )}
         </div>
-      </div> 
+      </div>
+      <StatusReasonModal
+        isOpen={isReasonModalOpen}
+        onClose={() => setIsReasonModalOpen(false)}
+        onSubmit={handleReasonSubmit}
+        statusType={pendingStatus}
+        isLoading={isActionLoading}
+      />
 
       {/* Part Selector Modal */}
       {failure && (
