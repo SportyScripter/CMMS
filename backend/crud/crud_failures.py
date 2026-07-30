@@ -52,7 +52,9 @@ def get_failures(db: Session, skip: int = 0, limit: int = 100) -> list[Failure]:
     )
 
 
-def get_failures_by_machine(db: Session, machine_id: int) -> list[Failure]:
+def get_failures_by_machine(
+    db: Session, machine_id: int, skip: int = 0, limit: int = 100
+) -> list[Failure]:
     """Retrieve a list of failures for a specific machine."""
     return (
         db.query(Failure)
@@ -65,6 +67,8 @@ def get_failures_by_machine(db: Session, machine_id: int) -> list[Failure]:
             joinedload(Failure.attachments),
         )
         .filter(Failure.machine_id == machine_id)
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
