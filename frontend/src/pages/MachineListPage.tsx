@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Machine } from "../types/machine";
 import { useAuth } from "../context/AuthContext";
+import { MachineFailuresModal } from "../components/machines/MachineFailuresModal";
+import { MachineOrdersModal } from "../components/machines/MachineOrdersModal";
 import {
   ArrowLeft,
   Settings2,
@@ -31,6 +33,15 @@ export const MachineListPage = () => {
   const [filterQr, setFilterQr] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+
+  const [failuresModalMachine, setFailuresModalMachine] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [ordersModalMachine, setOrdersModalMachine] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchMachines = async () => {
@@ -290,25 +301,49 @@ export const MachineListPage = () => {
                 </p>
               </div>
               <div className="mt-auto pt-4 flex gap-3 border-t border-black/5">
-                <Link
-                  to={`/machines/${machine.id}/calendar`}
-                  className="flex-1 flex items-center justify-center px-2 py-2 bg-white/70 hover:bg-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                <button
+                  onClick={() =>
+                    setOrdersModalMachine({
+                      id: machine.id,
+                      name: machine.name,
+                    })
+                  }
+                  className="flex-1 flex items-center justify-center px-2 py-2 bg-white/70 hover:bg-white rounded-lg text-sm font-semibold transition-colors shadow-sm text-gray-800"
                 >
-                  <CalendarDays className="w-4 h-4 mr-2" />
-                  Kalendarz
-                </Link>
-                <Link
-                  to={`/machines/${machine.id}/failures`}
-                  className="flex-1 flex items-center justify-center px-2 py-2 bg-white/70 hover:bg-white rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                  <CalendarDays className="w-4 h-4 mr-2 text-indigo-600" />
+                  Zlecenia
+                </button>
+                <button
+                  onClick={() =>
+                    setFailuresModalMachine({
+                      id: machine.id,
+                      name: machine.name,
+                    })
+                  }
+                  className="flex-1 flex items-center justify-center px-2 py-2 bg-white/70 hover:bg-white rounded-lg text-sm font-semibold transition-colors shadow-sm text-gray-800"
                 >
-                  <Activity className="w-4 h-4 mr-2" />
+                  <Activity className="w-4 h-4 mr-2 text-red-500" />
                   Awarie
-                </Link>
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
-    </div>
+      {/* Modals placed outside the main list loop for performance */}
+      <MachineFailuresModal
+        isOpen={!!failuresModalMachine}
+        onClose={() => setFailuresModalMachine(null)}
+        machineId={failuresModalMachine?.id || null}
+        machineName={failuresModalMachine?.name || ""}
+      />
+
+      <MachineOrdersModal
+        isOpen={!!ordersModalMachine}
+        onClose={() => setOrdersModalMachine(null)}
+        machineId={ordersModalMachine?.id || null}
+        machineName={ordersModalMachine?.name || ""}
+      />
+    </div> // This is the closing div of MachineListPage
   );
 };

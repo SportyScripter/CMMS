@@ -5,3 +5,10 @@ export interface Machine {
   qr_code: string;
   status: string;
 }
+
+export interface MachineFailuresModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  machineId: number | null;
+  machineName: string;
+}

@@ -56,6 +56,20 @@ def get_failure(
     return db_failure
 
 
+@router.get("/machine/{machine_id}", response_model=list[FailureResponse])
+def get_failures_by_machine(
+    machine_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(ALLOW_READ_ONLY),
+) -> Any:
+    """Retrieve a list of failures for a specific machine."""
+    return crud_failures.get_failures_by_machine(
+        db=db, machine_id=machine_id, skip=skip, limit=limit
+    )
+
+
 @router.patch("/{failure_id}", response_model=FailureResponse)
 def update_failure(
     failure_id: int,

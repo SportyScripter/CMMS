@@ -1,4 +1,5 @@
 import { Machine } from "./machine";
+import {Role} from './auth';
 
 export interface Order {
   id: number;
@@ -8,7 +9,7 @@ export interface Order {
   order_type: { id: number; name: string };
   order_machine?: { id: number; name: string };
   principal: { id: number; name: string; lastname: string };
-  performed?: { id: number; name: string; lastname: string };
+  performed?: { id: number; name: string; lastname: string, Role: { id: number; name: string } };
 }
 
 export interface ManageOrderTypesModalProps {
@@ -41,4 +42,11 @@ export interface OrderDetailsChecklistModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdated: () => void;
+}
+
+export interface MachineOrdersModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  machineId: number | null;
+  machineName: string;
 }
