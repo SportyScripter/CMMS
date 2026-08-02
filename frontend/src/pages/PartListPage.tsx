@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Part, PartCategory } from "../types/part";
 import { PartEditModal } from "../components/PartEditModal";
 import { useAuth } from "../context/AuthContext";
 import {
-  ArrowLeft,
   PackageSearch,
   Loader2,
   AlertCircle,

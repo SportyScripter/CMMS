@@ -49,7 +49,9 @@ def get_orders(db: Session, skip: int = 0, limit: int = 100) -> list[OrderCalend
     )
 
 
-def get_orders_by_machine(db: Session, machine_id: int) -> list[OrderCalendar]:
+def get_orders_by_machine(
+    db: Session, machine_id: int, skip: int = 0, limit: int = 100
+) -> list[OrderCalendar]:
     """Retrieve a list of order entries for a specific machine."""
     return (
         db.query(OrderCalendar)
@@ -61,7 +63,9 @@ def get_orders_by_machine(db: Session, machine_id: int) -> list[OrderCalendar]:
             joinedload(OrderCalendar.attachments),
             joinedload(OrderCalendar.checklist_items),
         )
-        .filter(OrderCalendar.order_machine_id == machine_id)
+        .filter(OrderCalendar.machine_id == machine_id)
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
@@ -98,7 +102,7 @@ def update_order(
     db.commit()
     db.refresh(db_order)
     if db_order.machine_id:
-        recalculate_machine_status(db, db_order.order_machine_id)
+        recalculate_machine_status(db, db_order.machine_id)
     return db_order
 
 
@@ -110,5 +114,5 @@ def delete_order(db: Session, order_id: int) -> OrderCalendar | None:
     db.delete(db_order)
     db.commit()
     if db_order.machine_id:
-        recalculate_machine_status(db, db_order.order_machine_id)
+        recalculate_machine_status(db, db_order.machine_id)
     return db_order

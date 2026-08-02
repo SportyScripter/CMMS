@@ -112,6 +112,7 @@ ALLOW_MANAGE_ORDER_CALENDAR = RoleChecker(
         "Lider",
         "Mechanik",
         "Elektryk",
+        "Automatyk",
     ]
 )
 

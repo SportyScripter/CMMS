@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Machine } from "../types/machine";
@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import { MachineFailuresModal } from "../components/machines/MachineFailuresModal";
 import { MachineOrdersModal } from "../components/machines/MachineOrdersModal";
 import {
-  ArrowLeft,
   Settings2,
   Loader2,
   AlertCircle,
@@ -17,6 +16,10 @@ import {
   Activity,
   Edit,
 } from "lucide-react";
+import { 
+  getStatusBadgeStyle, 
+  translateStatus 
+} from "../utils/statusUtils";
 
 export const MachineListPage = () => {
   const { user } = useAuth();
@@ -98,48 +101,6 @@ export const MachineListPage = () => {
     setFilterLocation("");
     setFilterStatus("");
   };
-
-  // Returns color styles for the machine card based on its main status
-  const getCardColorStyles = (status: string) => {
-    switch (status.toLocaleLowerCase()) {
-      // 1. Machine fully operational (Lowest priority)
-      case "sprawna":
-      case "operational":
-        return "bg-emerald-100 border-emerald-200 text-emerald-900";
-
-      // 2. Critical production stop (Priority 1)
-      case "awaria":
-      case "out of service":
-        return "bg-red-200 border-red-300 text-red-900";
-
-      // 3. Machine is running but with issues (Priority 2)
-      case "utrudniona produkcja":
-      case "produkcja utrudniona": // Keeping both forms for backward compatibility
-        return "bg-orange-200 border-orange-300 text-orange-900";
-
-      // 4. Mechanic is already working on it / waiting for parts (Priority 3)
-      case "w trakcie naprawy":
-        return "bg-blue-100 border-blue-300 text-blue-900";
-
-      // 5. Ticket created, but not yet picked up (Priority 4)
-      case "oczekujące (nowe)":
-        return "bg-yellow-200 border-yellow-300 text-yellow-900";
-
-      // 6. Active calendar order / preventive maintenance (Priority 5)
-      case "w trakcie przeglądu":
-      case "under maintenance":
-        return "bg-indigo-100 border-indigo-300 text-indigo-900";
-
-      // 7. Machine turned off / out of use
-      case "wyłączona":
-      case "off":
-        return "bg-gray-200 border-gray-400 text-gray-600 grayscale opacity-90";
-
-      default:
-        return "bg-white border-gray-200 text-gray-900";
-    }
-  };
-
   return (
     <div className="max-w-auto mx-auto space-y-1 p-2">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-4">
@@ -278,7 +239,7 @@ export const MachineListPage = () => {
           {filteredMachines.map((machine) => (
             <div
               key={machine.id}
-              className={`relative flex flex-col p-5 rounded-2xl border shadow-sm transition-transform hover:scale-[1.02] ${getCardColorStyles(machine.status)}`}
+              className={`relative flex flex-col p-5 rounded-2xl border shadow-sm transition-transform hover:scale-[1.02] ${getStatusBadgeStyle(machine.status)}`}
             >
               {canManageMachines && (
                 <button
@@ -297,7 +258,7 @@ export const MachineListPage = () => {
                   QR: {machine.qr_code}
                 </p>
                 <p className="text-sm font-medium mt-2 capitalize">
-                  Status: {machine.status}
+                  Status: {translateStatus(machine.status)}
                 </p>
               </div>
               <div className="mt-auto pt-4 flex gap-3 border-t border-black/5">
