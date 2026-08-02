@@ -19,6 +19,11 @@ import {
   Play,
   Calendar,
 } from "lucide-react";
+import {
+  translateStatus,
+  getStatusBadgeStyle,
+  getStatusRowStyle,
+} from "../utils/statusUtils";
 
 export const FailureListPage = () => {
   // --- API DATA STATES ---
@@ -75,83 +80,6 @@ export const FailureListPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // --- TABLE STYLING HELPERS ---
-  // Returns appropriate Tailwind CSS badge colors based on the failure status
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "Close":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "CRITICAL":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "WARNING":
-        return "bg-amber-100 text-amber-800 border-amber-200";
-      case "IN_PROGRESS":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "ACCEPTED":
-        return "bg-indigo-100 text-indigo-800 border-indigo-200";
-      case "RESOLVED":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200";
-      case "WAITING_FOR_PARTS":
-        return "bg-purple-100 text-purple-800 border-purple-300";
-      case "WAITING_FOR_SERVICE":
-        return "bg-purple-100 text-purple-800 border-purple-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-  // Returns background hover colors for table rows based on status priority
-  const getRowStyle = (status: string) => {
-    switch (status) {
-      case "Pending":
-        return "bg-amber-50 hover:bg-amber-100";
-      case "Close":
-        return "bg-green-50 hover:bg-green-100";
-      case "CRITICAL":
-        return "bg-red-50 hover:bg-red-100";
-      case "WARNING":
-        return "bg-orange-50 hover:bg-orange-100";
-      case "IN_PROGRESS":
-        return "bg-amber-50 hover:bg-amber-100";
-      case "ACCEPTED":
-        return "bg-indigo-50 hover:bg-indigo-100";
-      case "RESOLVED":
-        return "bg-emerald-50 hover:bg-emerald-100";
-      case "WAITING_FOR_PARTS":
-        return "bg-purple-50 hover:bg-purple-100";
-      case "WAITING_FOR_SERVICE":
-        return "bg-purple-50 hover:bg-purple-100";
-      default:
-        return "bg-white hover:bg-gray-50";
-    }
-  };
-  // Translates raw backend status strings into human-readable Polish labels
-  const translateStatus = (status: string) => {
-    switch (status) {
-      case "Pending":
-        return "Oczekujące (Nowe)";
-      case "Close":
-        return "Zamknięte";
-      case "CRITICAL":
-        return "Awaria";
-      case "WARNING":
-        return "Utrudniona produkcja";
-      case "IN_PROGRESS":
-        return "W trakcie naprawy";
-      case "ACCEPTED":
-        return "Zgłoszenie przyjęte";
-      case "RESOLVED":
-        return "Zakończone";
-      case "WAITING_FOR_PARTS":
-        return "Oczekiwanie na części";
-      case "WAITING_FOR_SERVICE":
-        return "Oczekiwanie na serwis zewnętrzny";
-      default:
-        return status;
-    }
-  };
-
   // --- INTEGRATED FILTERING & SORTING LOGIC ---
   // This useMemo hook recalculates the list only when data or filter states change.
   const filteredAndSortedFailures = useMemo(() => {
@@ -181,9 +109,11 @@ export const FailureListPage = () => {
         if (statusFilter === "CRITICAL" && f.status !== "CRITICAL")
           return false;
         if (statusFilter === "WARNING" && f.status !== "WARNING") return false;
-       if (
-          statusFilter === "IN_PROGRESS" && 
-          !["IN_PROGRESS", "WAITING_FOR_PARTS", "WAITING_FOR_SERVICE"].includes(f.status)
+        if (
+          statusFilter === "IN_PROGRESS" &&
+          !["IN_PROGRESS", "WAITING_FOR_PARTS", "WAITING_FOR_SERVICE"].includes(
+            f.status,
+          )
         )
           return false;
       }
@@ -343,7 +273,7 @@ export const FailureListPage = () => {
               <button
                 onClick={() => setStatusFilter("IN_PROGRESS")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                  statusFilter === "IN_PROGRESS" 
+                  statusFilter === "IN_PROGRESS"
                     ? "bg-indigo-600 text-white border-indigo-600"
                     : "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100"
                 }`}
@@ -453,11 +383,11 @@ export const FailureListPage = () => {
                 {filteredAndSortedFailures.map((failure) => (
                   <tr
                     key={failure.id}
-                    className={`transition-colors border-b border-gray-50/50 ${getRowStyle(failure.status)}`}
+                    className={`transition-colors border-b border-gray-50/50 ${getStatusRowStyle(failure.status)}`}
                   >
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(failure.status)}`}
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${getStatusBadgeStyle(failure.status)}`}
                       >
                         {translateStatus(failure.status)}
                       </span>

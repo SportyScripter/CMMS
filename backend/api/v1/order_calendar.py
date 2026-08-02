@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from api.dependencies import get_db
 from core.permissions import (
     ALLOW_MANAGE_ORDER_CALENDAR,
+    ALLOW_READ_ONLY,
     ALLOW_READ_ONLY_ORDER_CALENDAR,
     ALLOW_POST_AND_DELETE_ORDER_CALENDAR,
 )
@@ -60,6 +61,20 @@ def get_order(
             detail="Order not found",
         )
     return db_order
+
+
+@router.get("/machine/{machine_id}", response_model=list[OrderCalendarResponse])
+def get_orders_by_machine_endpoint(
+    machine_id: int,
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(ALLOW_READ_ONLY),
+) -> Any:
+    """Retrieve a list of scheduled orders for a specific machine."""
+    return crud_orders_calendar.get_orders_by_machine(
+        db=db, machine_id=machine_id, skip=skip, limit=limit
+    )
 
 
 @router.patch("/{order_id}", response_model=OrderCalendarResponse)

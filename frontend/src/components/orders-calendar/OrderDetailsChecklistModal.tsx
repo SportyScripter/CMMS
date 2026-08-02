@@ -21,6 +21,10 @@ import {
   OrderDetailsChecklistModalProps,
 } from "../../types/order-calendar";
 import { AddChecklistItemsModal } from "./AddChecklistItemsModal";
+import {
+  getCalendarBadgeStyle,
+  translateCalendarStatus,
+} from "../../utils/statusUtils";
 
 // Interface to track edited tasks (whether they existed in DB or are new)
 interface EditTask {
@@ -259,14 +263,23 @@ export const OrderDetailsChecklistModal: React.FC<
   const startOrder = async () => {
     if (!isExecutionAllowed) return;
     try {
+      const assigneeId = order.performed?.id
+        ? Number(order.performed.id)
+        : Number(currentUser.id);
+
       await api.patch(`/order-calendar/${order.id}`, {
         status: "in_progress",
-        performed_id: order.performed_id || currentUser.id,
+        performed_id: assigneeId,
       });
+
       fetchOrderDetails();
       onUpdated();
-    } catch (err) {
-      alert("Błąd zmiany statusu.");
+    } catch (err: any) {
+      console.error(
+        "Szczegóły błędu startu zlecenia:",
+        err.response?.data || err,
+      );
+      alert("Błąd zmiany statusu. Sprawdź logi serwera.");
     }
   };
 
@@ -320,24 +333,12 @@ export const OrderDetailsChecklistModal: React.FC<
               <h3 className="font-bold text-gray-900 text-lg flex items-center">
                 Zlecenie #{order.id}
                 <span
-                  className={`ml-3 px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider
-                  ${
-                    order.status === "completed"
-                      ? "bg-emerald-100 text-emerald-800"
-                      : order.status === "in_progress"
-                        ? "bg-yellow-100 text-yellow-800"
-                        :order.status === "un_completed"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-gray-200 text-gray-800"
-                  }`}
+                  className={`ml-3 px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${getCalendarBadgeStyle(
+                    order.status,
+                    order.scheduled_date,
+                  )}`}
                 >
-                  {order.status === "completed"
-                    ? "Wykonane"
-                    : order.status === "in_progress"
-                      ? "W trakcie"
-                      : order.status === "un_completed"
-                        ? "Nieukończone"
-                        : "Zaplanowane"}
+                  {translateCalendarStatus(order.status)}
                 </span>
               </h3>
               <p className="text-sm text-gray-500 mt-1">

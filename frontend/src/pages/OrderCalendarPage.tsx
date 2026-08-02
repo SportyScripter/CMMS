@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { api } from "../api/axiosConfig";
 import {
   ChevronLeft,
@@ -7,7 +7,6 @@ import {
   List,
   Filter,
   Plus,
-  Settings2,
   AlertCircle,
 } from "lucide-react";
 import { Order } from "../types/order-calendar";
@@ -15,7 +14,10 @@ import { AddOrderModal } from "../components/orders-calendar/AddOrderModal";
 import { OrderDetailsChecklistModal } from "../components/orders-calendar/OrderDetailsChecklistModal";
 import { useAuth } from "../context/AuthContext";
 import { User } from "../types/auth";
-
+import {
+  translateCalendarStatus,
+  getCalendarBadgeStyle,
+} from "../utils/statusUtils";
 export const OrderCalendarPage = () => {
   // Get current user
   const { user } = useAuth();
@@ -47,8 +49,6 @@ export const OrderCalendarPage = () => {
 
   const [isAddOrderModalOpen, setIsAddOrderModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-
-  const [isManageTypesModalOpen, setIsManageTypesModalOpen] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -130,18 +130,6 @@ export const OrderCalendarPage = () => {
       );
   }, [orders, filterMachine, filterType]);
 
-  const getCardStyle = (status: string, scheduledDate: string) => {
-    if (status === "completed")
-      return "bg-emerald-50 border-emerald-300 text-emerald-900 border-l-4 border-l-emerald-500";
-    if (status === "in_progress")
-      return "bg-yellow-50 border-yellow-300 text-yellow-900 border-l-4 border-l-yellow-500";
-    if (status === "un_completed")
-      return "bg-red-50 border-red-300 text-red-900 border-l-4 border-l-red-500";
-    if (isToday(new Date(scheduledDate)))
-      return "bg-red-50 border-red-300 text-red-900 border-l-4 border-l-red-500";
-    return "bg-gray-50 border-gray-200 text-gray-800 border-l-4 border-l-gray-400";
-  };
-
   return (
     <div className="max-w-auto mx-auto space-y-1 p-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -157,12 +145,12 @@ export const OrderCalendarPage = () => {
 
         <div className="flex gap-3">
           {canAddOrder && (
-          <button
-            onClick={() => setIsAddOrderModalOpen(true)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center shadow-sm"
-          >
-            <Plus className="w-4 h-4 mr-2" /> Dodaj zlecenie
-          </button>
+            <button
+              onClick={() => setIsAddOrderModalOpen(true)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center shadow-sm"
+            >
+              <Plus className="w-4 h-4 mr-2" /> Dodaj zlecenie
+            </button>
           )}
         </div>
       </div>
@@ -281,7 +269,7 @@ export const OrderCalendarPage = () => {
                     <div
                       key={order.id}
                       onClick={() => setSelectedOrderId(order.id)}
-                      className={`p-3 rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95 flex flex-col ${getCardStyle(order.status, order.scheduled_date)}`}
+                      className={`p-3 rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95 flex flex-col ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
                     >
                       <span className="text-xs font-bold uppercase tracking-wider mb-1 opacity-80">
                         {order.order_type?.name || "Brak typu"}
@@ -289,14 +277,10 @@ export const OrderCalendarPage = () => {
                       <span className="text-sm font-semibold mb-2 line-clamp-2">
                         {order.description}
                       </span>
-                      <span className="text-sm font-semibold mb-2 line-clamp-2">
-                        {order.status === "completed"
-                          ? "Wykonane"
-                          : order.status === "in_progress"
-                            ? "W trakcie"
-                            : order.status === "un_completed"
-                              ? "Nieukończone"
-                              : "Zaplanowane"}
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
+                      >
+                        {translateCalendarStatus(order.status)}
                       </span>
                       <div className="mt-auto text-xs opacity-70 font-medium">
                         {order.order_machine?.name || "Brak maszyny"}

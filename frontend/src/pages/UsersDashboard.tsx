@@ -1,6 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, ShieldPlus, Search, Users, ShieldUser, Building2 } from "lucide-react";
+import {
+  UserPlus,
+  ShieldPlus,
+  Users,
+  ShieldUser,
+  Building2,
+} from "lucide-react";
 
 // --- ADMIN ACTIONS CONFIGURATION ---
 // Defines the navigation cards available on the administration dashboard.
@@ -41,10 +47,9 @@ const adminActions = [
   },
   {
     title: "Wydziały Produkcyjne",
-    description:
-      "Zarządzaj strukturą departamentów i wydziałów w fabryce.",
+    description: "Zarządzaj strukturą departamentów i wydziałów w fabryce.",
     icon: Building2,
-    href: "/departments/manage", 
+    href: "/departments/manage",
     color: "text-amber-600",
     bgColor: "bg-amber-100",
   },
@@ -53,7 +58,6 @@ const adminActions = [
 export const UsersDashboard = () => {
   return (
     <div className="max-w-auto mx-auto space-y-1 p-2">
-      
       {/* --- DASHBOARD HEADER --- */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
@@ -74,14 +78,13 @@ export const UsersDashboard = () => {
             className="group block bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-blue-200 overflow-hidden active:scale-95 cursor-pointer"
           >
             <div className="p-6 flex items-start">
-              
               {/* Action Icon with Dynamic Colors */}
               <div
                 className={`p-4 rounded-xl ${action.bgColor} ${action.color} group-hover:scale-110 transition-transform duration-300`}
               >
                 <action.icon className="w-8 h-8" />
               </div>
-              
+
               {/* Action Title and Description */}
               <div className="ml-5 flex-1">
                 <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
@@ -91,12 +94,10 @@ export const UsersDashboard = () => {
                   {action.description}
                 </p>
               </div>
-
             </div>
           </Link>
         ))}
       </div>
-
     </div>
   );
 };

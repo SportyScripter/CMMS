@@ -63,78 +63,49 @@ def recalculate_machine_status(db: Session, machine_id: int):
     Priority hierarchy (from most critical to least critical).
     """
     machine = db.query(Machine).filter(Machine.id == machine_id).first()
+
     if not machine:
         return
 
-    # HIERARCHY 1: Production stopped (CRITICAL)
-    critical_failure = (
-        db.query(Failure)
-        .filter(Failure.machine_id == machine_id, Failure.status == "CRITICAL")
-        .first()
-    )
-
-    if critical_failure:
-        machine.status = "Awaria"
-        db.commit()
-        return
-
-    # HIERARCHY 2: Hindered production (WARNING)
-    warning_failure = (
-        db.query(Failure)
-        .filter(Failure.machine_id == machine_id, Failure.status == "WARNING")
-        .first()
-    )
-
-    if warning_failure:
-        machine.status = "Utrudniona produkcja"
-        db.commit()
-        return
-
-    # HIERARCHY 3: Failures in progress / blocked waiting for parts or service
-    active_repair = (
+    active_failures = (
         db.query(Failure)
         .filter(
             Failure.machine_id == machine_id,
-            Failure.status.in_(
-                ["IN_PROGRESS", "WAITING_FOR_PARTS", "WAITING_FOR_SERVICE", "ACCEPTED"]
-            ),
+            Failure.status.notin_(["RESOLVED", "CLOSE"]),
         )
-        .first()
+        .all()
     )
 
-    if active_repair:
-        machine.status = "W trakcie naprawy"
-        db.commit()
-        return
+    statuses = [f.status for f in active_failures]
 
-    # HIERARCHY 4: New, unassigned tickets (Pending)
-    pending_failure = (
-        db.query(Failure)
-        .filter(Failure.machine_id == machine_id, Failure.status == "Pending")
-        .first()
-    )
-
-    if pending_failure:
-        machine.status = "Oczekujące (Nowe)"
-        db.commit()
-        return
-
-    # HIERARCHY 5: Active maintenance orders from the calendar
-    active_order = (
-        db.query(OrderCalendar)
-        .filter(
-            OrderCalendar.machine_id == machine_id,
-            OrderCalendar.status == "in_progress",
+    if "CRITICAL" in statuses:
+        machine.status = "CRITICAL"
+    elif "WARNING" in statuses:
+        machine.status = "WARNING"
+    elif "IN_PROGRESS" in statuses:
+        machine.status = "IN_PROGRESS"
+    elif "WAITING_FOR_PARTS" in statuses:
+        machine.status = "WAITING_FOR_PARTS"
+    elif "WAITING_FOR_SERVICE" in statuses:
+        machine.status = "WAITING_FOR_SERVICE"
+    elif "ACCEPTED" in statuses:
+        machine.status = "ACCEPTED"
+    elif "PENDING" in statuses:
+        machine.status = "PENDING"
+    else:
+        active_order = (
+            db.query(OrderCalendar)
+            .filter(
+                OrderCalendar.machine_id == machine_id,
+                OrderCalendar.status == "in_progress",
+            )
+            .first()
         )
-        .first()
-    )
 
-    if active_order:
-        machine.status = "W trakcie przeglądu"
-        db.commit()
-        return
+        if active_order:
+            machine.status = "MAINTENANCE"
+        else:
+            machine.status = "OPERATIONAL"
 
-    # HIERARCHY 6: Machine is fully operational (no active failures or maintenance)
-    # Failures are either 'RESOLVED' or 'Close', orders are 'completed'
-    machine.status = "Sprawna"
     db.commit()
+    db.refresh(machine)
