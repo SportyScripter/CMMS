@@ -5,6 +5,7 @@ import { Machine } from "../types/machine";
 import { useAuth } from "../context/AuthContext";
 import { MachineFailuresModal } from "../components/machines/MachineFailuresModal";
 import { MachineOrdersModal } from "../components/machines/MachineOrdersModal";
+import { EditMachineModal } from "../components/machines/EditMachineModal";
 import {
   Settings2,
   Loader2,
@@ -16,10 +17,7 @@ import {
   Activity,
   Edit,
 } from "lucide-react";
-import { 
-  getStatusBadgeStyle, 
-  translateStatus 
-} from "../utils/statusUtils";
+import { getStatusBadgeStyle, translateStatus } from "../utils/statusUtils";
 
 export const MachineListPage = () => {
   const { user } = useAuth();
@@ -46,19 +44,24 @@ export const MachineListPage = () => {
     name: string;
   } | null>(null);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [machineToEdit, setMachineToEdit] = useState<Machine | null>(null);
+
+ const fetchMachines = async () => {
+    setIsLoading(true); 
+    try {
+      const response = await api.get<Machine[]>("/machines");
+      setMachines(response.data);
+    } catch (err: any) {
+      setError(
+        "Nie udało się pobrać listy maszyn. Sprawdź połączenie z serwerem.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchMachines = async () => {
-      try {
-        const response = await api.get<Machine[]>("/machines");
-        setMachines(response.data);
-      } catch (err: any) {
-        setError(
-          "Nie udało się pobrać listy maszyn. Sprawdź połączenie z serwerem.",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchMachines();
   }, []);
 
@@ -243,6 +246,11 @@ export const MachineListPage = () => {
             >
               {canManageMachines && (
                 <button
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    setMachineToEdit(machine);
+                    setIsEditModalOpen(true);
+                  }}
                   className="absolute top-4 right-4 p-2 bg-white/60 hover:bg-white rounded-full transition-colors shadow-sm"
                   title="Edytuj Maszynę"
                 >
@@ -305,6 +313,15 @@ export const MachineListPage = () => {
         machineId={ordersModalMachine?.id || null}
         machineName={ordersModalMachine?.name || ""}
       />
-    </div> // This is the closing div of MachineListPage
+      <EditMachineModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setMachineToEdit(null);
+        }}
+        machine={machineToEdit}
+        onUpdated={fetchMachines} 
+      />
+    </div>
   );
 };

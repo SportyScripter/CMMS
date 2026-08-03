@@ -12,3 +12,10 @@ export interface MachineFailuresModalProps {
   machineId: number | null;
   machineName: string;
 }
+
+export interface EditMachineModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  machine: Machine | null;
+  onUpdated: () => void; 
+}
