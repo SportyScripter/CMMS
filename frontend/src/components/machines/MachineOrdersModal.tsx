@@ -140,49 +140,135 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                 </p>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-start gap-3">
-                <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
-                  <User className="w-5 h-5" />
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* KOLUMNA 1: Wykonawca */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase">
+                      Wykonawca
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 mt-0.5">
+                      {selectedOrder.performed?.name}{" "}
+                      {selectedOrder.performed?.lastname || "Nie przypisano"}
+                    </p>
+                    {selectedOrder.performed?.role?.name && (
+                      <p className="text-xs text-gray-400">
+                        Stanowisko: {selectedOrder.performed?.role.name}
+                      </p>
+                    )}
+                  </div>
                 </div>
+
+                {/* KOLUMNA 2: Zleceniodawca */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase">
+                      Zleceniodawca
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 mt-0.5">
+                      {selectedOrder.principal?.name}{" "}
+                      {selectedOrder.principal?.lastname || "Brak danych"}
+                    </p>
+                    {selectedOrder.principal?.role?.name && (
+                      <p className="text-xs text-gray-400">
+                        Stanowisko: {selectedOrder.principal?.role.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-start gap-3">
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase">
-                    Wykonawca
+                    Opis zlecenia
                   </p>
                   <p className="text-sm font-medium text-gray-900 mt-0.5">
-                    {selectedOrder.performed?.name}{" "}
-                    {selectedOrder.performed?.lastname || "Nie przypisano"}
+                    {selectedOrder.description || "Brak dodatkowego opisu."}
                   </p>
-                  {selectedOrder.performed?.Role?.name  && (
-                    <p className="text-xs text-gray-400">
-                      Stanowisko: {selectedOrder.performed?.Role.name}
-                    </p>
-                  )}
+                </div>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-start gap-3">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase">
+                    Dodatkowe informacje / uwagi
+                  </p>
+                  <p className="text-sm font-medium text-gray-900 mt-0.5">
+                    {selectedOrder.comments || "Brak uwag."}
+                  </p>
                 </div>
               </div>
 
               {/* Checklist section */}
               <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-                <h4 className="text-gray-900 font-bold mb-3 flex items-center">
+                <h4 className="text-gray-900 font-bold mb-4 flex items-center">
                   <CheckSquare className="w-4 h-4 mr-2 text-indigo-500" />
                   Checklista przeglądu
                 </h4>
-                {/* Adjust mapping based on your actual nested types */}
-                {/* {selectedOrder.checklists?.length > 0 ? (
-                  <div className="space-y-2">
-                    {selectedOrder.checklists.map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg">
-                        <div className={`w-5 h-5 rounded border flex items-center justify-center ${item.is_completed ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-gray-300'}`}>
-                          {item.is_completed && <CheckSquare className="w-3 h-3" />}
+
+                {selectedOrder.checklist_items &&
+                selectedOrder.checklist_items.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedOrder.checklist_items.map((item, idx) => {
+                      let rowStyle = "bg-gray-50 border-gray-200";
+                      let badgeStyle =
+                        "bg-gray-200 text-gray-700 border-gray-300";
+
+                      if (item.status === "OK") {
+                        rowStyle = "bg-emerald-50 border-emerald-200";
+                        badgeStyle =
+                          "bg-emerald-100 text-emerald-800 border-emerald-300";
+                      } else if (item.status === "NOK") {
+                        rowStyle = "bg-red-50 border-red-200";
+                        badgeStyle = "bg-red-100 text-red-800 border-red-300";
+                      } else if (item.status === "ND") {
+                        rowStyle = "bg-gray-50 border-gray-200";
+                        badgeStyle =
+                          "bg-gray-200 text-gray-800 border-gray-300";
+                      }
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-start gap-4 p-3 rounded-lg border shadow-sm transition-colors ${rowStyle}`}
+                        >
+                          {/* LEFT SIDE : Status Badge */}
+                          <div className="shrink-0 mt-0.5">
+                            <span
+                              className={`inline-flex items-center justify-center px-2.5 py-1 text-xs font-bold rounded-md border uppercase ${badgeStyle}`}
+                            >
+                              {item.status || "BRAK"}
+                            </span>
+                          </div>
+
+                          {/* RIGHT SIDE: Description and Comments */}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-gray-900">
+                              {item.task_description}
+                            </span>
+                            {item.comments && (
+                              <span className="text-xs text-gray-600 mt-1.5">
+                                <span className="font-medium text-gray-500">
+                                  Uwagi:
+                                </span>{" "}
+                                {item.comments}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <span className={`text-sm ${item.is_completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{item.task_name}</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
-                ) : ( */}
-                <p className="text-sm text-gray-500 italic">
-                  Brak zdefiniowanej checklisty dla tego zadania.
-                </p>
-                {/* )} */}
+                ) : (
+                  <p className="text-sm text-gray-500 italic">
+                    Brak dedykowanych zadań (checklisty) dla tego przeglądu.
+                  </p>
+                )}
               </div>
             </div>
           ) : orders.length === 0 ? (

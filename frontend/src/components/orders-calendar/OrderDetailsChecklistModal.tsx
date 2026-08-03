@@ -351,6 +351,14 @@ export const OrderDetailsChecklistModal: React.FC<
                   {order.order_type?.name}
                 </span>
               </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Zlecił:{" "}
+                <span className="font-semibold text-gray-700">
+                  {order.principal
+                    ? `${order.principal.name} ${order.principal.lastname}`
+                    : "Brak danych"}
+                </span>{" "}
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
