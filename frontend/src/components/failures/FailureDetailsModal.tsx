@@ -49,6 +49,14 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
     "Elektryk",
   ].includes(role);
 
+  // Delete permission: Only managers can delete failures, not submitters or service personnel
+  const canDeleteFailure = [
+    "Super Admin",
+    "Admin",
+    "Dyrektor",
+    "Kierownik",
+  ].includes(role);
+
   // Data states
   const [failure, setFailure] = useState<Failure | null>(null);
   const [availableParts, setAvailableParts] = useState<Part[]>([]);
@@ -143,7 +151,7 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
 
   // --- ACTIONS ---
 
-// Update status (e.g., to ACCEPTED, IN_PROGRESS, WAITING_FOR_PARTS)
+  // Update status (e.g., to ACCEPTED, IN_PROGRESS, WAITING_FOR_PARTS)
   const handleStatusChange = async (newStatus: string, reason?: string) => {
     setIsActionLoading(true);
     setError("");
@@ -154,13 +162,13 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
       };
 
       if (reason) {
-        payload.repair_description = reason; 
+        payload.repair_description = reason;
       }
 
       await api.patch(`/failures/${failureId}`, payload);
-      
+
       onUpdated();
-      onClose(); // Możesz też nie zamykać modala zgłoszenia, jeśli chcesz, żeby użytkownik widział, że status się zmienił
+      onClose();
     } catch (err: any) {
       setError(err.response?.data?.detail || "Failed to update status.");
     } finally {
@@ -196,8 +204,8 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
     }
   };
 
-  // Submitter deletes their own open failure report
-  const handleDeleteSubmitter = async () => {
+  // Generalized delete function (used by both submitter and managers)
+  const handleDeleteFailure = async () => {
     if (
       !window.confirm(
         "Czy na pewno chcesz usunąć to zgłoszenie? Tej operacji nie można cofnąć.",
@@ -212,7 +220,7 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
     try {
       await api.delete(`/failures/${failureId}`);
       onUpdated();
-      onClose(); // Zamknij modal po udanym usunięciu
+      onClose();
     } catch (err: any) {
       setError(
         err.response?.data?.detail || "Nie udało się usunąć zgłoszenia.",
@@ -307,10 +315,22 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in duration-200">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-          <h3 className="font-semibold text-gray-900 flex items-center text-lg">
-            <Wrench className="w-5 h-5 text-blue-600 mr-2" />
-            Szczegóły zgłoszenia #{failureId}
-          </h3>
+          <div className="flex items-center gap-4">
+            <h3 className="font-semibold text-gray-900 flex items-center text-lg">
+              <Wrench className="w-5 h-5 text-blue-600 mr-2" />
+              Szczegóły zgłoszenia #{failureId}
+            </h3>
+            {/* Przycisk usuwania dla zarządzających */}
+            {canDeleteFailure && (
+              <button
+                onClick={handleDeleteFailure}
+                disabled={isActionLoading}
+                className="flex items-center text-sm px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors font-medium disabled:opacity-50"
+              >
+                <Trash2 className="w-4 h-4 mr-1.5" /> Usuń zgłoszenie
+              </button>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 p-1 rounded-lg transition-colors"
@@ -390,7 +410,7 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
                         </button>
                         <button
                           type="button"
-                          onClick={handleDeleteSubmitter}
+                          onClick={handleDeleteFailure}
                           disabled={isActionLoading}
                           className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center transition-colors disabled:opacity-50"
                         >
