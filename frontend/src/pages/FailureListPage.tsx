@@ -4,7 +4,7 @@ import { Failure, Department } from "../types/failure";
 import { Machine } from "../types/machine";
 import { calculateDowntime } from "../utils/dateUtils";
 import { AddFailureModal } from "../components/failures/AddFailureModal";
-import { FailureDetailsModal } from "../components/failures/FailureDetailsModal";
+import { FailureDetailsModal } from "../components/failures/FailureDetails";
 import {
   AlertTriangle,
   Filter,

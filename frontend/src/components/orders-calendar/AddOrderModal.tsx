@@ -10,7 +10,6 @@ import {
   ListChecks,
 } from "lucide-react";
 import { api } from "../../api/axiosConfig";
-import { useAuth } from "../../context/AuthContext";
 import { Machine } from "../../types/machine";
 import { User } from "../../types/auth";
 import { AddOrderModalProps, OrderType } from "../../types/order-calendar";
