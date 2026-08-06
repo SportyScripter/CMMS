@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Part, PartCategory } from "../types/part";
-import { PartEditModal } from "../components/PartEditModal";
+import { PartEditModal } from "../components//parts/PartEditModal";
+import { CreatePartModal } from "../components/parts/CreatePartModal";
 import { useAuth } from "../context/AuthContext";
 import {
   PackageSearch,
@@ -34,6 +34,9 @@ export const PartListPage = () => {
   const [compatibleMachines, setCompatibleMachines] = useState<any[]>([]);
   const [isCompatModalOpen, setIsCompatModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // New state for creating parts modal
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoadingCompat, setIsLoadingCompat] = useState(false);
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -45,22 +48,26 @@ export const PartListPage = () => {
 
   const [selectedPart, setSelectedPart] = useState<Part | null>(null);
 
+  // Extracted fetch logic to allow refreshing from the creation modal
+  const fetchWarehouseData = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const partResponse = await api.get<Part[]>("/parts");
+      const categoryResponse =
+        await api.get<PartCategory[]>("/part-categories");
+      setParts(partResponse.data);
+      setCategories(categoryResponse.data);
+    } catch (err: any) {
+      setError(
+        "Nie udało się pobrać danych z serwera. Sprawdź połączenie z bazą danych.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchWarehouseData = async () => {
-      try {
-        const partResponse = await api.get<Part[]>("/parts");
-        const categoryResponse =
-          await api.get<PartCategory[]>("/part-categories");
-        setParts(partResponse.data);
-        setCategories(categoryResponse.data);
-      } catch (err: any) {
-        setError(
-          "Nie udało się pobrać danych z serwera. Sprawdź połączenie z bazą danych.",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchWarehouseData();
   }, []);
 
@@ -70,7 +77,7 @@ export const PartListPage = () => {
       const response = await api.get(`/part-compatibilities/part/${partId}`);
       setCompatibleMachines(response.data);
     } catch (err) {
-      console.error("Nie udało się pobrać kompatybilnych maszyn", err);
+      console.error("Failed to fetch compatible machines", err);
     } finally {
       setIsLoadingCompat(false);
     }
@@ -80,6 +87,7 @@ export const PartListPage = () => {
     const category = categories.find((c) => c.id === categoryId);
     return category ? category.name : "Brak kategorii";
   };
+
   const availablePartsForType = filterCategory
     ? parts.filter((p) => p.category_id.toString() === filterCategory)
     : parts;
@@ -87,6 +95,7 @@ export const PartListPage = () => {
   const uniqueTypes = Array.from(
     new Set(availablePartsForType.map((p) => p.type)),
   );
+
   const filteredParts = parts.filter((part) => {
     const matchProducer = (part.producer || "")
       .toLowerCase()
@@ -101,6 +110,7 @@ export const PartListPage = () => {
     const matchType = filterType ? part.type === filterType : true;
     return matchName && matchQr && matchCategory && matchType && matchProducer;
   });
+
   const clearFilters = () => {
     setFilterName("");
     setFilterQr("");
@@ -128,7 +138,7 @@ export const PartListPage = () => {
           {!isLoading && !error && parts.length > 0 && (
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`flex items-center px-4 py-2 rounded-lg gont-medium transition-colors ${
+              className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
                 isFilterOpen
                   ? "bg-blue-100 text-blue-700"
                   : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
@@ -139,16 +149,17 @@ export const PartListPage = () => {
             </button>
           )}
           {canManageParts && (
-            <Link
-              to="/parts/create"
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
             >
               <Plus className="w-5 h-5 mr-1.5" />
               Dodaj część
-            </Link>
+            </button>
           )}
         </div>
       </div>
+
       {isFilterOpen && (
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 animate-in slide-in-from-top-2">
           <div className="flex justify-between items-center mb-4">
@@ -240,6 +251,7 @@ export const PartListPage = () => {
           </div>
         </div>
       )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center p-12 text-gray-500">
@@ -281,7 +293,11 @@ export const PartListPage = () => {
                   return (
                     <tr
                       key={part.id}
-                      className={`transition-colors ${isLowStock ? "bg-red-50/50 hover:bg-red-50" : "hover:bg-blue-50/50"}`}
+                      className={`transition-colors ${
+                        isLowStock
+                          ? "bg-red-50/50 hover:bg-red-50"
+                          : "hover:bg-blue-50/50"
+                      }`}
                     >
                       <td className="px-6 py-4 text-center font-medium text-gray-400">
                         {index + 1}
@@ -307,7 +323,9 @@ export const PartListPage = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <span
-                            className={`text-lg font-bold ${isLowStock ? "text-red-600" : "text-emerald-600"}`}
+                            className={`text-lg font-bold ${
+                              isLowStock ? "text-red-600" : "text-emerald-600"
+                            }`}
                           >
                             {part.quantity}
                           </span>
@@ -346,8 +364,9 @@ export const PartListPage = () => {
         )}
       </div>
 
+      {/* --- Details Modal --- */}
       {selectedPart && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[50] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden relative">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div className="flex items-center gap-4">
@@ -479,86 +498,6 @@ export const PartListPage = () => {
                 </div>
               )}
             </div>
-            {isEditModalOpen && selectedPart && (
-              <PartEditModal
-                part={selectedPart}
-                categories={categories}
-                setCategories={setCategories} 
-                onClose={() => setIsEditModalOpen(false)}
-                onUpdated={async () => {
-                  setIsLoading(true);
-                  try {
-                    const response = await api.get<Part[]>("/parts");
-                    setParts(response.data);
-                    const updatedCurrent = response.data.find(
-                      (p) => p.id === selectedPart.id,
-                    );
-                    if (updatedCurrent) setSelectedPart(updatedCurrent);
-                  } catch (err) {
-                    console.error("Nie udało się odświeżyć listy części", err);
-                  } finally {
-                    setIsLoading(false);
-                  }
-                }}
-              />
-            )}
-
-            {isCompatModalOpen && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
-                  <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50">
-                    <h3 className="font-semibold text-gray-900 flex items-center text-base">
-                      <Wrench className="w-5 h-5 text-emerald-600 mr-2" />
-                      Kompatybilne urządzenia dla: {selectedPart.name}
-                    </h3>
-                    <button
-                      onClick={() => setIsCompatModalOpen(false)}
-                      className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="p-4 overflow-y-auto space-y-2 flex-1">
-                    {isLoadingCompat ? (
-                      <div className="flex justify-center items-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
-                      </div>
-                    ) : compatibleMachines.length === 0 ? (
-                      <p className="text-center text-gray-500 py-8 text-sm">
-                        Ta część nie została przypisana do żadnego urządzenia.
-                      </p>
-                    ) : (
-                      compatibleMachines.map((item) => (
-                        <div
-                          key={`${item.part_id}-${item.machine_id}`}
-                          className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex flex-col"
-                        >
-                          <span className="font-medium text-gray-900 text-sm">
-                            {item.machine.name}
-                          </span>
-                          {item.machine.location && (
-                            <span className="text-xs text-gray-500 mt-0.5">
-                              Lokalizacja: {item.machine.location}
-                            </span>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setIsCompatModalOpen(false)}
-                      className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
-                    >
-                      Zamknij
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end">
               <button
@@ -572,6 +511,82 @@ export const PartListPage = () => {
           </div>
         </div>
       )}
+
+      {/* --- Compatibility Modal --- */}
+      {isCompatModalOpen && selectedPart && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-emerald-50/50">
+              <h3 className="font-semibold text-gray-900 flex items-center text-base">
+                <Wrench className="w-5 h-5 text-emerald-600 mr-2" />
+                Kompatybilne urządzenia dla: {selectedPart.name}
+              </h3>
+              <button
+                onClick={() => setIsCompatModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto space-y-2 flex-1">
+              {isLoadingCompat ? (
+                <div className="flex justify-center items-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                </div>
+              ) : compatibleMachines.length === 0 ? (
+                <p className="text-center text-gray-500 py-8 text-sm">
+                  Ta część nie została przypisana do żadnego urządzenia.
+                </p>
+              ) : (
+                compatibleMachines.map((item) => (
+                  <div
+                    key={`${item.part_id}-${item.machine_id}`}
+                    className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex flex-col"
+                  >
+                    <span className="font-medium text-gray-900 text-sm">
+                      {item.machine.name}
+                    </span>
+                    {item.machine.location && (
+                      <span className="text-xs text-gray-500 mt-0.5">
+                        Lokalizacja: {item.machine.location}
+                      </span>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsCompatModalOpen(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+              >
+                Zamknij
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- Edit Part Modal --- */}
+      {isEditModalOpen && selectedPart && (
+        <PartEditModal
+          part={selectedPart}
+          categories={categories}
+          setCategories={setCategories}
+          onClose={() => setIsEditModalOpen(false)}
+          onUpdated={fetchWarehouseData}
+        />
+      )}
+
+      {/* --- Create Part Modal --- */}
+      <CreatePartModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreated={fetchWarehouseData}
+      />
     </div>
   );
 };
