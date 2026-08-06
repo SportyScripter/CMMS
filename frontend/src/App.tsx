@@ -10,7 +10,6 @@ import { UserListPage } from "./pages/UserListPage";
 import { CreateUserPage } from "./pages/CreateUserPage";
 import { MachineListPage } from "./pages/MachineListPage";
 import { PartListPage } from "./pages/PartListPage";
-import { PartCreatePage } from "./pages/PartCreatePage";
 import { FailureListPage } from "./pages/FailureListPage";
 import { DepartmentManagementPage } from "./pages/DepartmentManagementPage";
 import { OrderCalendarPage } from "./pages/OrderCalendarPage";
@@ -68,7 +67,6 @@ const AppRoutes = () => {
         <Route path="failures" element={<FailureListPage />} />
         <Route path="/calendar" element={<OrderCalendarPage />} />
         <Route path="/parts" element={<PartListPage />} />
-        <Route path="/parts/create" element={<PartCreatePage />} />
         <Route
           path="messages"
           element={
