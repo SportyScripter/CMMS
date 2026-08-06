@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Order } from "../types/order-calendar";
 import { AddOrderModal } from "../components/orders-calendar/AddOrderModal";
-import { OrderDetailsChecklistModal } from "../components/orders-calendar/OrderDetailsChecklistModal";
+import { OrderDetailsChecklistModal } from "../components/orders-calendar/OrderDetailsChecklist";
 import { useAuth } from "../context/AuthContext";
 import { User } from "../types/auth";
 import {
