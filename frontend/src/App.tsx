@@ -1,27 +1,28 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { LoginPage } from './pages/LoginPage';
-import { MainLayout } from './components/MainLayout';
-import { UsersDashboard } from './pages/UsersDashboard';
-import { CreateRolePage } from './pages/CreateRolePage';
-import { RoleListPage } from './pages/RoleListPage';
-import { UserListPage } from './pages/UserListPage';
-import {CreateUserPage} from './pages/CreateUserPage';
-import { MachineListPage } from './pages/MachineListPage';
-import { MachineCreatePage } from './pages/MachineCreatePage';
-import {PartListPage} from './pages/PartListPage';
-import {PartCreatePage} from './pages/PartCreatePage';
-import {FailureListPage} from './pages/FailureListPage';
-import {DepartmentManagementPage} from './pages/DepartmentManagementPage';
-import {OrderCalendarPage} from './pages/OrderCalendarPage';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { LoginPage } from "./pages/LoginPage";
+import { MainLayout } from "./components/MainLayout";
+import { UsersDashboard } from "./pages/UsersDashboard";
+import { CreateRolePage } from "./pages/CreateRolePage";
+import { RoleListPage } from "./pages/RoleListPage";
+import { UserListPage } from "./pages/UserListPage";
+import { CreateUserPage } from "./pages/CreateUserPage";
+import { MachineListPage } from "./pages/MachineListPage";
+import { PartListPage } from "./pages/PartListPage";
+import { PartCreatePage } from "./pages/PartCreatePage";
+import { FailureListPage } from "./pages/FailureListPage";
+import { DepartmentManagementPage } from "./pages/DepartmentManagementPage";
+import { OrderCalendarPage } from "./pages/OrderCalendarPage";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500 font-medium animate-pulse">Wczytywanie aplikacji...</p>
+        <p className="text-gray-500 font-medium animate-pulse">
+          Wczytywanie aplikacji...
+        </p>
       </div>
     );
   }
@@ -33,30 +34,58 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-const Dashboard = () => <div><h1 className="text-2xl font-bold mb-4">Pulpit</h1><p className="text-gray-600">Witaj w systemie CMMS.</p></div>;
-const Machines = () => <div><h1 className="text-2xl font-bold mb-4">Park Maszynowy</h1></div>;
+const Dashboard = () => (
+  <div>
+    <h1 className="text-2xl font-bold mb-4">Pulpit</h1>
+    <p className="text-gray-600">Witaj w systemie CMMS.</p>
+  </div>
+);
+const Machines = () => (
+  <div>
+    <h1 className="text-2xl font-bold mb-4">Park Maszynowy</h1>
+  </div>
+);
 const AppRoutes = () => {
   const { user } = useAuth();
 
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
-      
-      <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+      <Route
+        path="/login"
+        element={user ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Dashboard />} />
         <Route path="machines" element={<MachineListPage />} />
-        <Route path="machines/create" element={<MachineCreatePage />} />
         <Route path="failures" element={<FailureListPage />} />
         <Route path="/calendar" element={<OrderCalendarPage />} />
         <Route path="/parts" element={<PartListPage />} />
-        <Route path="/parts/create" element={<PartCreatePage />} />   
-        <Route path="messages" element={<div><h1 className="text-2xl font-bold mb-4">Wiadomości</h1></div>} />
+        <Route path="/parts/create" element={<PartCreatePage />} />
+        <Route
+          path="messages"
+          element={
+            <div>
+              <h1 className="text-2xl font-bold mb-4">Wiadomości</h1>
+            </div>
+          }
+        />
         <Route path="users" element={<UsersDashboard />} />
         <Route path="users/roles/create" element={<CreateRolePage />} />
         <Route path="users/roles/list" element={<RoleListPage />} />
         <Route path="users/list" element={<UserListPage />} />
         <Route path="users/create" element={<CreateUserPage />} />
-        <Route path="/departments/manage" element={<DepartmentManagementPage />} />
+        <Route
+          path="/departments/manage"
+          element={<DepartmentManagementPage />}
+        />
       </Route>
     </Routes>
   );
