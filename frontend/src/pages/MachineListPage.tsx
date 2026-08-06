@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Machine } from "../types/machine";
 import { useAuth } from "../context/AuthContext";
 import { MachineFailuresModal } from "../components/machines/MachineFailuresModal";
 import { MachineOrdersModal } from "../components/machines/MachineOrdersModal";
 import { EditMachineModal } from "../components/machines/EditMachineModal";
+import { CreateMachineModal } from "../components/machines/CreateMachineModal";
 import {
   Settings2,
   Loader2,
@@ -47,8 +47,10 @@ export const MachineListPage = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [machineToEdit, setMachineToEdit] = useState<Machine | null>(null);
 
- const fetchMachines = async () => {
-    setIsLoading(true); 
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const fetchMachines = async () => {
+    setIsLoading(true);
     try {
       const response = await api.get<Machine[]>("/machines");
       setMachines(response.data);
@@ -104,6 +106,7 @@ export const MachineListPage = () => {
     setFilterLocation("");
     setFilterStatus("");
   };
+
   return (
     <div className="max-w-auto mx-auto space-y-1 p-2">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-2 gap-4">
@@ -133,18 +136,19 @@ export const MachineListPage = () => {
             </button>
           )}
           {canManageMachines && (
-            <Link
-              to="/machines/create"
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
               className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4 mr-2" />
               Dodaj Maszynę
-            </Link>
+            </button>
           )}
         </div>
       </div>
+
       {isFilterOpen && (
-        <div className="bf-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 animate-in slide-in-from-top-2">
+        <div className="bf-white p-5 rounded-xl shadow-sm border border-gray-100 mb-6 animate-in slide-in-from-top-2 bg-white">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-semibold text-gray-700">
               Kryteria wyszukiwania
@@ -172,7 +176,7 @@ export const MachineListPage = () => {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-500 mb-1">
-                Kod QE
+                Kod QR
               </label>
               <input
                 type="text"
@@ -219,6 +223,7 @@ export const MachineListPage = () => {
           </div>
         </div>
       )}
+
       {isLoading ? (
         <div className="flex flex-col items-center justify-center p-12 text-gray-500">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-4" />
@@ -242,12 +247,14 @@ export const MachineListPage = () => {
           {filteredMachines.map((machine) => (
             <div
               key={machine.id}
-              className={`relative flex flex-col p-5 rounded-2xl border shadow-sm transition-transform hover:scale-[1.02] ${getStatusBadgeStyle(machine.status)}`}
+              className={`relative flex flex-col p-5 rounded-2xl border shadow-sm transition-transform hover:scale-[1.02] ${getStatusBadgeStyle(
+                machine.status,
+              )}`}
             >
               {canManageMachines && (
                 <button
                   onClick={(e) => {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     setMachineToEdit(machine);
                     setIsEditModalOpen(true);
                   }}
@@ -299,20 +306,22 @@ export const MachineListPage = () => {
           ))}
         </div>
       )}
-      {/* Modals placed outside the main list loop for performance */}
+
+      {/* --- FAILURES MODAL --- */}
       <MachineFailuresModal
         isOpen={!!failuresModalMachine}
         onClose={() => setFailuresModalMachine(null)}
         machineId={failuresModalMachine?.id || null}
         machineName={failuresModalMachine?.name || ""}
       />
-
+      {/* --- ORDERS MODAL --- */}
       <MachineOrdersModal
         isOpen={!!ordersModalMachine}
         onClose={() => setOrdersModalMachine(null)}
         machineId={ordersModalMachine?.id || null}
         machineName={ordersModalMachine?.name || ""}
       />
+      {/* --- EDIT MACHINE MODAL --- */}
       <EditMachineModal
         isOpen={isEditModalOpen}
         onClose={() => {
@@ -320,7 +329,14 @@ export const MachineListPage = () => {
           setMachineToEdit(null);
         }}
         machine={machineToEdit}
-        onUpdated={fetchMachines} 
+        onUpdated={fetchMachines}
+      />
+
+      {/* --- CREATE MACHINE MODAL --- */}
+      <CreateMachineModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreated={fetchMachines}
       />
     </div>
   );
