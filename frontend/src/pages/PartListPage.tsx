@@ -45,14 +45,12 @@ export const PartListPage = () => {
     "warehouse",
   );
 
-  // Wspólne stany filtrów (dla obu widoków)
   const [filterName, setFilterName] = useState("");
   const [filterQr, setFilterQr] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterProducer, setFilterProducer] = useState("");
 
-  // Specyficzny filtr dla historii
   const [filterTransactionType, setFilterTransactionType] = useState("");
 
   const [selectedPart, setSelectedPart] = useState<Part | null>(null);
@@ -135,7 +133,7 @@ export const PartListPage = () => {
 
   return (
     <div className="max-w-auto mx-auto space-y-4 p-2">
-      {/* --- NAGŁÓWEK STRONY --- */}
+      {/* --- PAGE HEADER --- */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center">
           <div>
@@ -175,7 +173,7 @@ export const PartListPage = () => {
         </div>
       </div>
 
-      {/* --- PIGUŁKA PRZEŁĄCZANIA WIDOKÓW --- */}
+      {/* --- Switch view --- */}
       <div className="flex justify-end">
         <div className="inline-flex bg-gray-100 p-1 rounded-xl border border-gray-200/60 shadow-inner">
           <button
@@ -203,7 +201,7 @@ export const PartListPage = () => {
         </div>
       </div>
 
-      {/* --- PANEL FILTRÓW (WSPÓLNY DLA OBETU WIDOKÓW) --- */}
+      {/* --- Filters panel  --- */}
       <PartFilters
         isOpen={isFilterOpen}
         activeTab={activeTab}
@@ -224,7 +222,7 @@ export const PartListPage = () => {
         onClear={clearFilters}
       />
 
-      {/* --- ZAWARTOŚĆ ZALEŻNA OD ZAKŁADKI --- */}
+      {/* --- Content dependa on the active tab --- */}
       {activeTab === "warehouse" ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           {isLoading ? (
@@ -363,7 +361,7 @@ export const PartListPage = () => {
           }
         }}
         onAdjustStockClick={() => {
-          setIsTakeModalOpen(true); // Otwiera modal edycji stanu ze szczegółów części!
+          setIsTakeModalOpen(true);
         }}
       />
       <TakePartModal
@@ -371,8 +369,7 @@ export const PartListPage = () => {
         onClose={() => setIsTakeModalOpen(false)}
         part={selectedPart}
         onSuccess={() => {
-          fetchWarehouseData(); // Odświeża stan części na liście
-          // Opcjonalnie odświeżamy też wybraną część, żeby w szczegółach od razu zaktualizowała się ilość:
+          fetchWarehouseData();
           if (selectedPart) {
             api
               .get<Part>(`/parts/${selectedPart.id}`)

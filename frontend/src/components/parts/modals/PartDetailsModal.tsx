@@ -34,7 +34,7 @@ export const PartDetailsModal: React.FC<PartDetailsModalProps> = ({
           <div className="flex items-center gap-3 flex-wrap">
             <h2 className="text-xl font-bold text-gray-900">Szczegóły części</h2>
             
-            {/* Przycisk Edytuj Stan / Operacja magazynowa w centralnej części nagłówka */}
+            {/* Edit button for adjusting stock */}
             <button
               type="button"
               onClick={onAdjustStockClick}

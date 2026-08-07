@@ -53,7 +53,6 @@ export const TakePartModal: React.FC<TakePartModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Walidacja ilości
     if (quantityChange === 0) {
       setError("Wartość zmiany ilości nie może wynosić 0.");
       return;
@@ -69,7 +68,6 @@ export const TakePartModal: React.FC<TakePartModalProps> = ({
       return;
     }
 
-    // 2. Walidacja opisu - ZMIANA: Wymagamy tylko dla pobrania ręcznego i awarii
     const isReasonRequired = ["FAILURE", "MANUAL_DISPATCH"].includes(
       transactionType,
     );
