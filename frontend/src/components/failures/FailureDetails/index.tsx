@@ -25,7 +25,7 @@ export const FailureDetailsModal: React.FC<FailureDetailsModalProps> = ({
   const failure = details.failure;
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in duration-200">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in duration-200">
         <FailureHeader
           failureId={failureId}
           canDeleteFailure={details.canDeleteFailure}

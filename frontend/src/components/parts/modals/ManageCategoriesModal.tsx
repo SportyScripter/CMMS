@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Settings, X, Save, Edit2, Trash2 } from "lucide-react";
-import { api } from "../../api/axiosConfig";
-import { PartCategory } from "../../types/part";
+import { api } from "../../../api/axiosConfig";
+import { PartCategory } from "../../../types/part";
 
 interface ManageCategoriesModalProps {
   isOpen: boolean;
