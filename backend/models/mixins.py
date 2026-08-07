@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-
 from sqlalchemy import Column, DateTime
 
 
@@ -9,14 +8,14 @@ class TimestampMixin:
     """
 
     created_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
         comment="UTC timestamp when the record was initially created",
     )
 
     updated_at = Column(
-        DateTime,
+        DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,

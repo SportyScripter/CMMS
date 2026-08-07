@@ -5,6 +5,7 @@ import { Part, PartCategory } from "../../types/part";
 import { OperationDetailsModal } from "./modals/OperationDetailsModal";
 import { TRANSACTION_TYPES } from "../../utils/constants";
 import {PartHistoryItem} from "../../types/part";
+import { formatDateTime } from "../../utils/dateUtils";
 
 interface PartHistoryGlobalViewProps {
   parts: Part[];
@@ -161,7 +162,7 @@ export const PartHistoryGlobalView: React.FC<PartHistoryGlobalViewProps> = ({
                     className="hover:bg-blue-50/30 transition-colors"
                   >
                     <td className="px-6 py-4 text-gray-500 whitespace-nowrap text-xs font-medium">
-                      {new Date(item.created_at).toLocaleString("pl-PL")}
+                      {formatDateTime(item.created_at)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-semibold text-gray-900">

@@ -35,3 +35,22 @@ export const calculateDowntime = (
 
   return parts.join(" ");
 };
+
+
+/**
+ * Formats a date string to a localized Polish date and time format.
+ * Automatically handles missing UTC timezones by adding "Z".
+ */
+export const formatDateTime = (dateStr?: string | null): string => {
+  if (!dateStr) return "-";
+  
+  const date = new Date(ensureUtc(dateStr));
+  
+  return new Intl.DateTimeFormat("pl-PL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
