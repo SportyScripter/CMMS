@@ -16,6 +16,7 @@ from api.v1 import (
     parts,
     roles,
     users,
+    part_history,
 )
 
 api_router = APIRouter()
@@ -68,3 +69,6 @@ api_router.include_router(
     tags=["Order Checklist Items"],
 )
 api_router.include_router(messages.router, prefix="/messages", tags=["Messages"])
+api_router.include_router(
+    part_history.router, prefix="/part-history", tags=["Part History"]
+)

@@ -88,3 +88,4 @@ class Part(Base):
     part_category = relationship("PartCategory", back_populates="parts")
     compatibilities = relationship("PartCompatibility", back_populates="part")
     used_in_failures = relationship("FailurePart", back_populates="part")
+    history = relationship("PartHistory", back_populates="part")
