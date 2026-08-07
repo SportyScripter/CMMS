@@ -28,8 +28,8 @@ __all__ = [
     "OrderType",
     "Part",
     "PartCategory",
-    "PartHistory",
     "PartCompatibility",
+    "PartHistory",
     "Role",
     "User",
 ]
