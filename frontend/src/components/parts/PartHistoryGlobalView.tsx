@@ -4,18 +4,7 @@ import { Loader2, AlertCircle, History, ExternalLink } from "lucide-react";
 import { Part, PartCategory } from "../../types/part";
 import { OperationDetailsModal } from "./modals/OperationDetailsModal";
 import { TRANSACTION_TYPES } from "../../utils/constants";
-
-interface GlobalHistoryItem {
-  id: number;
-  part_id: number;
-  user_id: number;
-  machine_id: number | null;
-  failure_id: number | null;
-  quantity_change: number;
-  transaction_type: string;
-  reason: string;
-  created_at: string;
-}
+import {PartHistoryItem} from "../../types/part";
 
 interface PartHistoryGlobalViewProps {
   parts: Part[];
@@ -38,7 +27,7 @@ export const PartHistoryGlobalView: React.FC<PartHistoryGlobalViewProps> = ({
   filterTransactionType,
   onSelectFailure,
 }) => {
-  const [history, setHistory] = useState<GlobalHistoryItem[]>([]);
+  const [history, setHistory] = useState<PartHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedOp, setSelectedOp] = useState<any | null>(null);
@@ -47,7 +36,7 @@ export const PartHistoryGlobalView: React.FC<PartHistoryGlobalViewProps> = ({
       setIsLoading(true);
       setError("");
       try {
-        const response = await api.get<GlobalHistoryItem[]>("/part-history/");
+        const response = await api.get<PartHistoryItem[]>("/part-history/");
         setHistory(response.data);
       } catch (err) {
         setError(

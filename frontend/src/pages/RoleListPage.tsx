@@ -2,12 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/axiosConfig';
 import { ArrowLeft, ShieldUser, Loader2, AlertCircle } from 'lucide-react';
-
-interface Role {
-  id: number;
-  name: string;
-  description?: string;
-}
+import { Role } from '../types/auth';
 
 export const RoleListPage = () => {
   const [roles, setRoles] = useState<Role[]>([]);

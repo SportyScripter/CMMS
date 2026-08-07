@@ -13,12 +13,7 @@ import { PartCategory } from "../../../types/part";
 import { AddCategoryModal } from "./AddCategoryModal";
 import { ManageCategoriesModal } from "./ManageCategoriesModal";
 import { AssignMachinesModal } from "./AssignMachinesModal";
-
-interface Machine {
-  id: number;
-  name: string;
-  location?: string;
-}
+import { Machine } from "../../../types/machine";
 
 interface CreatePartModalProps {
   isOpen: boolean;

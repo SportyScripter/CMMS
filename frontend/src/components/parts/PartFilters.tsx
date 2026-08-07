@@ -18,7 +18,6 @@ interface PartFiltersProps {
   filterType: string;
   setFilterType: (val: string) => void;
   
-  // Dodatkowe pole tylko dla historii
   filterTransactionType?: string;
   setFilterTransactionType?: (val: string) => void;
 
