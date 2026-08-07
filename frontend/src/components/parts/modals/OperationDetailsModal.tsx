@@ -12,14 +12,7 @@ import {
   Boxes,
 } from "lucide-react";
 import { Part } from "../../../types/part";
-
-const transactionTypeTranslations: Record<string, string> = {
-  FAILURE: "Zużycie (Awaria)",
-  DELIVERY: "Dostawa",
-  MANUAL_DISPATCH: "Pobranie ręczne",
-  RETURN: "Zwrot",
-  ADJUSTMENT: "Korekta stanu",
-};
+import { TRANSACTION_TYPES } from "../../../utils/constants";
 
 interface OperationDetailsModalProps {
   isOpen: boolean;
@@ -72,7 +65,7 @@ export const OperationDetailsModal: React.FC<OperationDetailsModalProps> = ({
                 icon={<Hash />}
                 label="Typ operacji"
                 value={
-                  transactionTypeTranslations[operation.transaction_type] ||
+                  TRANSACTION_TYPES[operation.transaction_type]?.label ||
                   operation.transaction_type
                 }
               />

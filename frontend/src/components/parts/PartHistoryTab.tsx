@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../api/axiosConfig";
 import { Loader2, AlertCircle, History } from "lucide-react";
-
-const transactionTypeTranslations: Record<string, { label: string; color: string }> = {
-  FAILURE: { label: "Zużycie (Awaria)", color: "bg-red-50 text-red-700 border-red-200" },
-  DELIVERY: { label: "Dostawa", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  MANUAL_DISPATCH: { label: "Pobranie ręczne", color: "bg-blue-50 text-blue-700 border-blue-200" },
-  RETURN: { label: "Zwrot", color: "bg-purple-50 text-purple-700 border-purple-200" },
-  ADJUSTMENT: { label: "Korekta stanu", color: "bg-amber-50 text-amber-700 border-amber-200" },
-};
+import { TRANSACTION_TYPES } from "../../utils/constants";
 
 interface PartHistoryItem {
   id: number;
@@ -36,7 +29,9 @@ export const PartHistoryTab: React.FC<PartHistoryTabProps> = ({ partId }) => {
       setIsLoading(true);
       setError("");
       try {
-        const response = await api.get<PartHistoryItem[]>(`/part-history/part/${partId}`);
+        const response = await api.get<PartHistoryItem[]>(
+          `/part-history/part/${partId}`,
+        );
         setHistory(response.data);
       } catch (err) {
         setError("Nie udało się pobrać historii operacji dla tej części.");
@@ -88,28 +83,42 @@ export const PartHistoryTab: React.FC<PartHistoryTabProps> = ({ partId }) => {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {history.map((item) => {
-              const badge = transactionTypeTranslations[item.transaction_type] || {
+              const badge = TRANSACTION_TYPES[item.transaction_type] || {
                 label: item.transaction_type,
                 color: "bg-gray-50 text-gray-700 border-gray-200",
               };
               const isPositive = item.quantity_change > 0;
 
               return (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr
+                  key={item.id}
+                  className="hover:bg-gray-50/50 transition-colors"
+                >
                   <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
                     {new Date(item.created_at).toLocaleString("pl-PL")}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span className={`px-2.5 py-0.5 rounded-full font-medium border ${badge.color}`}>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full font-medium border ${badge.color}`}
+                    >
                       {badge.label}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center font-bold whitespace-nowrap">
-                    <span className={isPositive ? "text-emerald-600" : "text-red-600"}>
-                      {isPositive ? `+${item.quantity_change}` : item.quantity_change}
+                    <span
+                      className={
+                        isPositive ? "text-emerald-600" : "text-red-600"
+                      }
+                    >
+                      {isPositive
+                        ? `+${item.quantity_change}`
+                        : item.quantity_change}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-700 max-w-xs truncate" title={item.reason}>
+                  <td
+                    className="px-4 py-3 text-gray-700 max-w-xs truncate"
+                    title={item.reason}
+                  >
                     {item.reason}
                   </td>
                 </tr>
