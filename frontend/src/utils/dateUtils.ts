@@ -5,15 +5,22 @@
 
 const ensureUtc = (dateStr: string): string => {
   if (!dateStr) return dateStr;
-  return dateStr.endsWith('Z') || dateStr.includes('+') ? dateStr : `${dateStr}Z`;
+  return dateStr.endsWith("Z") || dateStr.includes("+")
+    ? dateStr
+    : `${dateStr}Z`;
 };
 
-export const calculateDowntime = (startDateStr: string, endDateStr?: string | null): string => {
+export const calculateDowntime = (
+  startDateStr: string,
+  endDateStr?: string | null,
+): string => {
   const start = new Date(ensureUtc(startDateStr)).getTime();
-  const end = endDateStr ? new Date(ensureUtc(endDateStr)).getTime() : new Date().getTime();
-  
+  const end = endDateStr
+    ? new Date(ensureUtc(endDateStr)).getTime()
+    : new Date().getTime();
+
   const diffMs = end - start;
-  
+
   if (diffMs <= 0) return "0m";
 
   const diffMins = Math.floor(diffMs / (1000 * 60));

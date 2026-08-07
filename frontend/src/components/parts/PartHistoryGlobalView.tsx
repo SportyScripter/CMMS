@@ -3,32 +3,7 @@ import { api } from "../../api/axiosConfig";
 import { Loader2, AlertCircle, History, ExternalLink } from "lucide-react";
 import { Part, PartCategory } from "../../types/part";
 import { OperationDetailsModal } from "./modals/OperationDetailsModal";
-
-const transactionTypeTranslations: Record<
-  string,
-  { label: string; color: string }
-> = {
-  FAILURE: {
-    label: "Zużycie (Awaria)",
-    color: "bg-red-50 text-red-700 border-red-200",
-  },
-  DELIVERY: {
-    label: "Dostawa",
-    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  },
-  MANUAL_DISPATCH: {
-    label: "Pobranie ręczne",
-    color: "bg-blue-50 text-blue-700 border-blue-200",
-  },
-  RETURN: {
-    label: "Zwrot",
-    color: "bg-purple-50 text-purple-700 border-purple-200",
-  },
-  ADJUSTMENT: {
-    label: "Korekta stanu",
-    color: "bg-amber-50 text-amber-700 border-amber-200",
-  },
-};
+import { TRANSACTION_TYPES } from "../../utils/constants";
 
 interface GlobalHistoryItem {
   id: number;
@@ -184,9 +159,7 @@ export const PartHistoryGlobalView: React.FC<PartHistoryGlobalViewProps> = ({
             <tbody className="divide-y divide-gray-100">
               {filteredHistory.map((item) => {
                 const part = getPartDetails(item.part_id);
-                const badge = transactionTypeTranslations[
-                  item.transaction_type
-                ] || {
+                const badge = TRANSACTION_TYPES[item.transaction_type] || {
                   label: item.transaction_type,
                   color: "bg-gray-50 text-gray-700 border-gray-200",
                 };
