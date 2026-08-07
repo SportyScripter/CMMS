@@ -13,6 +13,7 @@ from .part_category import PartCategory
 from .part_compatibility import PartCompatibility
 from .role import Role
 from .user import User
+from .part_history import PartHistory
 
 __all__ = [
     "Attachment",
@@ -28,6 +29,7 @@ __all__ = [
     "Part",
     "PartCategory",
     "PartCompatibility",
+    "PartHistory",
     "Role",
     "User",
 ]

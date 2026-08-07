@@ -44,6 +44,7 @@ def create_failure_part(
         return crud_failure_parts.create_failure_part(
             db=db,
             failure_part_in=failure_part_in,
+            user_id=current_user.id,
         )
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
