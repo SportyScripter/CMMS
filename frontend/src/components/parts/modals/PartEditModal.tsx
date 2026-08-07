@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { api } from "../../api/axiosConfig";
-import { Part, PartCategory } from "../../types/part";
-import { useAuth } from "../../context/AuthContext";
+import { api } from "../../../api/axiosConfig";
+import { Part, PartCategory } from "../../../types/part";
+import { useAuth } from "../../../context/AuthContext";
 import { X, Loader2, Wrench, Search, CheckCircle2, Plus, Settings } from "lucide-react";
 import { AddCategoryModal } from "./AddCategoryModal";
 import { ManageCategoriesModal } from "./ManageCategoriesModal";

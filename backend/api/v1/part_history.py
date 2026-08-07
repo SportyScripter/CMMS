@@ -12,9 +12,7 @@ from models.user import User
 from api.dependencies import get_db
 from core.permissions import ALLOW_EDIT_PARTS
 
-router = APIRouter(
-    prefix="/part-history", tags=["Part History / Transakcje magazynowe"]
-)
+router = APIRouter()
 
 
 @router.get("/", response_model=List[PartHistoryResponse])

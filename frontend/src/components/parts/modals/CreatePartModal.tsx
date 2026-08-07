@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { api } from "../../api/axiosConfig";
+import { api } from "../../../api/axiosConfig";
 import {
   PlusCircle,
   Loader2,
@@ -9,7 +9,7 @@ import {
   X,
   AlertCircle,
 } from "lucide-react";
-import { PartCategory } from "../../types/part";
+import { PartCategory } from "../../../types/part";
 import { AddCategoryModal } from "./AddCategoryModal";
 import { ManageCategoriesModal } from "./ManageCategoriesModal";
 import { AssignMachinesModal } from "./AssignMachinesModal";
