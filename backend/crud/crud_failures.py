@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import desc
 
 from models.failure import Failure
 from models.failure_part import FailurePart
@@ -49,6 +50,7 @@ def get_failures(db: Session, skip: int = 0, limit: int = 100) -> list[Failure]:
             joinedload(Failure.used_parts).joinedload(FailurePart.part),
             joinedload(Failure.attachments),
         )
+        .order_by(desc(Failure.updated_at))
         .offset(skip)
         .limit(limit)
         .all()

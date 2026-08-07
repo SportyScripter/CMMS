@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   X,
   Activity,
@@ -18,7 +18,8 @@ import {
   getStatusBadgeStyle,
   translateStatus,
 } from "../../utils/statusUtils";
-import { calculateDowntime } from "../../utils/dateUtils";
+import { calculateDowntime, formatDateTime } from "../../utils/dateUtils";
+
 export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
   isOpen,
   onClose,
@@ -53,6 +54,15 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
       setSelectedFailure(null);
     }
   }, [isOpen, machineId]);
+
+  // Sort failures by updated_at or created_at in descending order
+  const sortedFailures = useMemo(() => {
+    return [...failures].sort((a, b) => {
+      const dateA = new Date(a.updated_at || a.created_at).getTime();
+      const dateB = new Date(b.updated_at || b.created_at).getTime();
+      return dateB - dateA;
+    });
+  }, [failures]);
 
   const handleClose = () => {
     setSelectedFailure(null);
@@ -153,15 +163,13 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
                       {selectedFailure.submitter?.name}{" "}
                       {selectedFailure.submitter?.lastname || "Nie podano"}
                     </p>
-                    {selectedFailure.submitter?.role.name && (
+                    {selectedFailure.submitter?.role?.name && (
                       <p className="text-xs text-gray-400">
                         Stanowisko: {selectedFailure.submitter?.role.name}
                       </p>
                     )}
                     <p className="text-xs text-gray-400">
-                      {new Date(selectedFailure.created_at).toLocaleString(
-                        "pl-PL",
-                      )}
+                      {formatDateTime(selectedFailure.created_at)}
                     </p>
                   </div>
                 </div>
@@ -178,7 +186,7 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
                       {selectedFailure.recipient?.name}{" "}
                       {selectedFailure.recipient?.lastname || "Nie przypisano"}
                     </p>
-                    {selectedFailure.recipient?.role.name && (
+                    {selectedFailure.recipient?.role?.name && (
                       <p className="text-xs text-gray-400">
                         Stanowisko: {selectedFailure.recipient?.role.name}
                       </p>
@@ -186,9 +194,7 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
                     {selectedFailure.end_date && (
                       <p className="text-xs text-gray-400">
                         Zakończono:{" "}
-                        {new Date(selectedFailure.end_date).toLocaleString(
-                          "pl-PL",
-                        )}
+                        {formatDateTime(selectedFailure.end_date)}
                       </p>
                     )}
                   </div>
@@ -206,7 +212,7 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
                 </p>
               </div>
             </div>
-          ) : failures.length === 0 ? (
+          ) : sortedFailures.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
               <Activity className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 font-medium">
@@ -216,7 +222,8 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
           ) : (
             // --- LIST VIEW ---
             <div className="space-y-3">
-              {failures.map((failure) => (
+              {/* Using the sorted array! */}
+              {sortedFailures.map((failure) => (
                 <div
                   key={failure.id}
                   onClick={() => setSelectedFailure(failure)}
@@ -224,7 +231,6 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      {/* Dynamic Badge applied here */}
                       <span
                         className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getStatusBadgeStyle(failure.status)}`}
                       >
@@ -232,9 +238,8 @@ export const MachineFailuresModal: React.FC<MachineFailuresModalProps> = ({
                       </span>
                       <span className="text-xs text-gray-500 flex items-center">
                         <Calendar className="w-3 h-3 mr-1" />
-                        {new Date(failure.created_at).toLocaleDateString(
-                          "pl-PL",
-                        )}
+                        {/* Using formatDateTime for the main list */}
+                        {formatDateTime(failure.created_at)}
                       </span>
                     </div>
                     <p className="text-sm font-medium text-gray-900 line-clamp-2">

@@ -5,6 +5,7 @@ import { Machine } from "../types/machine";
 import { calculateDowntime } from "../utils/dateUtils";
 import { AddFailureModal } from "../components/failures/AddFailureModal";
 import { FailureDetailsModal } from "../components/failures/FailureDetails";
+import { formatDateTime } from "../utils/dateUtils";
 import {
   AlertTriangle,
   Filter,
@@ -139,16 +140,21 @@ export const FailureListPage = () => {
 
     // STEP 2: SORTING
     return filtered.sort((a, b) => {
-      // Priority 1: CRITICAL failures always take precedence at the top of the list
-      const aIsCritical = a.status === "CRITICAL";
-      const bIsCritical = b.status === "CRITICAL";
-      if (aIsCritical && !bIsCritical) return -1;
-      if (!aIsCritical && bIsCritical) return 1;
+      // Priority 1: CRITICAL failures always come first in the 'active' view
+      if (viewMode === "active") {
+        const aIsCritical = a.status === "CRITICAL";
+        const bIsCritical = b.status === "CRITICAL";
+        if (aIsCritical && !bIsCritical) return -1;
+        if (!aIsCritical && bIsCritical) return 1;
+      }
 
-      // Priority 2: Older tickets appear first (meaning they have the longest downtime)
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateA - dateB;
+      // Priority 2: sort by updated_at descending (newest first) for all other cases
+      // Fallback (||): if modal was never updated, use created_at for sorting
+      const dateA = new Date(a.updated_at || a.created_at).getTime();
+      const dateB = new Date(b.updated_at || b.created_at).getTime();
+
+      // dateB - dateA sort descending (newest first)
+      return dateB - dateA;
     });
   }, [
     failures,
@@ -401,7 +407,7 @@ export const FailureListPage = () => {
                     <td className="px-6 py-4">
                       {failure.submitter.name} {failure.submitter.lastname}
                       <span className="block text-xs text-gray-400">
-                        {new Date(failure.created_at).toLocaleString("pl-PL")}
+                        {formatDateTime(failure.created_at)}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -416,7 +422,7 @@ export const FailureListPage = () => {
                       <td className="px-6 py-4">
                         {failure.recipient?.name} {failure.recipient?.lastname}
                         <span className="block text-xs text-gray-400">
-                          {new Date(failure.created_at).toLocaleString("pl-PL")}
+                          {formatDateTime(failure.updated_at)}
                         </span>
                       </td>
                     )}
