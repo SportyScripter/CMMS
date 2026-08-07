@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { X, Search, Plus, Filter, CheckSquare, Square } from "lucide-react";
+import { X, Plus, Filter, CheckSquare, Square } from "lucide-react";
 import { api } from "../../api/axiosConfig";
-import {
-  OrderType,
-  AddChecklistItemsModalProps,
-} from "../../types/order-calendar";
-import { Machine } from "../../types/machine";
+import { AddChecklistItemsModalProps } from "../../types/order-calendar";
 
 export const AddChecklistItemsModal: React.FC<AddChecklistItemsModalProps> = ({
   isOpen,

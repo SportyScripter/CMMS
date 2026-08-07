@@ -2,18 +2,7 @@ import React, { useEffect, useState } from "react";
 import { api } from "../../api/axiosConfig";
 import { Loader2, AlertCircle, History } from "lucide-react";
 import { TRANSACTION_TYPES } from "../../utils/constants";
-
-interface PartHistoryItem {
-  id: number;
-  part_id: number;
-  user_id: number;
-  machine_id: number | null;
-  failure_id: number | null;
-  quantity_change: number;
-  transaction_type: string;
-  reason: string;
-  created_at: string;
-}
+import {PartHistoryItem} from "../../types/part";
 
 interface PartHistoryTabProps {
   partId: number;

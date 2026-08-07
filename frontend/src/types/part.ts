@@ -17,3 +17,15 @@ export interface Part {
     docs?: string | null;
     qr_code: string;
 }
+
+export interface PartHistoryItem {
+  id: number;
+  part_id: number;
+  user_id: number;
+  machine_id: number | null;
+  failure_id: number | null;
+  quantity_change: number;
+  transaction_type: string;
+  reason: string;
+  created_at: string;
+}

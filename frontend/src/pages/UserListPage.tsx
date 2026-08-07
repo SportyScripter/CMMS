@@ -1,15 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { api } from '../api/axiosConfig';
-import { User } from '../types/auth';
-import { ArrowLeft, Users, Loader2, AlertCircle, CheckCircle2, XCircle, Filter, X, Eye } from 'lucide-react';
-import { UserDetailsModal } from '../components/users/UserDetailsModal';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { api } from "../api/axiosConfig";
+import { User } from "../types/auth";
+import {
+  ArrowLeft,
+  Users,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Filter,
+  X,
+  Eye,
+} from "lucide-react";
+import { UserDetailsModal } from "../components/users/UserDetailsModal";
 
 export const UserListPage = () => {
   // --- DATA FETCHING STATES ---
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // --- FILTER STATES ---
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -24,10 +34,12 @@ export const UserListPage = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get<User[]>('/users');
+      const response = await api.get<User[]>("/users");
       setUsers(response.data);
     } catch (err: any) {
-      setError('Nie udało się pobrać listy użytkowników. Sprawdź połączenie z serwerem.');
+      setError(
+        "Nie udało się pobrać listy użytkowników. Sprawdź połączenie z serwerem.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -39,10 +51,16 @@ export const UserListPage = () => {
 
   // --- FILTERING LOGIC ---
   const filteredUsers = users.filter((user) => {
-    const matchSap = user.sap_number.toLowerCase().includes(filterSap.toLowerCase());
-    const matchName = user.name.toLowerCase().includes(filterName.toLowerCase());
-    const matchLastName = user.lastname.toLowerCase().includes(filterLastName.toLowerCase());
-    
+    const matchSap = user.sap_number
+      .toLowerCase()
+      .includes(filterSap.toLowerCase());
+    const matchName = user.name
+      .toLowerCase()
+      .includes(filterName.toLowerCase());
+    const matchLastName = user.lastname
+      .toLowerCase()
+      .includes(filterLastName.toLowerCase());
+
     return matchSap && matchName && matchLastName;
   });
 
@@ -100,16 +118,25 @@ export const UserListPage = () => {
           </thead>
           <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
             {filteredUsers.map((user, index) => (
-              <tr key={user.id} className="hover:bg-blue-50/50 transition-colors">
-                <td className="px-6 py-4 font-medium text-gray-500">#{index + 1}</td>
-                <td className="px-6 py-4 font-medium text-gray-500">{user.id}</td>
-                <td className="px-6 py-4 font-mono text-blue-600 font-medium">{user.sap_number}</td>
+              <tr
+                key={user.id}
+                className="hover:bg-blue-50/50 transition-colors"
+              >
+                <td className="px-6 py-4 font-medium text-gray-500">
+                  #{index + 1}
+                </td>
+                <td className="px-6 py-4 font-medium text-gray-500">
+                  {user.id}
+                </td>
+                <td className="px-6 py-4 font-mono text-blue-600 font-medium">
+                  {user.sap_number}
+                </td>
                 <td className="px-6 py-4 font-semibold text-gray-900">
                   {user.name} {user.lastname}
                 </td>
                 <td className="px-6 py-4">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                    {user.role?.name || 'Brak roli'}
+                    {user.role?.name || "Brak roli"}
                   </span>
                 </td>
                 <td className="px-6 py-4">
@@ -124,7 +151,7 @@ export const UserListPage = () => {
                   )}
                 </td>
                 <td className="px-6 py-4 text-center">
-                  <button 
+                  <button
                     onClick={() => setSelectedUser(user)}
                     className="px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 rounded-lg font-medium inline-flex items-center transition-colors"
                   >
@@ -141,12 +168,11 @@ export const UserListPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto">
-      
       {/* --- HEADER SECTION --- */}
       <div className="flex items-center mb-10 gap-10">
         <div className="flex items-center">
-          <Link 
-            to="/users" 
+          <Link
+            to="/users"
             className="mr-4 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-20 h-20 text-blue-400 hover:text-blue-600" />
@@ -157,7 +183,8 @@ export const UserListPage = () => {
               Lista użytkowników
             </h1>
             <p className="mt-1 text-sm text-gray-600">
-              Przeglądaj wszystkich pracowników zarejestrowanych w systemie CMMS.
+              Przeglądaj wszystkich pracowników zarejestrowanych w systemie
+              CMMS.
             </p>
           </div>
         </div>
@@ -167,11 +194,11 @@ export const UserListPage = () => {
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className={`flex items-center px-6 py-2 rounded-lg font-medium transition-colors ml-auto ${
               isFilterOpen
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                ? "bg-blue-100 text-blue-700"
+                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
             }`}
           >
-            <Filter className="w-4 h-4 mr-2"/>
+            <Filter className="w-4 h-4 mr-2" />
             Filtruj Listę
           </button>
         )}
@@ -181,15 +208,23 @@ export const UserListPage = () => {
       {isFilterOpen && (
         <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4 animate-in slide-in-from-top-2">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-sm font-semibold text-gray-700"> Kryteria wyszukiwania:</h3>
-            <button onClick={clearFilters} className="text-sm text-gray-500 hover:text-red-600 flex items-center">
-              <X className="w-4 h-4 mr-1"/> Wyczyść filtry
+            <h3 className="text-sm font-semibold text-gray-700">
+              {" "}
+              Kryteria wyszukiwania:
+            </h3>
+            <button
+              onClick={clearFilters}
+              className="text-sm text-gray-500 hover:text-red-600 flex items-center"
+            >
+              <X className="w-4 h-4 mr-1" /> Wyczyść filtry
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Numer SAP</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Numer SAP
+              </label>
               <input
                 type="text"
                 value={filterSap}
@@ -199,7 +234,9 @@ export const UserListPage = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Imię</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Imię
+              </label>
               <input
                 type="text"
                 value={filterName}
@@ -209,7 +246,9 @@ export const UserListPage = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Nazwisko</label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+                Nazwisko
+              </label>
               <input
                 type="text"
                 value={filterLastName}
@@ -228,13 +267,12 @@ export const UserListPage = () => {
       </div>
 
       {/* --- USER DETAILS MODAL --- */}
-      <UserDetailsModal 
-        user={selectedUser} 
-        isOpen={selectedUser !== null} 
+      <UserDetailsModal
+        user={selectedUser}
+        isOpen={selectedUser !== null}
         onClose={() => setSelectedUser(null)}
         onUpdated={fetchUsers}
       />
-      
     </div>
   );
 };

@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { Wrench, Search, X } from "lucide-react";
-
-interface Machine {
-  id: number;
-  name: string;
-  location?: string;
-}
+import {Machine} from "../../../types/machine";
 
 interface AssignMachinesModalProps {
   isOpen: boolean;

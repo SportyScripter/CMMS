@@ -26,7 +26,7 @@ export const PartDetailsModal: React.FC<PartDetailsModalProps> = ({
   if (!isOpen || !part) return null;
 
   return (
-    <div className="fixed inset-0 z-[50] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-10 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden relative flex flex-col max-h-[90vh]">
         
         {/* --- HEADER --- */}

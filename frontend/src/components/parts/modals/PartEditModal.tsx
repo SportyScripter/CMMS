@@ -5,12 +5,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { X, Loader2, Wrench, Search, CheckCircle2, Plus, Settings } from "lucide-react";
 import { AddCategoryModal } from "./AddCategoryModal";
 import { ManageCategoriesModal } from "./ManageCategoriesModal";
-
-interface Machine {
-  id: number;
-  name: string;
-  location?: string;
-}
+import {Machine} from "../../../types/machine";
 
 interface PartEditModalProps {
   part: Part;
@@ -140,7 +135,7 @@ export const PartEditModal: React.FC<PartEditModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[20] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
         <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden relative flex flex-col max-h-[90vh]">
           
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
