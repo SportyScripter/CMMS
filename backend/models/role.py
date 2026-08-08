@@ -32,3 +32,8 @@ class Role(Base):
 
     # Relationships
     users = relationship("User", back_populates="role")
+    assigned_orders = relationship(
+        "OrderCalendar",
+        foreign_keys="[OrderCalendar.assigned_role_id]",
+        back_populates="assigned_role",
+    )

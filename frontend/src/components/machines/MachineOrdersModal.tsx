@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   CheckSquare,
   User,
+  Users,
 } from "lucide-react";
 import { api } from "../../api/axiosConfig";
 import { Order, MachineOrdersModalProps } from "../../types/order-calendar";
@@ -98,7 +99,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/80">
           <div className="flex items-center">
@@ -175,7 +176,23 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                 </p>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {/* Column 1: Department */}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase">
+                      Wydział
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 mt-0.5">
+                      {selectedOrder.assigned_role?.name || "Ogólne (Brak)"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Column 2: Performed */}
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
                     <User className="w-5 h-5" />
@@ -196,6 +213,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                   </div>
                 </div>
 
+                {/* Column 3: Principal */}
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
                     <User className="w-5 h-5" />
@@ -216,6 +234,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                   </div>
                 </div>
               </div>
+
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-start gap-3">
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase">
@@ -270,7 +289,6 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                           key={idx}
                           className={`flex items-start gap-4 p-3 rounded-lg border shadow-sm transition-colors ${rowStyle}`}
                         >
-                          {/* LEFT SIDE : Status Badge */}
                           <div className="shrink-0 mt-0.5">
                             <span
                               className={`inline-flex items-center justify-center px-2.5 py-1 text-xs font-bold rounded-md border uppercase ${badgeStyle}`}
@@ -279,7 +297,6 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                             </span>
                           </div>
 
-                          {/* RIGHT SIDE: Description and Comments */}
                           <div className="flex flex-col">
                             <span className="text-sm font-semibold text-gray-900">
                               {item.task_description}
@@ -321,14 +338,20 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                   className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-indigo-400 group"
                 >
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span
                         className={`px-3 py-1 font-bold text-sm rounded-lg border uppercase ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
                       >
                         {translateCalendarStatus(order.status)}
                       </span>
+
+                      <span className="flex items-center text-xs font-bold px-1.5 py-0.5 rounded bg-white border border-gray-200 text-indigo-600 shadow-sm">
+                        <Users className="w-3.5 h-3.5 mr-1" />
+                        {order.assigned_role?.name || "Brak (Ogólne)"}
+                      </span>
+
                       {order.scheduled_date && (
-                        <span className="text-xs text-gray-500 flex items-center">
+                        <span className="text-xs text-gray-500 flex items-center ml-1">
                           <Clock className="w-3 h-3 mr-1" />
                           Termin: {formatDateTime(order.scheduled_date)}
                         </span>

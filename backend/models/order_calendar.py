@@ -84,6 +84,7 @@ class OrderCalendar(Base, TimestampMixin):
         foreign_keys=[performed_id],
         back_populates="performed_calendar_entries",
     )
+    assigned_role_id = Column(Integer, ForeignKey("roles.id"), nullable=True)
 
     order_machine = relationship("Machine", back_populates="calendar_entries")
     checklist_items = relationship(
@@ -91,3 +92,6 @@ class OrderCalendar(Base, TimestampMixin):
         back_populates="order_calendar",
     )
     attachments = relationship("Attachment", back_populates="order_calendar")
+    assigned_role = relationship(
+        "Role", foreign_keys=[assigned_role_id], back_populates="assigned_orders"
+    )

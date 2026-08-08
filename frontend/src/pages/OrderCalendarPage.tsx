@@ -9,12 +9,13 @@ import {
   Plus,
   AlertCircle,
   Eye,
+  Users,
 } from "lucide-react";
 import { Order } from "../types/order-calendar";
 import { AddOrderModal } from "../components/orders-calendar/AddOrderModal";
 import { OrderDetailsChecklistModal } from "../components/orders-calendar/OrderDetailsChecklist";
 import { useAuth } from "../context/AuthContext";
-import { User } from "../types/auth";
+import { User, Role } from "../types/auth";
 import {
   translateCalendarStatus,
   getCalendarBadgeStyle,
@@ -38,6 +39,7 @@ export const OrderCalendarPage = () => {
   const [orderTypes, setOrderTypes] = useState<{ id: number; name: string }[]>(
     [],
   );
+  const [roles, setRoles] = useState<Role[]>([]); 
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -48,6 +50,7 @@ export const OrderCalendarPage = () => {
   // --- FILTERS ---
   const [filterMachine, setFilterMachine] = useState("ALL");
   const [filterType, setFilterType] = useState("ALL");
+  const [filterRole, setFilterRole] = useState("ALL"); 
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -58,14 +61,16 @@ export const OrderCalendarPage = () => {
     setIsLoading(true);
     setError("");
     try {
-      const [ordersRes, machinesRes, typesRes] = await Promise.all([
+      const [ordersRes, machinesRes, typesRes, rolesRes] = await Promise.all([
         api.get<Order[]>("/order-calendar"),
         api.get("/machines"),
         api.get("/order-types"),
+        api.get<Role[]>("/roles"), 
       ]);
       setOrders(ordersRes.data || []);
       setMachines(machinesRes.data || []);
       setOrderTypes(typesRes.data || []);
+      setRoles(rolesRes.data || []);
     } catch (err: any) {
       console.error("Błąd pobierania danych kalendarza:", err);
       setError(
@@ -135,6 +140,11 @@ export const OrderCalendarPage = () => {
         (o) =>
           filterType === "ALL" || o.order_type?.id?.toString() === filterType,
       )
+      .filter(
+        (o) =>
+          filterRole === "ALL" ||
+          o.assigned_role?.id?.toString() === filterRole, 
+      )
       .filter((o) => {
         if (viewMode !== "list") return true;
 
@@ -182,7 +192,7 @@ export const OrderCalendarPage = () => {
           new Date(b.scheduled_date).getTime()
         );
       });
-  }, [orders, filterMachine, filterType, viewMode, dateFrom, dateTo]);
+  }, [orders, filterMachine, filterType, filterRole, viewMode, dateFrom, dateTo]);
 
   return (
     <div className="max-w-auto mx-auto space-y-1 p-2">
@@ -252,6 +262,25 @@ export const OrderCalendarPage = () => {
           </div>
 
           <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            className="bg-white border border-gray-200 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+          >
+            <option value="ALL">Wszystkie wydziały</option>
+            {roles
+              .filter((role) =>
+                ["elektryk", "mechanik", "automatyk"].includes(
+                  role.name.toLowerCase()
+                )
+              )
+              .map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.name}
+                </option>
+              ))}
+          </select>
+
+          <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
             className="bg-white border border-gray-200 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"
@@ -263,6 +292,7 @@ export const OrderCalendarPage = () => {
               </option>
             ))}
           </select>
+
           <select
             value={filterMachine}
             onChange={(e) => setFilterMachine(e.target.value)}
@@ -372,9 +402,16 @@ export const OrderCalendarPage = () => {
                       onClick={() => setSelectedOrderId(order.id)}
                       className={`p-3 rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95 flex flex-col ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
                     >
-                      <span className="text-xs font-bold uppercase tracking-wider mb-1 opacity-80">
-                        {order.order_type?.name || "Brak typu"}
-                      </span>
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-xs font-bold uppercase tracking-wider opacity-80">
+                          {order.order_type?.name || "Brak typu"}
+                        </span>
+                        <div className="flex items-center text-xs font-bold px-1.5 py-0.5 rounded bg-white/60 text-indigo-700 shadow-sm border border-indigo-100/50">
+                          <Users className="w-3 h-3 mr-1" />
+                          {order.assigned_role?.name || "Ogólne"}
+                        </div>
+                      </div>
+                      
                       <span className="text-sm font-semibold mb-2 line-clamp-2">
                         {order.description}
                       </span>
@@ -415,6 +452,9 @@ export const OrderCalendarPage = () => {
                       Status
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Wydział
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Maszyna
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -443,6 +483,12 @@ export const OrderCalendarPage = () => {
                         >
                           {translateCalendarStatus(order.status)}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                        <div className="flex items-center">
+                          <Users className="w-4 h-4 mr-1.5 opacity-70" />
+                          {order.assigned_role?.name || "Brak (Ogólne)"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                         {order.order_machine?.name || "Nie przypisano"}

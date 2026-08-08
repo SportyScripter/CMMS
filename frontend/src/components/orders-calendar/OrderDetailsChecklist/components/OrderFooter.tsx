@@ -25,17 +25,22 @@ export const OrderFooter: React.FC<OrderFooterProps> = ({
   return (
     <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
       {!isEditMode ? (
-        // Footer for Execution Mode (Technicians)
         <>
           <div className="text-sm text-gray-500 font-medium">
-            Przypisano:{" "}
             {order.performed ? (
-              <span className="text-blue-600 font-bold">
-                {order.performed.name} {order.performed.lastname} (
-                {order.performed.role?.name})
-              </span>
+              <>
+                Realizuje:{" "}
+                <span className="text-blue-600 font-bold">
+                  {order.performed.name} {order.performed.lastname}
+                </span>
+              </>
             ) : (
-              "Brak przypisanego technika"
+              <>
+                Przypisany wydział:{" "}
+                <span className="text-indigo-600 font-bold">
+                  {order.assigned_role?.name || "Brak (ogólnodostępne)"}
+                </span>
+              </>
             )}
           </div>
 
@@ -82,7 +87,6 @@ export const OrderFooter: React.FC<OrderFooterProps> = ({
           </div>
         </>
       ) : (
-        // Footer for Edit Mode (Managers)
         <div className="flex justify-end w-full gap-3">
           <button
             type="button"
