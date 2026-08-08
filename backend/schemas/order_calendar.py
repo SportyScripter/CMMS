@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from schemas.role import RoleResponse
 from pydantic import BaseModel, Field
 
 from schemas.attachment import AttachmentResponse
@@ -24,6 +25,10 @@ class OrderCalendarBase(BaseModel):
     performed_id: int | None = Field(
         None,
         description="Technician assigned to execute the task.",
+    )
+    assigned_role_id: int | None = Field(
+        None,
+        description="Role assigned to the order for access control and task delegation.",
     )
     machine_id: int | None = Field(
         None,
@@ -65,6 +70,9 @@ class OrderCalendarUpdate(BaseModel):
         description="Updated user who requested the order.",
     )
     performed_id: int | None = Field(None, description="Updated technician assigned.")
+    assigned_role_id: int | None = Field(
+        None, description="Updated role assigned to the order."
+    )
     machine_id: int | None = Field(None, description="Updated target machine.")
     comments: str | None = Field(None, description="Updated additional notes.")
     scheduled_date: datetime | None = Field(
@@ -95,10 +103,13 @@ class OrderCalendarResponse(OrderCalendarBase):
         ...,
         description="Timestamp when the order was last updated.",
     )
+    assigned_role: RoleResponse | None = None
+
     order_type: OrderTypeResponse
     principal: UserResponse
     performed: UserResponse | None = None
     order_machine: MachineResponse | None = None
     attachments: list[AttachmentResponse] = []
     checklist_items: list[OrderChecklistItemResponse] = []
+
     model_config = {"from_attributes": True}

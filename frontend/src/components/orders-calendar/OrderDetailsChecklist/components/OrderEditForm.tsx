@@ -2,7 +2,7 @@ import React from "react";
 import { Calendar, ListChecks, Trash2 } from "lucide-react";
 import { Machine } from "../../../../types/machine";
 import { OrderType } from "../../../../types/order-calendar";
-import { User } from "../../../../types/auth";
+import { Role } from "../../../../types/auth";
 import { EditTask } from "../useOrderDetails";
 
 interface OrderEditFormProps {
@@ -13,13 +13,13 @@ interface OrderEditFormProps {
   setEditScheduledDate: (val: string) => void;
   editMachineId: string;
   setEditMachineId: (val: string) => void;
-  editPerformedId: string;
-  setEditPerformedId: (val: string) => void;
+  editAssignedRoleId: string; 
+  setEditAssignedRoleId: (val: string) => void; 
   editDescription: string;
   setEditDescription: (val: string) => void;
   orderTypes: OrderType[];
   machines: Machine[];
-  usersList: User[];
+  rolesList: Role[]; 
   editChecklistTasks: EditTask[];
   handleRemoveTaskInEdit: (index: number) => void;
   setIsAddChecklistModalOpen: (val: boolean) => void;
@@ -33,13 +33,13 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({
   setEditScheduledDate,
   editMachineId,
   setEditMachineId,
-  editPerformedId,
-  setEditPerformedId,
+  editAssignedRoleId,
+  setEditAssignedRoleId,
   editDescription,
   setEditDescription,
   orderTypes,
   machines,
-  usersList,
+  rolesList,
   editChecklistTasks,
   handleRemoveTaskInEdit,
   setIsAddChecklistModalOpen,
@@ -50,7 +50,6 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({
       onSubmit={saveEditedDetails}
       className="grid grid-cols-1 lg:grid-cols-5 gap-6"
     >
-      {/* Left column (60%): Basic order details */}
       <div className="lg:col-span-3 space-y-4">
         <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
           <h4 className="text-base font-bold text-gray-900 mb-2 flex items-center border-b border-gray-100 pb-2">
@@ -96,16 +95,20 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Przypisany technik</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Wydział / Rola</label>
               <select
-                value={editPerformedId}
-                onChange={(e) => setEditPerformedId(e.target.value)}
+                value={editAssignedRoleId}
+                onChange={(e) => setEditAssignedRoleId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm"
               >
-                <option value="">-- Przypisz później --</option>
-                {usersList.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} {u.lastname} {u.role ? `(${u.role.name})` : ""}
+                <option value="">-- Dowolny wydział --</option>
+                {rolesList
+                  .filter(role => 
+                    ["elektryk", "mechanik", "mechanik2", "automatyk"].includes(role.name.toLowerCase())
+                  )
+                  .map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
                   </option>
                 ))}
               </select>
@@ -125,7 +128,6 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({
         </div>
       </div>
 
-      {/* Right column (40%): Edit Checklist */}
       <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-col min-h-[300px]">
         <div className="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
           <h4 className="font-semibold text-gray-900 flex items-center">

@@ -2,14 +2,11 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import { OrderDetailsChecklistModalProps } from "../../../types/order-calendar";
 
-// Hook and Subcomponents
 import { useOrderDetails } from "./useOrderDetails";
 import { OrderHeader } from "./components/OrderHeader";
 import { OrderEditForm } from "./components/OrderEditForm";
 import { OrderExecutionView } from "./components/OrderExecutionView";
 import { OrderFooter } from "./components/OrderFooter";
-
-// Shared modal (assuming it's in the parent folder)
 import { AddChecklistItemsModal } from "../AddChecklistItemsModal";
 
 export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProps> = ({
@@ -20,7 +17,6 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
 }) => {
   const details = useOrderDetails(orderId, isOpen, onClose, onUpdated);
 
-  // Early return if modal is closed or data is missing
   if (!isOpen || (!details.isLoading && !details.order)) return null;
 
   const { order } = details;
@@ -30,7 +26,6 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl flex flex-col max-h-[95vh] animate-in fade-in duration-200">
           
-          {/* Header Section */}
           {order && (
             <OrderHeader
               order={order}
@@ -41,7 +36,6 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
             />
           )}
 
-          {/* Main Body Section */}
           <div className="p-6 overflow-y-auto flex-1 bg-gray-50/50">
             {details.isLoading ? (
               <div className="flex flex-col items-center justify-center h-40">
@@ -57,13 +51,13 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
                 setEditScheduledDate={details.setEditScheduledDate}
                 editMachineId={details.editMachineId}
                 setEditMachineId={details.setEditMachineId}
-                editPerformedId={details.editPerformedId}
-                setEditPerformedId={details.setEditPerformedId}
+                editAssignedRoleId={details.editAssignedRoleId} 
+                setEditAssignedRoleId={details.setEditAssignedRoleId}
                 editDescription={details.editDescription}
                 setEditDescription={details.setEditDescription}
                 orderTypes={details.orderTypes}
                 machines={details.machines}
-                usersList={details.usersList}
+                rolesList={details.rolesList} 
                 editChecklistTasks={details.editChecklistTasks}
                 handleRemoveTaskInEdit={details.handleRemoveTaskInEdit}
                 setIsAddChecklistModalOpen={details.setIsAddChecklistModalOpen}
@@ -80,7 +74,6 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
             )}
           </div>
 
-          {/* Footer Actions */}
           {order && (
             <OrderFooter
               isEditMode={details.isEditMode}
@@ -96,7 +89,6 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
         </div>
       </div>
 
-      {/* External Modal for Adding Tasks */}
       <AddChecklistItemsModal
         isOpen={details.isAddChecklistModalOpen}
         onClose={() => details.setIsAddChecklistModalOpen(false)}

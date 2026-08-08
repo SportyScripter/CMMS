@@ -25,8 +25,9 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
         <div className="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200 flex items-center shadow-sm">
           <ShieldAlert className="w-6 h-6 mr-3 shrink-0 text-red-600" />
           <p className="text-sm">
-            <strong>Brak uprawnień do realizacji.</strong> Zlecenie jest przypisane do innej roli (
-            {order.performed?.role?.name || "innej"}).
+            <strong>Brak uprawnień do realizacji.</strong> Zlecenie jest przypisane do wydziału: 
+            <span className="font-bold ml-1">{order.assigned_role?.name || "innego"}</span>, 
+            lub jest już realizowane przez inną osobę.
           </p>
         </div>
       )}
@@ -98,7 +99,6 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
                     </span>
                   </div>
 
-                  {/* Execution Action Buttons */}
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       disabled={!isExecutionAllowed}
@@ -137,7 +137,6 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
                   </div>
                 </div>
 
-                {/* Item Specific Comment */}
                 <div className="mt-3 pl-6">
                   <div className="relative">
                     <MessageSquare className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />

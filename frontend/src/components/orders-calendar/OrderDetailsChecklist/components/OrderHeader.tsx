@@ -43,6 +43,14 @@ export const OrderHeader: React.FC<OrderHeaderProps> = ({
           <span className="font-semibold text-gray-700">
             {order.order_type?.name}
           </span>
+          {order.assigned_role && (
+            <>
+              {" "}| Wydział:{" "}
+              <span className="font-semibold text-indigo-700">
+                {order.assigned_role.name}
+              </span>
+            </>
+          )}
         </p>
         <p className="text-sm text-gray-500 mt-1">
           Zlecił:{" "}
