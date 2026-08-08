@@ -8,6 +8,7 @@ import {
   Filter,
   Plus,
   AlertCircle,
+  Eye,
 } from "lucide-react";
 import { Order } from "../types/order-calendar";
 import { AddOrderModal } from "../components/orders-calendar/AddOrderModal";
@@ -18,13 +19,12 @@ import {
   translateCalendarStatus,
   getCalendarBadgeStyle,
 } from "../utils/statusUtils";
+import { formatDateTime } from "../utils/dateUtils";
 
 export const OrderCalendarPage = () => {
-  // Get current user
   const { user } = useAuth();
   const currentUser = user as User;
 
-  // Check permissions (case-insensitive)
   const userRole = currentUser?.role?.name?.toLowerCase() || "";
   const canAddOrder = [
     "admin",
@@ -45,8 +45,11 @@ export const OrderCalendarPage = () => {
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  // --- FILTERS ---
   const [filterMachine, setFilterMachine] = useState("ALL");
   const [filterType, setFilterType] = useState("ALL");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
 
   const [isAddOrderModalOpen, setIsAddOrderModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
@@ -114,6 +117,14 @@ export const OrderCalendarPage = () => {
   };
 
   const filteredOrders = useMemo(() => {
+    const getStatusWeight = (status: string) => {
+      const s = status.toLowerCase();
+      if (s === "in_progress") return 1;
+      if (s === "un_completed") return 2;
+      if (s === "completed") return 4;
+      return 3;
+    };
+
     return orders
       .filter(
         (o) =>
@@ -124,12 +135,54 @@ export const OrderCalendarPage = () => {
         (o) =>
           filterType === "ALL" || o.order_type?.id?.toString() === filterType,
       )
-      .sort(
-        (a, b) =>
+      .filter((o) => {
+        if (viewMode !== "list") return true;
+
+        const isCompleted = o.status.toLowerCase() === "completed";
+        const dateStr =
+          isCompleted && (o as any).updated_at
+            ? (o as any).updated_at
+            : o.scheduled_date;
+        const refTime = new Date(dateStr).getTime();
+
+        if (dateFrom) {
+          const from = new Date(dateFrom).getTime();
+          if (refTime < from) return false;
+        }
+        if (dateTo) {
+          const to = new Date(dateTo);
+          to.setHours(23, 59, 59, 999);
+          if (refTime > to.getTime()) return false;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        const weightA = getStatusWeight(a.status);
+        const weightB = getStatusWeight(b.status);
+
+        if (weightA !== weightB) {
+          return weightA - weightB;
+        }
+
+        const isCompletedA = a.status.toLowerCase() === "completed";
+        const isCompletedB = b.status.toLowerCase() === "completed";
+
+        if (isCompletedA && isCompletedB) {
+          const dateA = (a as any).updated_at
+            ? new Date((a as any).updated_at).getTime()
+            : new Date(a.scheduled_date).getTime();
+          const dateB = (b as any).updated_at
+            ? new Date((b as any).updated_at).getTime()
+            : new Date(b.scheduled_date).getTime();
+          return dateB - dateA;
+        }
+
+        return (
           new Date(a.scheduled_date).getTime() -
-          new Date(b.scheduled_date).getTime(),
-      );
-  }, [orders, filterMachine, filterType]);
+          new Date(b.scheduled_date).getTime()
+        );
+      });
+  }, [orders, filterMachine, filterType, viewMode, dateFrom, dateTo]);
 
   return (
     <div className="max-w-auto mx-auto space-y-1 p-2">
@@ -163,33 +216,41 @@ export const OrderCalendarPage = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 gap-4">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={prevWeek}
-            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-700" />
-          </button>
-          <div className="text-lg font-bold text-gray-900 w-48 text-center capitalize">
-            {startOfWeek.toLocaleDateString("pl-PL", {
-              month: "long",
-              year: "numeric",
-            })}
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 gap-4">
+        {/* Calendar navigation */}
+        {viewMode === "calendar" ? (
+          <div className="flex items-center gap-4">
+            <button
+              onClick={prevWeek}
+              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
+            </button>
+            <div className="text-lg font-bold text-gray-900 w-48 text-center capitalize">
+              {startOfWeek.toLocaleDateString("pl-PL", {
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
+            <button
+              onClick={nextWeek}
+              className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-700" />
+            </button>
           </div>
-          <button
-            onClick={nextWeek}
-            className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <ChevronRight className="w-5 h-5 text-gray-700" />
-          </button>
-        </div>
+        ) : (
+          <div className="text-lg font-bold text-gray-900">
+            Wszystkie zlecenia
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center text-gray-500 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
             <Filter className="w-4 h-4 mr-2" />
             <span className="text-sm font-medium">Filtry:</span>
           </div>
+
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -214,9 +275,37 @@ export const OrderCalendarPage = () => {
               </option>
             ))}
           </select>
+
+          {/* Date filters only for list view */}
+          {viewMode === "list" && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center border border-gray-200 rounded-lg px-2 bg-white">
+                <span className="text-xs text-gray-500 font-medium ml-1">
+                  Od:
+                </span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="text-sm border-none focus:ring-0 py-1.5 px-2 outline-none bg-transparent"
+                />
+              </div>
+              <div className="flex items-center border border-gray-200 rounded-lg px-2 bg-white">
+                <span className="text-xs text-gray-500 font-medium ml-1">
+                  Do:
+                </span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="text-sm border-none focus:ring-0 py-1.5 px-2 outline-none bg-transparent"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className="flex bg-gray-100 p-1 rounded-lg shrink-0">
           <button
             onClick={() => setViewMode("calendar")}
             className={`px-4 py-1.5 rounded-md text-sm font-medium flex items-center transition-colors ${viewMode === "calendar" ? "bg-white shadow-sm text-blue-600" : "text-gray-600 hover:text-gray-900"}`}
@@ -238,14 +327,23 @@ export const OrderCalendarPage = () => {
             {weekDays.map((day, i) => (
               <div
                 key={i}
-                className={`p-4 border-b border-gray-100 text-center ${isToday(day) ? "bg-blue-50/50" : "bg-gray-50"}`}
+                className={`p-4 text-center transition-colors relative ${
+                  isToday(day)
+                    ? "bg-blue-50/70 border-b-2 border-blue-500 shadow-sm"
+                    : "bg-gray-50 border-b border-gray-100"
+                }`}
               >
+                {isToday(day) && (
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
+                )}
                 <div
-                  className={`text-2xl font-bold ${isToday(day) ? "text-blue-600" : "text-gray-900"}`}
+                  className={`text-2xl font-bold ${isToday(day) ? "text-blue-700" : "text-gray-900"}`}
                 >
                   {day.getDate()}
                 </div>
-                <div className="text-xs text-gray-500 capitalize">
+                <div
+                  className={`text-xs capitalize ${isToday(day) ? "text-blue-600 font-semibold" : "text-gray-500"}`}
+                >
                   {day.toLocaleDateString("pl-PL", { weekday: "long" })}
                 </div>
               </div>
@@ -264,7 +362,9 @@ export const OrderCalendarPage = () => {
               return (
                 <div
                   key={i}
-                  className={`min-h-[600px] p-2 space-y-2 ${isToday(day) ? "bg-blue-50/10" : ""}`}
+                  className={`min-h-[600px] p-2 space-y-2 ${
+                    isToday(day) ? "bg-blue-50/40" : ""
+                  }`}
                 >
                   {dayOrders.map((order) => (
                     <div
@@ -279,18 +379,15 @@ export const OrderCalendarPage = () => {
                         {order.description}
                       </span>
                       <span
-                        className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
+                        className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
                       >
                         {translateCalendarStatus(order.status)}
                       </span>
-                      <div className="mt-auto text-xs opacity-70 font-medium">
+                      <div className="mt-auto pt-2 text-xs opacity-70 font-medium">
                         {order.order_machine?.name || "Brak maszyny"}
                       </div>
-                      <div className="text-xs opacity-70 mt-1 font-mono">
-                        {new Date(order.scheduled_date).toLocaleTimeString(
-                          "pl-PL",
-                          { hour: "2-digit", minute: "2-digit" },
-                        )}
+                      <div className="text-xs opacity-90 font-bold mt-1">
+                        {formatDateTime(order.scheduled_date)}
                       </div>
                     </div>
                   ))}
@@ -300,8 +397,77 @@ export const OrderCalendarPage = () => {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <div className="text-gray-500 text-center py-12">Widok listy...</div>
+        /* List view */
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          {filteredOrders.length === 0 ? (
+            <div className="text-gray-500 text-center py-12">
+              Brak zleceń spełniających kryteria wyszukiwania.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Termin
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Maszyna
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Typ Zlecenia
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                      Opis zadania
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Akcje
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredOrders.map((order) => (
+                    <tr
+                      key={order.id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {formatDateTime(order.scheduled_date)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
+                        >
+                          {translateCalendarStatus(order.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                        {order.order_machine?.name || "Nie przypisano"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {order.order_type?.name || "Brak"}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell max-w-xs truncate">
+                        {order.description}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => setSelectedOrderId(order.id)}
+                          className="inline-flex items-center text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                        >
+                          <Eye className="w-4 h-4 mr-1.5" />
+                          Podgląd
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

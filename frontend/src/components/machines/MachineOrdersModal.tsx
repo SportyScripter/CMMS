@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   X,
   CalendarDays,
@@ -10,11 +10,12 @@ import {
   User,
 } from "lucide-react";
 import { api } from "../../api/axiosConfig";
-import { Order, MachineOrdersModalProps } from "../../types/order-calendar"; // Dostosuj typy
+import { Order, MachineOrdersModalProps } from "../../types/order-calendar";
 import {
   translateCalendarStatus,
   getCalendarBadgeStyle,
 } from "../../utils/statusUtils";
+import { formatDateTime } from "../../utils/dateUtils";
 
 export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
   isOpen,
@@ -26,7 +27,6 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // New state for drill-down view
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
@@ -51,6 +51,43 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
       setSelectedOrder(null);
     }
   }, [isOpen, machineId]);
+
+  const sortedOrders = useMemo(() => {
+    const getStatusWeight = (status: string) => {
+      const s = status.toLowerCase();
+      if (s === "in_progress") return 1;
+      if (s === "un_completed") return 2;
+      if (s === "completed") return 4;
+      return 3;
+    };
+
+    return [...orders].sort((a, b) => {
+      const weightA = getStatusWeight(a.status);
+      const weightB = getStatusWeight(b.status);
+
+      if (weightA !== weightB) {
+        return weightA - weightB;
+      }
+
+      const isCompletedA = a.status.toLowerCase() === "completed";
+      const isCompletedB = b.status.toLowerCase() === "completed";
+
+      if (isCompletedA && isCompletedB) {
+        const dateA = (a as any).updated_at
+          ? new Date((a as any).updated_at).getTime()
+          : new Date(a.scheduled_date).getTime();
+        const dateB = (b as any).updated_at
+          ? new Date((b as any).updated_at).getTime()
+          : new Date(b.scheduled_date).getTime();
+        return dateB - dateA;
+      }
+
+      return (
+        new Date(a.scheduled_date).getTime() -
+        new Date(b.scheduled_date).getTime()
+      );
+    });
+  }, [orders]);
 
   const handleClose = () => {
     setSelectedOrder(null);
@@ -124,9 +161,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                       <Clock className="w-4 h-4 mr-1.5" />
                       Termin:{" "}
                       <span className="text-gray-900 ml-1">
-                        {new Date(
-                          selectedOrder.scheduled_date,
-                        ).toLocaleDateString("pl-PL")}
+                        {formatDateTime(selectedOrder.scheduled_date)}
                       </span>
                     </span>
                   )}
@@ -141,7 +176,6 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
               </div>
 
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* KOLUMNA 1: Wykonawca */}
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
                     <User className="w-5 h-5" />
@@ -162,7 +196,6 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                   </div>
                 </div>
 
-                {/* KOLUMNA 2: Zleceniodawca */}
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
                     <User className="w-5 h-5" />
@@ -271,7 +304,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                 )}
               </div>
             </div>
-          ) : orders.length === 0 ? (
+          ) : sortedOrders.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
               <CalendarDays className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 font-medium">
@@ -281,7 +314,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
           ) : (
             // --- LIST VIEW ---
             <div className="space-y-3">
-              {orders.map((order) => (
+              {sortedOrders.map((order) => (
                 <div
                   key={order.id}
                   onClick={() => setSelectedOrder(order)}
@@ -297,10 +330,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                       {order.scheduled_date && (
                         <span className="text-xs text-gray-500 flex items-center">
                           <Clock className="w-3 h-3 mr-1" />
-                          Termin:{" "}
-                          {new Date(order.scheduled_date).toLocaleDateString(
-                            "pl-PL",
-                          )}
+                          Termin: {formatDateTime(order.scheduled_date)}
                         </span>
                       )}
                     </div>
