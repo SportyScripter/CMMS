@@ -50,29 +50,22 @@ export const useOrderDetails = (
 
   // --- PERMISSIONS LOGIC ---
   const userRole = currentUser?.role?.name?.toLowerCase() || "";
-  const ADMIN_ROLES = ["admin", "super admin", "kierownik", "dyrektor"];
+  const ADMIN_ROLES = ["admin", "super admin", "kierownik", "dyrektor", "technik"];
   const TECH_ROLES = ["mechanik", "mechanik2", "elektryk", "automatyk"];
 
   const canEditGlobalDetails = ADMIN_ROLES.includes(userRole);
 
   const canExecuteTask = () => {
     if (!order) return false;
-    if (canEditGlobalDetails) return true;
-    if (!TECH_ROLES.includes(userRole)) return false;
+    if (canEditGlobalDetails) return true; 
+    if (!TECH_ROLES.includes(userRole)) return false; 
 
     if (order.performed && order.performed.id !== currentUser.id) return false;
-
-    if (
-      order.assigned_role &&
-      order.assigned_role.name.toLowerCase() === userRole
-    )
-      return true;
-
+    if (order.assigned_role && order.assigned_role.name.toLowerCase() === userRole) return true;
     if (!order.assigned_role) return true;
 
     return false;
   };
-
   const isExecutionAllowed = canExecuteTask();
 
   // --- FETCH DATA ---

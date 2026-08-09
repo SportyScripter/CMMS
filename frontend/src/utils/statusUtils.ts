@@ -110,7 +110,7 @@ export const getStatusRowStyle = (status: string) => {
 export const CALENDAR_CONFIG: Record<string, { label: string; color: string }> =
   {
     COMPLETED: { label: "Wykonane", color: STATUS_COLORS.emerald },
-    IN_PROGRESS: { label: "W trakcie", color: STATUS_COLORS.blue }, // Standard "In progress" (not "in repair")
+    IN_PROGRESS: { label: "W trakcie", color: STATUS_COLORS.blue }, 
     UN_COMPLETED: { label: "Nieukończone", color: STATUS_COLORS.red },
     SCHEDULED: { label: "Zaplanowane", color: STATUS_COLORS.gray },
   };
@@ -148,4 +148,23 @@ export const getCalendarBadgeStyle = (
 
   // In any other case, we take the color straight from the dictionary
   return getCalendarConfig(status).color;
+};
+
+// --- PRIORITY ----
+export const translatePriority = (priority: string) => {
+  switch (priority) {
+    case 'low': return 'Niski';
+    case 'normal': return 'Normalny';
+    case 'high': return 'Wysoki';
+    default: return priority || 'Normalny';
+  }
+};
+
+export const getPriorityBadgeStyle = (priority: string) => {
+  switch (priority) {
+    case 'low': return 'bg-gray-100 text-gray-700 border-gray-200';
+    case 'normal': return 'bg-blue-50 text-blue-700 border-blue-200';
+    case 'high': return 'bg-red-600 text-white border-red-700';
+    default: return 'bg-gray-100 text-gray-700 border-gray-200';
+  }
 };

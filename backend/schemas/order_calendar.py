@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from schemas.role import RoleResponse
 from pydantic import BaseModel, Field
@@ -47,6 +48,11 @@ class OrderCalendarBase(BaseModel):
         max_length=50,
         description="Current execution state (e.g., 'scheduled', 'in_progress', 'completed').",
     )
+    priority: Optional[str] = Field(
+        default="normal",
+        max_length=50,
+        description="Priorytet zlecenia (np. low, normal, high, critical)",
+    )
 
 
 class OrderCalendarCreate(OrderCalendarBase):
@@ -84,6 +90,19 @@ class OrderCalendarUpdate(BaseModel):
         max_length=50,
         description="Updated current execution state.",
     )
+    priority: Optional[str] = Field(
+        None,
+        max_length=50,
+        description="Updated priority of the order.",
+    )
+    started_at: Optional[datetime] = Field(
+        None,
+        description="Timestamp when the task execution began.",
+    )
+    completed_at: Optional[datetime] = Field(
+        None,
+        description="Timestamp when the task execution was completed.",
+    )
 
 
 class OrderCalendarResponse(OrderCalendarBase):
@@ -103,6 +122,15 @@ class OrderCalendarResponse(OrderCalendarBase):
         ...,
         description="Timestamp when the order was last updated.",
     )
+    started_at: Optional[datetime] = Field(
+        None,
+        description="Timestamp when the task execution began.",
+    )
+    completed_at: Optional[datetime] = Field(
+        None,
+        description="Timestamp when the task execution was completed.",
+    )
+
     assigned_role: RoleResponse | None = None
 
     order_type: OrderTypeResponse

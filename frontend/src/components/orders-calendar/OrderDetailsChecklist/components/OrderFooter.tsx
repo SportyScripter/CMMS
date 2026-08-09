@@ -23,38 +23,21 @@ export const OrderFooter: React.FC<OrderFooterProps> = ({
   saveExecutionProgress,
 }) => {
   return (
-    <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4 shrink-0">
+    <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row justify-end items-center gap-4 shrink-0">
       {!isEditMode ? (
-        <>
-          <div className="text-sm text-gray-500 font-medium">
-            {order.performed ? (
-              <>
-                Realizuje:{" "}
-                <span className="text-blue-600 font-bold">
-                  {order.performed.name} {order.performed.lastname}
-                </span>
-              </>
-            ) : (
-              <>
-                Przypisany wydział:{" "}
-                <span className="text-indigo-600 font-bold">
-                  {order.assigned_role?.name || "Brak (ogólnodostępne)"}
-                </span>
-              </>
-            )}
-          </div>
+        <div className="flex gap-3 w-full sm:w-auto justify-end">
+          {order.status === "scheduled" && isExecutionAllowed && (
+            <button
+              onClick={startOrder}
+              className="flex-1 sm:flex-none px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-xl font-bold flex items-center justify-center transition-colors shadow-sm"
+            >
+              <Play className="w-5 h-5 mr-2" /> Rozpocznij pracę
+            </button>
+          )}
 
-          <div className="flex gap-3 w-full sm:w-auto">
-            {order.status === "scheduled" && isExecutionAllowed && (
-              <button
-                onClick={startOrder}
-                className="flex-1 sm:flex-none px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-xl font-bold flex items-center justify-center transition-colors shadow-sm"
-              >
-                <Play className="w-5 h-5 mr-2" /> Rozpocznij pracę
-              </button>
-            )}
-
-            {order.status !== "scheduled" && isExecutionAllowed && (
+          {order.status !== "scheduled" &&
+            order.status !== "completed" &&
+            isExecutionAllowed && (
               <>
                 <button
                   onClick={() => saveExecutionProgress(false)}
@@ -84,8 +67,7 @@ export const OrderFooter: React.FC<OrderFooterProps> = ({
                 </button>
               </>
             )}
-          </div>
-        </>
+        </div>
       ) : (
         <div className="flex justify-end w-full gap-3">
           <button

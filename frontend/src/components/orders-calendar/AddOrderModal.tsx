@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { api } from "../../api/axiosConfig";
 import { Machine } from "../../types/machine";
-import { Role } from "../../types/auth"; 
+import { Role } from "../../types/auth";
 import { AddOrderModalProps, OrderType } from "../../types/order-calendar";
 import { ManageOrderTypesModal } from "./ManageOrderTypesModal";
 import { AddChecklistItemsModal } from "./AddChecklistItemsModal";
@@ -24,7 +24,8 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
   // --- FORM STATES ---
   const [orderTypeId, setOrderTypeId] = useState<string>("");
   const [machineId, setMachineId] = useState<string>("");
-  const [assignedRoleId, setAssignedRoleId] = useState<string>(""); 
+  const [assignedRoleId, setAssignedRoleId] = useState<string>("");
+  const [priority, setPriority] = useState<string>("normal");
   const [description, setDescription] = useState("");
   const [comments, setComments] = useState("");
 
@@ -40,7 +41,7 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
   // --- DATA STATES ---
   const [machines, setMachines] = useState<Machine[]>([]);
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]); 
+  const [roles, setRoles] = useState<Role[]>([]);
 
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,6 +76,7 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
       setOrderTypeId("");
       setMachineId("");
       setAssignedRoleId("");
+      setPriority("normal");
       setDescription("");
       setComments("");
       setChecklistTasks([]);
@@ -104,6 +106,7 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
         principal_id: 0,
         assigned_role_id: assignedRoleId ? Number(assignedRoleId) : null,
         machine_id: machineId ? Number(machineId) : null,
+        priority: priority,
         comments: comments.trim() || null,
         scheduled_date: new Date(scheduledDate).toISOString(),
         status: "scheduled",
@@ -254,17 +257,33 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
                         <option value="">-- Przypisz później --</option>
                         {roles
                           .filter((role) =>
-                            [
-                              "elektryk",
-                              "mechanik",
-                              "automatyk",
-                            ].includes(role.name.toLowerCase()),
+                            ["elektryk", "mechanik", "automatyk"].includes(
+                              role.name.toLowerCase(),
+                            ),
                           )
                           .map((role) => (
                             <option key={role.id} value={role.id}>
                               {role.name}
                             </option>
                           ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Priorytet *
+                      </label>
+                      <select
+                        value={priority}
+                        onChange={(e) => setPriority(e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium transition-colors ${
+                          priority === "critical"
+                            ? "bg-red-50 text-red-700 border-red-300"
+                            : "bg-white border-gray-300"
+                        }`}
+                      >
+                        <option value="low">Niski</option>
+                        <option value="normal">Normalny</option>
+                        <option value="high">Wysoki</option>
                       </select>
                     </div>
                   </div>

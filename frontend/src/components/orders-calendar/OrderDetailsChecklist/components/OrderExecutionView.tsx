@@ -1,5 +1,13 @@
 import React from "react";
-import { ShieldAlert, MessageSquare } from "lucide-react";
+import {
+  ShieldAlert,
+  MessageSquare,
+  PlayCircle,
+  Clock,
+  CheckCircle2,
+  User,
+} from "lucide-react";
+import { formatDateTime,  calculateDowntime } from "../../../../utils/dateUtils";
 
 interface OrderExecutionViewProps {
   order: any;
@@ -7,7 +15,11 @@ interface OrderExecutionViewProps {
   setLocalOrderComments: (val: string) => void;
   localChecklist: any[];
   isExecutionAllowed: boolean;
-  handleChecklistExecutionUpdate: (itemId: number, field: string, value: string) => void;
+  handleChecklistExecutionUpdate: (
+    itemId: number,
+    field: string,
+    value: string,
+  ) => void;
 }
 
 export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
@@ -20,24 +32,90 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
 }) => {
   return (
     <div className="space-y-6">
-      {/* Warning when user does not have permission to execute */}
       {!isExecutionAllowed && (
         <div className="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200 flex items-center shadow-sm">
           <ShieldAlert className="w-6 h-6 mr-3 shrink-0 text-red-600" />
           <p className="text-sm">
-            <strong>Brak uprawnień do realizacji.</strong> Zlecenie jest przypisane do wydziału: 
-            <span className="font-bold ml-1">{order.assigned_role?.name || "innego"}</span>, 
-            lub jest już realizowane przez inną osobę.
+            <strong>Brak uprawnień do realizacji.</strong> Zlecenie jest
+            przypisane do wydziału:
+            <span className="font-bold ml-1">
+              {order.assigned_role?.name || "innego"}
+            </span>
+            , lub jest już realizowane przez inną osobę.
           </p>
         </div>
       )}
 
-      {/* General order information and summary comment */}
+      {/* Execution Information only when started */}
+      {order.started_at && (
+        <div className="bg-indigo-50 border border-indigo-100 p-5 rounded-xl shadow-sm flex flex-col md:flex-row flex-wrap gap-4 md:gap-8 items-start md:items-center">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 rounded-lg text-indigo-700">
+              <User className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-indigo-900/60 font-bold block text-xs uppercase tracking-wider">
+                Realizuje
+              </span>
+              <span className="font-bold text-indigo-900 text-sm">
+                {order.performed?.name} {order.performed?.lastname}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg text-blue-700">
+              <PlayCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-blue-900/60 font-bold block text-xs uppercase tracking-wider">
+                Rozpoczęto
+              </span>
+              <span className="font-bold text-blue-900 text-sm">
+                {formatDateTime(order.started_at)}
+              </span>
+            </div>
+          </div>
+
+          {order.completed_at && (
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-100 rounded-lg text-emerald-700">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-emerald-900/60 font-bold block text-xs uppercase tracking-wider">
+                  Zakończono
+                </span>
+                <span className="font-bold text-emerald-900 text-sm">
+                  {formatDateTime(order.completed_at)}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {order.started_at && order.completed_at && (
+            <div className="flex items-center gap-3 md:ml-auto">
+              <div className="p-2 bg-gray-200 rounded-lg text-gray-700">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-gray-500 font-bold block text-xs uppercase tracking-wider">
+                  Czas trwania
+                </span>
+                <span className="font-bold text-gray-800 text-sm">
+                  {calculateDowntime(order.started_at, order.completed_at)}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Common Information */}
       <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
         <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-2 mb-4">
           Informacje ogólne
         </h4>
-
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -47,7 +125,6 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
               {order.description}
             </div>
           </div>
-
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
               Komentarz ogólny (raport po przeglądzie)
@@ -63,7 +140,7 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
         </div>
       </div>
 
-      {/* Checklist execution items */}
+      {/* Checklist */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="bg-gray-50 px-5 py-3 border-b border-gray-200 flex justify-between items-center">
           <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider">
@@ -87,22 +164,25 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
                   item.status === "NOK"
                     ? "bg-red-50/30"
                     : item.status === "OK"
-                    ? "bg-emerald-50/30"
-                    : "hover:bg-gray-50"
+                      ? "bg-emerald-50/30"
+                      : "hover:bg-gray-50"
                 }`}
               >
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="flex-1">
-                    <span className="font-bold text-gray-400 mr-2">{idx + 1}.</span>
+                    <span className="font-bold text-gray-400 mr-2">
+                      {idx + 1}.
+                    </span>
                     <span className="font-semibold text-gray-800 text-sm md:text-base">
                       {item.task_description}
                     </span>
                   </div>
-
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       disabled={!isExecutionAllowed}
-                      onClick={() => handleChecklistExecutionUpdate(item.id, "status", "OK")}
+                      onClick={() =>
+                        handleChecklistExecutionUpdate(item.id, "status", "OK")
+                      }
                       className={`px-4 py-1.5 rounded-lg text-sm font-bold border transition-all disabled:opacity-50 ${
                         item.status === "OK"
                           ? "bg-emerald-500 text-white border-emerald-600 shadow-sm"
@@ -113,7 +193,9 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
                     </button>
                     <button
                       disabled={!isExecutionAllowed}
-                      onClick={() => handleChecklistExecutionUpdate(item.id, "status", "NOK")}
+                      onClick={() =>
+                        handleChecklistExecutionUpdate(item.id, "status", "NOK")
+                      }
                       className={`px-4 py-1.5 rounded-lg text-sm font-bold border transition-all disabled:opacity-50 ${
                         item.status === "NOK"
                           ? "bg-red-500 text-white border-red-600 shadow-sm"
@@ -124,19 +206,19 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
                     </button>
                     <button
                       disabled={!isExecutionAllowed}
-                      onClick={() => handleChecklistExecutionUpdate(item.id, "status", "ND")}
+                      onClick={() =>
+                        handleChecklistExecutionUpdate(item.id, "status", "ND")
+                      }
                       className={`px-4 py-1.5 rounded-lg text-sm font-bold border transition-all disabled:opacity-50 ${
                         item.status === "ND"
                           ? "bg-gray-600 text-white border-gray-700 shadow-sm"
                           : "bg-white text-gray-500 border-gray-300 hover:border-gray-500 hover:text-gray-700"
                       }`}
-                      title="Nie dotyczy"
                     >
                       ND
                     </button>
                   </div>
                 </div>
-
                 <div className="mt-3 pl-6">
                   <div className="relative">
                     <MessageSquare className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
@@ -145,7 +227,11 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
                       disabled={!isExecutionAllowed}
                       value={item.comments || ""}
                       onChange={(e) =>
-                        handleChecklistExecutionUpdate(item.id, "comments", e.target.value)
+                        handleChecklistExecutionUpdate(
+                          item.id,
+                          "comments",
+                          e.target.value,
+                        )
                       }
                       placeholder="Dodaj komentarz do tego punktu (opcjonalnie)..."
                       className="w-full pl-9 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-60 transition-colors"
