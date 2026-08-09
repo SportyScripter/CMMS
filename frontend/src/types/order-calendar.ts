@@ -1,10 +1,12 @@
 import { Machine } from "./machine";
-import { Role } from "./auth";
 
 export interface Order {
   id: number;
   description: string;
   scheduled_date: string;
+  started_at?: string | null;   
+  completed_at?: string | null; 
+  priority: string;
   status: string;
   comments?: string;
   order_type: { id: number; name: string };

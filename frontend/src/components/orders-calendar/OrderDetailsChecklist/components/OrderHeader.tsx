@@ -3,6 +3,8 @@ import { X, Edit2 } from "lucide-react";
 import {
   getCalendarBadgeStyle,
   translateCalendarStatus,
+  getPriorityBadgeStyle,
+  translatePriority,
 } from "../../../../utils/statusUtils";
 
 interface OrderHeaderProps {
@@ -23,18 +25,27 @@ export const OrderHeader: React.FC<OrderHeaderProps> = ({
   return (
     <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50 shrink-0">
       <div>
-        <h3 className="font-bold text-gray-900 text-lg flex items-center">
+        <h3 className="font-bold text-gray-900 text-lg flex items-center flex-wrap gap-2">
           Zlecenie #{order.id}
           <span
-            className={`ml-3 px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${getCalendarBadgeStyle(
+            className={`px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${getCalendarBadgeStyle(
               order.status,
               order.scheduled_date,
             )}`}
           >
             {translateCalendarStatus(order.status)}
           </span>
+          {order.priority && (
+            <span
+              className={`px-3 py-1 text-xs rounded-full font-bold uppercase tracking-wider border ${getPriorityBadgeStyle(
+                order.priority,
+              )}`}
+            >
+              {translatePriority(order.priority)}
+            </span>
+          )}
         </h3>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 mt-2">
           Maszyna:{" "}
           <span className="font-semibold text-gray-700">
             {order.order_machine?.name || "Brak"}
@@ -45,7 +56,8 @@ export const OrderHeader: React.FC<OrderHeaderProps> = ({
           </span>
           {order.assigned_role && (
             <>
-              {" "}| Wydział:{" "}
+              {" "}
+              | Wydział:{" "}
               <span className="font-semibold text-indigo-700">
                 {order.assigned_role.name}
               </span>

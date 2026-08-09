@@ -9,14 +9,18 @@ import {
   CheckSquare,
   User,
   Users,
+  PlayCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { api } from "../../api/axiosConfig";
 import { Order, MachineOrdersModalProps } from "../../types/order-calendar";
 import {
   translateCalendarStatus,
   getCalendarBadgeStyle,
+  getPriorityBadgeStyle,
+  translatePriority,
 } from "../../utils/statusUtils";
-import { formatDateTime } from "../../utils/dateUtils";
+import { formatDateTime, calculateDowntime } from "../../utils/dateUtils";
 
 export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
   isOpen,
@@ -152,11 +156,20 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                 className={`bg-white p-5 rounded-xl border border-gray-200 shadow-sm border-t-4 ${getCalendarBadgeStyle(selectedOrder.status, selectedOrder.scheduled_date)}`}
               >
                 <div className="flex justify-between items-start mb-4">
-                  <span
-                    className={`px-3 py-1 font-bold text-sm rounded-lg border uppercase ${getCalendarBadgeStyle(selectedOrder.status, selectedOrder.scheduled_date)}`}
-                  >
-                    {translateCalendarStatus(selectedOrder.status)}
-                  </span>
+                  <div className="flex gap-2 flex-wrap">
+                    <span
+                      className={`px-3 py-1 font-bold text-sm rounded-lg border uppercase ${getCalendarBadgeStyle(selectedOrder.status, selectedOrder.scheduled_date)}`}
+                    >
+                      {translateCalendarStatus(selectedOrder.status)}
+                    </span>
+                    {selectedOrder.priority && (
+                      <span
+                        className={`px-3 py-1 font-bold text-sm rounded-lg border uppercase ${getPriorityBadgeStyle(selectedOrder.priority)}`}
+                      >
+                        {translatePriority(selectedOrder.priority)}
+                      </span>
+                    )}
+                  </div>
                   {selectedOrder.scheduled_date && (
                     <span className="text-sm font-medium text-gray-500 flex items-center">
                       <Clock className="w-4 h-4 mr-1.5" />
@@ -176,8 +189,76 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                 </p>
               </div>
 
-              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {/* Column 1: Department */}
+              {/* Information panel on the top */}
+              {selectedOrder.started_at && (
+                <div className="bg-indigo-50 border border-indigo-100 p-5 rounded-xl shadow-sm flex flex-col md:flex-row flex-wrap gap-4 md:gap-8 items-start md:items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-100 rounded-lg text-indigo-700">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-indigo-900/60 font-bold block text-xs uppercase tracking-wider">
+                        Realizuje
+                      </span>
+                      <span className="font-bold text-indigo-900 text-sm">
+                        {selectedOrder.performed?.name}{" "}
+                        {selectedOrder.performed?.lastname}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg text-blue-700">
+                      <PlayCircle className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <span className="text-blue-900/60 font-bold block text-xs uppercase tracking-wider">
+                        Rozpoczęto
+                      </span>
+                      <span className="font-bold text-blue-900 text-sm">
+                        {formatDateTime(selectedOrder.started_at)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {selectedOrder.completed_at && (
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-100 rounded-lg text-emerald-700">
+                        <CheckCircle2 className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-emerald-900/60 font-bold block text-xs uppercase tracking-wider">
+                          Zakończono
+                        </span>
+                        <span className="font-bold text-emerald-900 text-sm">
+                          {formatDateTime(selectedOrder.completed_at)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedOrder.started_at && selectedOrder.completed_at && (
+                    <div className="flex items-center gap-3 md:ml-auto">
+                      <div className="p-2 bg-gray-200 rounded-lg text-gray-700">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-gray-500 font-bold block text-xs uppercase tracking-wider">
+                          Czas trwania
+                        </span>
+                        <span className="font-bold text-gray-800 text-sm">
+                          {calculateDowntime(
+                            selectedOrder.started_at,
+                            selectedOrder.completed_at,
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-indigo-50 rounded-lg text-indigo-600">
                     <Users className="w-5 h-5" />
@@ -192,28 +273,7 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                   </div>
                 </div>
 
-                {/* Column 2: Performed */}
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
-                    <User className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase">
-                      Wykonawca
-                    </p>
-                    <p className="text-sm font-medium text-gray-900 mt-0.5">
-                      {selectedOrder.performed?.name}{" "}
-                      {selectedOrder.performed?.lastname || "Nie przypisano"}
-                    </p>
-                    {selectedOrder.performed?.role?.name && (
-                      <p className="text-xs text-gray-400">
-                        Stanowisko: {selectedOrder.performed?.role.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Column 3: Principal */}
+                {/* Column 2: Principal */}
                 <div className="flex items-start gap-3">
                   <div className="p-2 bg-gray-100 rounded-lg text-gray-600">
                     <User className="w-5 h-5" />
@@ -344,6 +404,14 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                       >
                         {translateCalendarStatus(order.status)}
                       </span>
+
+                      {order.priority && (
+                        <span
+                          className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getPriorityBadgeStyle(order.priority)}`}
+                        >
+                          {translatePriority(order.priority)}
+                        </span>
+                      )}
 
                       <span className="flex items-center text-xs font-bold px-1.5 py-0.5 rounded bg-white border border-gray-200 text-indigo-600 shadow-sm">
                         <Users className="w-3.5 h-3.5 mr-1" />

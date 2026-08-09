@@ -69,6 +69,21 @@ class OrderCalendar(Base, TimestampMixin):
         nullable=False,
         comment="Current execution state (e.g., 'scheduled', 'in_progress', 'completed')",
     )
+    started_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Timestamp when the task execution began",
+    )
+    completed_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Timestamp when the task execution was completed",
+    )
+    priority = Column(
+        String(50),
+        default="normal",
+        comment="Priority level of the order (e.g., 'low', 'normal', 'high')",
+    )
 
     # Relationships
     order_type = relationship("OrderType", back_populates="calendar_entries")

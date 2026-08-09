@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
-
+from datetime import datetime
 from models.order_calendar import OrderCalendar
 from schemas.order_calendar import OrderCalendarCreate, OrderCalendarUpdate
 from crud.crud_machines import recalculate_machine_status
@@ -99,6 +99,15 @@ def update_order(
     update_data = order_update.dict(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_order, field, value)
+    new_status = update_data.get("status")
+
+    if new_status == "in_progress" and not db_order.started_at:
+        db_order.started_at = datetime.utcnow()
+
+    if new_status == "completed" and not db_order.completed_at:
+        db_order.completed_at = datetime.utcnow()
+    elif new_status in ["in_progress", "un_completed", "scheduled"]:
+        db_order.completed_at = None
     db.commit()
     db.refresh(db_order)
     if db_order.machine_id:

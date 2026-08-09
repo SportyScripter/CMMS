@@ -19,6 +19,8 @@ import { User, Role } from "../types/auth";
 import {
   translateCalendarStatus,
   getCalendarBadgeStyle,
+  getPriorityBadgeStyle,
+  translatePriority,
 } from "../utils/statusUtils";
 import { formatDateTime } from "../utils/dateUtils";
 
@@ -39,7 +41,7 @@ export const OrderCalendarPage = () => {
   const [orderTypes, setOrderTypes] = useState<{ id: number; name: string }[]>(
     [],
   );
-  const [roles, setRoles] = useState<Role[]>([]); 
+  const [roles, setRoles] = useState<Role[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -50,7 +52,7 @@ export const OrderCalendarPage = () => {
   // --- FILTERS ---
   const [filterMachine, setFilterMachine] = useState("ALL");
   const [filterType, setFilterType] = useState("ALL");
-  const [filterRole, setFilterRole] = useState("ALL"); 
+  const [filterRole, setFilterRole] = useState("ALL");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -65,7 +67,7 @@ export const OrderCalendarPage = () => {
         api.get<Order[]>("/order-calendar"),
         api.get("/machines"),
         api.get("/order-types"),
-        api.get<Role[]>("/roles"), 
+        api.get<Role[]>("/roles"),
       ]);
       setOrders(ordersRes.data || []);
       setMachines(machinesRes.data || []);
@@ -143,7 +145,7 @@ export const OrderCalendarPage = () => {
       .filter(
         (o) =>
           filterRole === "ALL" ||
-          o.assigned_role?.id?.toString() === filterRole, 
+          o.assigned_role?.id?.toString() === filterRole,
       )
       .filter((o) => {
         if (viewMode !== "list") return true;
@@ -192,7 +194,15 @@ export const OrderCalendarPage = () => {
           new Date(b.scheduled_date).getTime()
         );
       });
-  }, [orders, filterMachine, filterType, filterRole, viewMode, dateFrom, dateTo]);
+  }, [
+    orders,
+    filterMachine,
+    filterType,
+    filterRole,
+    viewMode,
+    dateFrom,
+    dateTo,
+  ]);
 
   return (
     <div className="max-w-auto mx-auto space-y-1 p-2">
@@ -270,8 +280,8 @@ export const OrderCalendarPage = () => {
             {roles
               .filter((role) =>
                 ["elektryk", "mechanik", "automatyk"].includes(
-                  role.name.toLowerCase()
-                )
+                  role.name.toLowerCase(),
+                ),
               )
               .map((r) => (
                 <option key={r.id} value={r.id}>
@@ -411,15 +421,26 @@ export const OrderCalendarPage = () => {
                           {order.assigned_role?.name || "Ogólne"}
                         </div>
                       </div>
-                      
+
                       <span className="text-sm font-semibold mb-2 line-clamp-2">
                         {order.description}
                       </span>
-                      <span
-                        className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
-                      >
-                        {translateCalendarStatus(order.status)}
-                      </span>
+
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        <span
+                          className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
+                        >
+                          {translateCalendarStatus(order.status)}
+                        </span>
+                        {order.priority && (
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getPriorityBadgeStyle(order.priority)}`}
+                          >
+                            {translatePriority(order.priority)}
+                          </span>
+                        )}
+                      </div>
+
                       <div className="mt-auto pt-2 text-xs opacity-70 font-medium">
                         {order.order_machine?.name || "Brak maszyny"}
                       </div>
@@ -450,6 +471,9 @@ export const OrderCalendarPage = () => {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                      Priorytet
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                       Wydział
@@ -483,6 +507,15 @@ export const OrderCalendarPage = () => {
                         >
                           {translateCalendarStatus(order.status)}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {order.priority && (
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getPriorityBadgeStyle(order.priority)}`}
+                          >
+                            {translatePriority(order.priority)}
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
                         <div className="flex items-center">
