@@ -116,24 +116,27 @@ def update_order(
     is_status_changing = new_status in ["paused", "completed"]
     is_handover = new_status == "in_progress" and old_performed_id != new_performed_id
 
-    if db_order.last_resumed_at and old_status == "in_progress":
-        if is_status_changing or is_handover:
+    if (
+        db_order.last_resumed_at
+        and old_status == "in_progress"
+        and (is_status_changing or is_handover)
+    ):
 
-            # Protect against naive datetime objects by ensuring last_resumed_at is timezone-aware
-            last_resumed = db_order.last_resumed_at
-            if last_resumed.tzinfo is None:
-                last_resumed = last_resumed.replace(tzinfo=timezone.utc)
+        # Protect against naive datetime objects by ensuring last_resumed_at is timezone-aware
+        last_resumed = db_order.last_resumed_at
+        if last_resumed.tzinfo is None:
+            last_resumed = last_resumed.replace(tzinfo=timezone.utc)
 
-            # Calculate elapsed time in minutes
-            elapsed = current_time - last_resumed
-            elapsed_minutes = int(elapsed.total_seconds() // 60)
+        # Calculate elapsed time in minutes
+        elapsed = current_time - last_resumed
+        elapsed_minutes = int(elapsed.total_seconds() // 60)
 
-            # Ensure work_time_minutes is initialized
-            current_minutes = db_order.work_time_minutes or 0
-            db_order.work_time_minutes = current_minutes + elapsed_minutes
+        # Ensure work_time_minutes is initialized
+        current_minutes = db_order.work_time_minutes or 0
+        db_order.work_time_minutes = current_minutes + elapsed_minutes
 
-            # Reset the resumption tracker
-            db_order.last_resumed_at = None
+        # Reset the resumption tracker
+        db_order.last_resumed_at = None
 
     # 2. Apply standard field updates from the payload
     for field, value in update_data.items():
