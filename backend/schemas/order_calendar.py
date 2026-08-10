@@ -53,6 +53,10 @@ class OrderCalendarBase(BaseModel):
         max_length=50,
         description="Priorytet zlecenia (np. low, normal, high, critical)",
     )
+    execution_report: Optional[str] = Field(
+        None,
+        description="Detailed report of the task execution, including observations and outcomes.",
+    )
 
 
 class OrderCalendarCreate(OrderCalendarBase):
@@ -103,6 +107,21 @@ class OrderCalendarUpdate(BaseModel):
         None,
         description="Timestamp when the task execution was completed.",
     )
+    execution_report: Optional[str] = Field(
+        None, description="Updated detailed report of the work performed."
+    )
+    pause_reason: Optional[str] = Field(
+        None, description="Updated reason for pausing the task, if applicable."
+    )
+    is_machine_operational: Optional[bool] = Field(
+        None, description="Updated indication of whether the machine is operational."
+    )
+    work_time_minutes: Optional[int] = Field(
+        None, description="Updated total time spent on the task in minutes."
+    )
+    last_resumed_at: Optional[datetime] = Field(
+        None, description="Updated timestamp when the task was last resumed."
+    )
 
 
 class OrderCalendarResponse(OrderCalendarBase):
@@ -129,6 +148,22 @@ class OrderCalendarResponse(OrderCalendarBase):
     completed_at: Optional[datetime] = Field(
         None,
         description="Timestamp when the task execution was completed.",
+    )
+    execution_report: Optional[str] = Field(
+        None,
+        description="Detailed report of the work performed, including observations and outcomes.",
+    )
+    pause_reason: Optional[str] = Field(
+        None, description="Reason for pausing the task, if applicable."
+    )
+    is_machine_operational: Optional[bool] = Field(
+        None, description="Indication of whether the machine is operational."
+    )
+    work_time_minutes: Optional[int] = Field(
+        None, description="Total time spent on the task in minutes."
+    )
+    last_resumed_at: Optional[datetime] = Field(
+        None, description="Timestamp when the task was last resumed."
     )
 
     assigned_role: RoleResponse | None = None

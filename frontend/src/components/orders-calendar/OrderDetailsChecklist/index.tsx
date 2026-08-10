@@ -9,12 +9,9 @@ import { OrderExecutionView } from "./components/OrderExecutionView";
 import { OrderFooter } from "./components/OrderFooter";
 import { AddChecklistItemsModal } from "../AddChecklistItemsModal";
 
-export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProps> = ({
-  orderId,
-  isOpen,
-  onClose,
-  onUpdated,
-}) => {
+export const OrderDetailsChecklistModal: React.FC<
+  OrderDetailsChecklistModalProps
+> = ({ orderId, isOpen, onClose, onUpdated }) => {
   const details = useOrderDetails(orderId, isOpen, onClose, onUpdated);
 
   if (!isOpen || (!details.isLoading && !details.order)) return null;
@@ -25,7 +22,6 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
     <>
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl flex flex-col max-h-[95vh] animate-in fade-in duration-200">
-          
           {order && (
             <OrderHeader
               order={order}
@@ -51,13 +47,13 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
                 setEditScheduledDate={details.setEditScheduledDate}
                 editMachineId={details.editMachineId}
                 setEditMachineId={details.setEditMachineId}
-                editAssignedRoleId={details.editAssignedRoleId} 
+                editAssignedRoleId={details.editAssignedRoleId}
                 setEditAssignedRoleId={details.setEditAssignedRoleId}
                 editDescription={details.editDescription}
                 setEditDescription={details.setEditDescription}
                 orderTypes={details.orderTypes}
                 machines={details.machines}
-                rolesList={details.rolesList} 
+                rolesList={details.rolesList}
                 editChecklistTasks={details.editChecklistTasks}
                 handleRemoveTaskInEdit={details.handleRemoveTaskInEdit}
                 setIsAddChecklistModalOpen={details.setIsAddChecklistModalOpen}
@@ -65,11 +61,13 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
             ) : (
               <OrderExecutionView
                 order={order}
-                localOrderComments={details.localOrderComments}
-                setLocalOrderComments={details.setLocalOrderComments}
+                localExecutionReport={details.localExecutionReport}
+                setLocalExecutionReport={details.setLocalExecutionReport}
                 localChecklist={details.localChecklist}
                 isExecutionAllowed={details.isExecutionAllowed}
-                handleChecklistExecutionUpdate={details.handleChecklistExecutionUpdate}
+                handleChecklistExecutionUpdate={
+                  details.handleChecklistExecutionUpdate
+                }
               />
             )}
           </div>
@@ -84,6 +82,7 @@ export const OrderDetailsChecklistModal: React.FC<OrderDetailsChecklistModalProp
               setIsEditMode={details.setIsEditMode}
               startOrder={details.startOrder}
               saveExecutionProgress={details.saveExecutionProgress}
+              currentUserId={details.currentUser?.id}
             />
           )}
         </div>

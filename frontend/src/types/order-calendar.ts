@@ -8,7 +8,12 @@ export interface Order {
   completed_at?: string | null; 
   priority: string;
   status: string;
-  comments?: string;
+  comments?: string | null;             
+  execution_report?: string | null;     
+  pause_reason?: string | null;         
+  is_machine_operational?: boolean;     
+  work_time_minutes?: number;           
+  last_resumed_at?: string | null;
   order_type: { id: number; name: string };
   order_machine?: { id: number; name: string };
   assigned_role_id?: number | null;

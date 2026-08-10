@@ -15,7 +15,7 @@ import { Role } from "../../types/auth";
 import { AddOrderModalProps, OrderType } from "../../types/order-calendar";
 import { ManageOrderTypesModal } from "./ManageOrderTypesModal";
 import { AddChecklistItemsModal } from "./AddChecklistItemsModal";
-
+import { formatDateTime } from "../../utils/dateUtils";
 export const AddOrderModal: React.FC<AddOrderModalProps> = ({
   isOpen,
   onClose,
@@ -28,13 +28,12 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
   const [priority, setPriority] = useState<string>("normal");
   const [description, setDescription] = useState("");
   const [comments, setComments] = useState("");
-
-  const [scheduledDate, setScheduledDate] = useState(() => {
+  // --- SCHEDULED DATE STATE ---
+  const [scheduledDate, setScheduledDate] = useState<string>(() => {
     const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    return now.toISOString().slice(0, 16);
+    const offset = now.getTimezoneOffset() * 60000;
+    return new Date(now.getTime() - offset).toISOString().slice(0, 16);
   });
-
   // --- CHECKLIST STATE ---
   const [checklistTasks, setChecklistTasks] = useState<string[]>([]);
 
@@ -99,7 +98,10 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
     setError("");
 
     try {
-      // 1. CREATE THE ORDER FIRST
+      // Format datetime-local value to ISO string preserving local time correctly
+      const formattedDate = new Date(scheduledDate).toISOString();
+
+      // 1. Create the order first
       const orderPayload = {
         order_type_id: Number(orderTypeId),
         description: description.trim(),
@@ -108,16 +110,14 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
         machine_id: machineId ? Number(machineId) : null,
         priority: priority,
         comments: comments.trim() || null,
-        scheduled_date: new Date(scheduledDate).toISOString(),
+        scheduled_date: formattedDate,
         status: "scheduled",
       };
 
       const orderResponse = await api.post("/order-calendar", orderPayload);
       const newOrderId = orderResponse.data.id; // Get generated ID
 
-      // 2. CREATE ALL CHECKLIST ITEMS LINKED TO THIS ORDER
       if (checklistTasks.length > 0) {
-        // Prepare promises for parallel execution to save time
         const itemPromises = checklistTasks.map((taskDesc) =>
           api.post("/order-checklist-items/", {
             order_calendar_id: newOrderId,
@@ -304,7 +304,7 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Uwagi dodatkowe
+                      Wskazówki dla wykonawcy (np. BHP, wymagane narzędzia)
                     </label>
                     <textarea
                       rows={2}
