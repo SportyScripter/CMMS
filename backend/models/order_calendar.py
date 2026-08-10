@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 
 from db.database import Base
@@ -83,6 +83,29 @@ class OrderCalendar(Base, TimestampMixin):
         String(50),
         default="normal",
         comment="Priority level of the order (e.g., 'low', 'normal', 'high')",
+    )
+    execution_report = Column(
+        String,
+        default=None,
+        nullable=True,
+        comment="Detailed report of the work performed, including observations and outcomes",
+    )
+    pause_reason = Column(
+        String,
+        default=None,
+        nullable=True,
+        comment="Reason for pausing the task, if applicable",
+    )
+    is_machine_operational = Column(
+        Boolean, default=True, comment="Indicates if the machine is operational"
+    )
+    work_time_minutes = Column(
+        Integer, default=0, comment="Total time spent on the task in minutes"
+    )
+    last_resumed_at = Column(
+        DateTime(timezone=True),
+        nullable=True,
+        comment="Timestamp when the task was last resumed",
     )
 
     # Relationships

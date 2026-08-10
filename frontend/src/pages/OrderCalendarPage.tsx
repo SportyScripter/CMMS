@@ -22,7 +22,7 @@ import {
   getPriorityBadgeStyle,
   translatePriority,
 } from "../utils/statusUtils";
-import { formatDateTime } from "../utils/dateUtils";
+import { formatDateTime, ensureUtc } from "../utils/dateUtils";
 
 export const OrderCalendarPage = () => {
   const { user } = useAuth();
@@ -391,14 +391,13 @@ export const OrderCalendarPage = () => {
 
             {weekDays.map((day, i) => {
               const dayOrders = filteredOrders.filter((o) => {
-                const orderDate = new Date(o.scheduled_date);
+                const orderDate = new Date(ensureUtc(o.scheduled_date));
                 return (
                   orderDate.getDate() === day.getDate() &&
                   orderDate.getMonth() === day.getMonth() &&
                   orderDate.getFullYear() === day.getFullYear()
                 );
               });
-
               return (
                 <div
                   key={i}
@@ -406,49 +405,86 @@ export const OrderCalendarPage = () => {
                     isToday(day) ? "bg-blue-50/40" : ""
                   }`}
                 >
-                  {dayOrders.map((order) => (
-                    <div
-                      key={order.id}
-                      onClick={() => setSelectedOrderId(order.id)}
-                      className={`p-3 rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95 flex flex-col ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
-                    >
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-xs font-bold uppercase tracking-wider opacity-80">
-                          {order.order_type?.name || "Brak typu"}
+                  {dayOrders.map((order) => {
+                    const todayStart = new Date();
+                    todayStart.setHours(0, 0, 0, 0);
+
+                    const orderDate = new Date(ensureUtc(order.scheduled_date));
+                    orderDate.setHours(0, 0, 0, 0);
+
+                    const isOverdue =
+                      orderDate.getTime() <= todayStart.getTime() &&
+                      ["scheduled", "un_completed"].includes(
+                        order.status.toLowerCase(),
+                      );
+
+                    let cardStyle = "bg-white border-gray-200";
+
+                    if (isOverdue) {
+                      cardStyle = "bg-red-50 border-red-300";
+                    } else {
+                      switch (order.status.toLowerCase()) {
+                        case "completed":
+                          cardStyle = "bg-emerald-50 border-emerald-200";
+                          break;
+                        case "in_progress":
+                          cardStyle = "bg-blue-50 border-blue-200";
+                          break;
+                        case "paused":
+                          cardStyle = "bg-slate-50 border-slate-200";
+                          break;
+                        case "un_completed":
+                          cardStyle = "bg-red-50 border-red-200";
+                          break;
+                        default:
+                          cardStyle = "bg-white border-gray-200";
+                      }
+                    }
+
+                    return (
+                      <div
+                        key={order.id}
+                        onClick={() => setSelectedOrderId(order.id)}
+                        className={`p-3 rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95 flex flex-col ${cardStyle}`}
+                      >
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-xs font-bold uppercase tracking-wider opacity-80">
+                            {order.order_type?.name || "Brak typu"}
+                          </span>
+                          <div className="flex items-center text-xs font-bold px-1.5 py-0.5 rounded bg-white/60 text-indigo-700 shadow-sm border border-indigo-100/50">
+                            <Users className="w-3 h-3 mr-1" />
+                            {order.assigned_role?.name || "Ogólne"}
+                          </div>
+                        </div>
+
+                        <span className="text-sm font-semibold mb-2 line-clamp-2">
+                          {order.description}
                         </span>
-                        <div className="flex items-center text-xs font-bold px-1.5 py-0.5 rounded bg-white/60 text-indigo-700 shadow-sm border border-indigo-100/50">
-                          <Users className="w-3 h-3 mr-1" />
-                          {order.assigned_role?.name || "Ogólne"}
+
+                        <div className="flex gap-2 mb-2 flex-wrap">
+                          <span
+                            className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
+                          >
+                            {translateCalendarStatus(order.status)}
+                          </span>
+                          {order.priority && (
+                            <span
+                              className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getPriorityBadgeStyle(order.priority)}`}
+                            >
+                              {translatePriority(order.priority)}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="mt-auto pt-2 text-xs opacity-70 font-medium">
+                          {order.order_machine?.name || "Brak maszyny"}
+                        </div>
+                        <div className="text-xs opacity-90 font-bold mt-1">
+                          {formatDateTime(order.scheduled_date)}
                         </div>
                       </div>
-
-                      <span className="text-sm font-semibold mb-2 line-clamp-2">
-                        {order.description}
-                      </span>
-
-                      <div className="flex gap-2 mb-2 flex-wrap">
-                        <span
-                          className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
-                        >
-                          {translateCalendarStatus(order.status)}
-                        </span>
-                        {order.priority && (
-                          <span
-                            className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getPriorityBadgeStyle(order.priority)}`}
-                          >
-                            {translatePriority(order.priority)}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-auto pt-2 text-xs opacity-70 font-medium">
-                        {order.order_machine?.name || "Brak maszyny"}
-                      </div>
-                      <div className="text-xs opacity-90 font-bold mt-1">
-                        {formatDateTime(order.scheduled_date)}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })}

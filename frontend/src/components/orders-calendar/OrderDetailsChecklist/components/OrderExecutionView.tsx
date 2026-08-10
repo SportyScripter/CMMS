@@ -1,31 +1,20 @@
 import React from "react";
-import {
-  ShieldAlert,
-  MessageSquare,
-  PlayCircle,
-  Clock,
-  CheckCircle2,
-  User,
-} from "lucide-react";
-import { formatDateTime,  calculateDowntime } from "../../../../utils/dateUtils";
+import { ShieldAlert, MessageSquare, PlayCircle, Clock, CheckCircle2, User, Info } from "lucide-react";
+import { formatDateTime, } from "../../../../utils/dateUtils";
 
 interface OrderExecutionViewProps {
   order: any;
-  localOrderComments: string;
-  setLocalOrderComments: (val: string) => void;
+  localExecutionReport: string; 
+  setLocalExecutionReport: (val: string) => void; 
   localChecklist: any[];
   isExecutionAllowed: boolean;
-  handleChecklistExecutionUpdate: (
-    itemId: number,
-    field: string,
-    value: string,
-  ) => void;
+  handleChecklistExecutionUpdate: (itemId: number, field: string, value: string) => void;
 }
 
 export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
   order,
-  localOrderComments,
-  setLocalOrderComments,
+  localExecutionReport,
+  setLocalExecutionReport,
   localChecklist,
   isExecutionAllowed,
   handleChecklistExecutionUpdate,
@@ -36,46 +25,39 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
         <div className="p-4 bg-red-50 text-red-800 rounded-xl border border-red-200 flex items-center shadow-sm">
           <ShieldAlert className="w-6 h-6 mr-3 shrink-0 text-red-600" />
           <p className="text-sm">
-            <strong>Brak uprawnień do realizacji.</strong> Zlecenie jest
-            przypisane do wydziału:
-            <span className="font-bold ml-1">
-              {order.assigned_role?.name || "innego"}
-            </span>
-            , lub jest już realizowane przez inną osobę.
+            <strong>Brak uprawnień do realizacji.</strong> Zlecenie jest przypisane do wydziału: 
+            <span className="font-bold ml-1">{order.assigned_role?.name || "innego"}</span>, 
+            lub jest już realizowane przez inną osobę.
           </p>
         </div>
       )}
 
-      {/* Execution Information only when started */}
-      {order.started_at && (
+      {/* Panel with execution information */}
+      {(order.started_at || order.work_time_minutes > 0) && (
         <div className="bg-indigo-50 border border-indigo-100 p-5 rounded-xl shadow-sm flex flex-col md:flex-row flex-wrap gap-4 md:gap-8 items-start md:items-center">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-100 rounded-lg text-indigo-700">
               <User className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-indigo-900/60 font-bold block text-xs uppercase tracking-wider">
-                Realizuje
-              </span>
+              <span className="text-indigo-900/60 font-bold block text-xs uppercase tracking-wider">Realizuje</span>
               <span className="font-bold text-indigo-900 text-sm">
                 {order.performed?.name} {order.performed?.lastname}
               </span>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg text-blue-700">
-              <PlayCircle className="w-5 h-5" />
+          
+          {order.started_at && (
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg text-blue-700">
+                <PlayCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-blue-900/60 font-bold block text-xs uppercase tracking-wider">Rozpoczęto</span>
+                <span className="font-bold text-blue-900 text-sm">{formatDateTime(order.started_at)}</span>
+              </div>
             </div>
-            <div>
-              <span className="text-blue-900/60 font-bold block text-xs uppercase tracking-wider">
-                Rozpoczęto
-              </span>
-              <span className="font-bold text-blue-900 text-sm">
-                {formatDateTime(order.started_at)}
-              </span>
-            </div>
-          </div>
+          )}
 
           {order.completed_at && (
             <div className="flex items-center gap-3">
@@ -83,57 +65,69 @@ export const OrderExecutionView: React.FC<OrderExecutionViewProps> = ({
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-emerald-900/60 font-bold block text-xs uppercase tracking-wider">
-                  Zakończono
-                </span>
-                <span className="font-bold text-emerald-900 text-sm">
-                  {formatDateTime(order.completed_at)}
-                </span>
+                <span className="text-emerald-900/60 font-bold block text-xs uppercase tracking-wider">Zakończono</span>
+                <span className="font-bold text-emerald-900 text-sm">{formatDateTime(order.completed_at)}</span>
               </div>
             </div>
           )}
 
-          {order.started_at && order.completed_at && (
-            <div className="flex items-center gap-3 md:ml-auto">
-              <div className="p-2 bg-gray-200 rounded-lg text-gray-700">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-gray-500 font-bold block text-xs uppercase tracking-wider">
-                  Czas trwania
-                </span>
-                <span className="font-bold text-gray-800 text-sm">
-                  {calculateDowntime(order.started_at, order.completed_at)}
-                </span>
-              </div>
+          {/* Work Time */}
+          <div className="flex items-center gap-3 md:ml-auto">
+            <div className="p-2 bg-gray-200 rounded-lg text-gray-700">
+              <Clock className="w-5 h-5" />
             </div>
-          )}
+            <div>
+              <span className="text-gray-500 font-bold block text-xs uppercase tracking-wider">Czas pracy</span>
+              <span className="font-bold text-gray-800 text-sm">
+                {order.work_time_minutes ? `${Math.floor(order.work_time_minutes / 60)}h ${order.work_time_minutes % 60}m` : "W toku"}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Common Information */}
+      {/* If order is paused show reason */}
+      {order.status === "paused" && order.pause_reason && (
+        <div className="p-4 bg-slate-100 text-slate-800 rounded-xl border border-slate-300 flex items-center shadow-sm">
+          <Info className="w-6 h-6 mr-3 shrink-0 text-slate-600" />
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wider text-slate-500">Powód wstrzymania</p>
+            <p className="font-medium">{order.pause_reason}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Main information */}
       <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
         <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-2 mb-4">
-          Informacje ogólne
+          Informacje ogólne i Raport
         </h4>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Opis zlecenia
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Krótki opis zadania</label>
             <div className="px-4 py-3 bg-gray-50 rounded-lg text-sm text-gray-800 border border-gray-200 min-h-[45px] shadow-inner">
               {order.description}
             </div>
           </div>
+          {order.comments && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Wskazówki dla wykonawcy (Planista)</label>
+              <div className="px-4 py-3 bg-amber-50/50 rounded-lg text-sm text-amber-900 border border-amber-200 min-h-[45px]">
+                {order.comments}
+              </div>
+            </div>
+          )}
+
+          {/* Execution Report */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Komentarz ogólny (raport po przeglądzie)
+              Raport z wykonania (Wypełnia technik)
             </label>
             <textarea
-              value={localOrderComments}
-              onChange={(e) => setLocalOrderComments(e.target.value)}
+              value={localExecutionReport}
+              onChange={(e) => setLocalExecutionReport(e.target.value)}
               disabled={!isExecutionAllowed}
-              placeholder="Wpisz uwagi zbiorcze dotyczące całego zlecenia..."
+              placeholder="Wpisz uwagi zbiorcze, co zostało zrobione..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm disabled:bg-gray-50 disabled:text-gray-500 min-h-[80px]"
             />
           </div>

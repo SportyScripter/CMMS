@@ -24,7 +24,7 @@ export const useOrderDetails = (
   const [checklist, setChecklist] = useState<any[]>([]);
 
   // --- EXECUTION STATES ---
-  const [localOrderComments, setLocalOrderComments] = useState("");
+  const [localExecutionReport, setLocalExecutionReport] = useState("");
   const [localChecklist, setLocalChecklist] = useState<any[]>([]);
 
   // --- EDIT MODE STATES ---
@@ -50,19 +50,31 @@ export const useOrderDetails = (
 
   // --- PERMISSIONS LOGIC ---
   const userRole = currentUser?.role?.name?.toLowerCase() || "";
-  const ADMIN_ROLES = ["admin", "super admin", "kierownik", "dyrektor", "technik"];
+  const ADMIN_ROLES = [
+    "admin",
+    "super admin",
+    "kierownik",
+    "dyrektor",
+    "technik",
+  ];
   const TECH_ROLES = ["mechanik", "mechanik2", "elektryk", "automatyk"];
 
   const canEditGlobalDetails = ADMIN_ROLES.includes(userRole);
 
   const canExecuteTask = () => {
     if (!order) return false;
-    if (canEditGlobalDetails) return true; 
-    if (!TECH_ROLES.includes(userRole)) return false; 
+    if (canEditGlobalDetails) return true;
+    if (!TECH_ROLES.includes(userRole)) return false;
 
-    if (order.performed && order.performed.id !== currentUser.id) return false;
-    if (order.assigned_role && order.assigned_role.name.toLowerCase() === userRole) return true;
-    if (!order.assigned_role) return true;
+    if (
+      order.assigned_role &&
+      order.assigned_role.name.toLowerCase() === userRole
+    ) {
+      return true;
+    }
+    if (!order.assigned_role) {
+      return true;
+    }
 
     return false;
   };
@@ -79,7 +91,9 @@ export const useOrderDetails = (
       ]);
       const fetchedOrder = orderRes.data;
       setOrder(fetchedOrder);
-      setLocalOrderComments(fetchedOrder.comments || "");
+
+      setLocalExecutionReport(fetchedOrder.execution_report || "");
+
       setChecklist(checklistRes.data);
       setLocalChecklist(JSON.parse(JSON.stringify(checklistRes.data)));
     } catch (err) {
@@ -115,7 +129,7 @@ export const useOrderDetails = (
 
       setEditOrderTypeId(order.order_type?.id?.toString() || "");
       setEditMachineId(order.order_machine?.id?.toString() || "");
-      setEditAssignedRoleId(order.assigned_role?.id?.toString() || ""); 
+      setEditAssignedRoleId(order.assigned_role?.id?.toString() || "");
       setEditDescription(order.description || "");
 
       const date = new Date(order.scheduled_date);
@@ -204,7 +218,7 @@ export const useOrderDetails = (
         description: editDescription.trim(),
         assigned_role_id: editAssignedRoleId
           ? Number(editAssignedRoleId)
-          : null, 
+          : null,
         machine_id: editMachineId ? Number(editMachineId) : null,
         scheduled_date: new Date(editScheduledDate).toISOString(),
         status: nextStatus,
@@ -253,35 +267,50 @@ export const useOrderDetails = (
     }
   };
 
-  const saveExecutionProgress = async (completeOrder: boolean = false) => {
+  const saveExecutionProgress = async (
+    completeOrder: boolean = false,
+    pauseReason?: string,
+    isOperational?: boolean,
+  ) => {
     if (!isExecutionAllowed) return;
     setIsSaving(true);
 
     try {
-      const orderUpdatePayload: any = { comments: localOrderComments };
-      if (completeOrder) {
-        orderUpdatePayload.status = "completed";
-      }
-
-      await api.patch(`/order-calendar/${order.id}`, orderUpdatePayload);
-
-      const promises = localChecklist.map((item) =>
+      const updatePromises = localChecklist.map((item) =>
         api.patch(`/order-checklist-items/${item.id}`, {
           status: item.status,
-          comments: item.comments,
+          comments: item.comments || null,
         }),
       );
-      await Promise.all(promises);
+      await Promise.all(updatePromises);
 
+      let newStatus = order?.status;
+      if (completeOrder) {
+        newStatus = "completed";
+      } else if (pauseReason) {
+        newStatus = "paused";
+      }
+
+      const orderPayload: any = {
+        status: newStatus,
+        execution_report: localExecutionReport.trim() || null,
+      };
+
+      if (pauseReason) {
+        orderPayload.pause_reason = pauseReason.trim();
+        orderPayload.is_machine_operational = isOperational;
+      }
+
+      await api.patch(`/order-calendar/${orderId}`, orderPayload);
+
+      fetchOrderDetails();
       onUpdated();
       if (completeOrder) {
         onClose();
-      } else {
-        fetchOrderDetails();
-        alert("Zapisano postępy!");
       }
-    } catch (err) {
-      alert("Wystąpił błąd podczas zapisu postępów.");
+    } catch (err: any) {
+      console.error("Błąd zapisywania postępów:", err);
+      alert("Nie udało się zapisać postępów.");
     } finally {
       setIsSaving(false);
     }
@@ -295,16 +324,16 @@ export const useOrderDetails = (
     currentUser,
     order,
     checklist,
-    localOrderComments,
-    setLocalOrderComments,
+    localExecutionReport,
     localChecklist,
+    setLocalExecutionReport,
     isEditMode,
     setIsEditMode,
     editOrderTypeId,
     setEditOrderTypeId,
     editMachineId,
     setEditMachineId,
-    editAssignedRoleId, 
+    editAssignedRoleId,
     setEditAssignedRoleId,
     editDescription,
     setEditDescription,
@@ -315,7 +344,7 @@ export const useOrderDetails = (
     setIsAddChecklistModalOpen,
     machines,
     orderTypes,
-    rolesList, 
+    rolesList,
     isLoading,
     isSaving,
     error,

@@ -298,20 +298,20 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-start gap-3">
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase">
-                    Opis zlecenia
+                    Wskazówki / dodatkowy opis
                   </p>
                   <p className="text-sm font-medium text-gray-900 mt-0.5">
-                    {selectedOrder.description || "Brak dodatkowego opisu."}
+                    {selectedOrder.comments || "Brak dodatkowego opisu."}
                   </p>
                 </div>
               </div>
               <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-start gap-3">
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase">
-                    Dodatkowe informacje / uwagi
+                    Raport z wykonania / uwagi
                   </p>
                   <p className="text-sm font-medium text-gray-900 mt-0.5">
-                    {selectedOrder.comments || "Brak uwag."}
+                    {selectedOrder.execution_report || "Brak uwag."}
                   </p>
                 </div>
               </div>
@@ -397,17 +397,22 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                   onClick={() => setSelectedOrder(order)}
                   className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-l-4 border-l-indigo-400 group"
                 >
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span
-                        className={`px-3 py-1 font-bold text-sm rounded-lg border uppercase ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
+                        className={`px-3 py-1 font-bold text-sm rounded-lg border uppercase ${getCalendarBadgeStyle(
+                          order.status,
+                          order.scheduled_date,
+                        )}`}
                       >
                         {translateCalendarStatus(order.status)}
                       </span>
 
                       {order.priority && (
                         <span
-                          className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getPriorityBadgeStyle(order.priority)}`}
+                          className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getPriorityBadgeStyle(
+                            order.priority,
+                          )}`}
                         >
                           {translatePriority(order.priority)}
                         </span>
@@ -425,11 +430,17 @@ export const MachineOrdersModal: React.FC<MachineOrdersModalProps> = ({
                         </span>
                       )}
                     </div>
-                    <p className="text-sm font-medium text-gray-900 line-clamp-1">
+
+                    <p className="text-sm font-bold text-gray-900 truncate">
                       {order.order_type?.name || "Brak tytułu"}
                     </p>
+
+                    <p className="text-sm text-gray-500 truncate mt-0.5">
+                      {order.description || "Brak dodatkowego opisu."}
+                    </p>
                   </div>
-                  <div className="hidden sm:block">
+
+                  <div className="hidden sm:block shrink-0 ml-4">
                     <ArrowLeft className="w-5 h-5 text-gray-300 group-hover:text-indigo-600 rotate-180 transition-colors" />
                   </div>
                 </div>

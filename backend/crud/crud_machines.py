@@ -93,17 +93,31 @@ def recalculate_machine_status(db: Session, machine_id: int):
     elif "PENDING" in statuses:
         machine.status = "PENDING"
     else:
-        active_order = (
+        # Evaluate active maintenance orders
+        active_orders = (
             db.query(OrderCalendar)
             .filter(
                 OrderCalendar.machine_id == machine_id,
-                OrderCalendar.status == "in_progress",
+                OrderCalendar.status.in_(["in_progress", "paused"]),
             )
-            .first()
+            .all()
         )
 
-        if active_order:
-            machine.status = "MAINTENANCE"
+        if active_orders:
+            is_in_progress = any(o.status == "in_progress" for o in active_orders)
+            is_paused_non_operational = any(
+                o.status == "paused" and not o.is_machine_operational
+                for o in active_orders
+            )
+
+            if is_in_progress:
+                machine.status = "MAINTENANCE"
+            elif is_paused_non_operational:
+                # Triggers when a task is paused and the machine is left dismantled
+                machine.status = "MAINTENANCE_ON_HOLD"
+            else:
+                # Triggers when a task is paused, but the machine can still operate
+                machine.status = "OPERATIONAL"
         else:
             machine.status = "OPERATIONAL"
 

@@ -3,7 +3,7 @@
  * Returns a human-readable string, e.g., "2d 4h 15m" or "45m".
  */
 
-const ensureUtc = (dateStr: string): string => {
+export const ensureUtc = (dateStr: string): string => {
   if (!dateStr) return dateStr;
   return dateStr.endsWith("Z") || dateStr.includes("+")
     ? dateStr
