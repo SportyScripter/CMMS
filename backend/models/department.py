@@ -26,4 +26,5 @@ class Department(Base):
     )
 
     # Relationships
+    users = relationship("User", back_populates="department")
     failures = relationship("Failure", back_populates="department")

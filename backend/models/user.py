@@ -50,8 +50,15 @@ class User(Base, TimestampMixin):
         nullable=False,
         comment="Determines the access level and permissions for the user",
     )
+    department_id = Column(
+        Integer,
+        ForeignKey("departments.id"),
+        nullable=True,
+        comment="Optional link to the department the user belongs to",
+    )
 
     # Relationships
+    department = relationship("Department", back_populates="users")
     role = relationship("Role", back_populates="users")
 
     submitted_failures = relationship(

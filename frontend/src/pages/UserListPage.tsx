@@ -34,7 +34,7 @@ export const UserListPage = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get<User[]>("/users");
+      const response = await api.get<User[]>("/users/");
       setUsers(response.data);
     } catch (err: any) {
       setError(

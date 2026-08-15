@@ -8,11 +8,14 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
-import { User } from "../../types/auth";
+import { User, Role } from "../../types/auth";
 import { api } from "../../api/axiosConfig";
-import { Role } from "../../types/auth";
+
 // --- INTERFACES ---
-// Defines the role structure fetched from the /roles endpoint.
+interface Department {
+  id: number;
+  name: string;
+}
 
 interface UserDetailsModalProps {
   user: User | null;
@@ -34,9 +37,9 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // --- ROLES LIST STATE ---
-  // Stores available system roles for the role selection dropdown in the edit form.
+  // --- ROLES & DEPARTMENTS LIST STATE ---
   const [roles, setRoles] = useState<Role[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   // --- EDIT FORM STATES ---
   const [editName, setEditName] = useState(user?.name || "");
@@ -45,23 +48,29 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   const [editRoleId, setEditRoleId] = useState<number | "">(
     user?.role_id || "",
   );
+  const [editDepartmentId, setEditDepartmentId] = useState<number | "">(
+    (user as any)?.department_id || (user as any)?.department?.id || ""
+  );
 
   // --- PASSWORD FORM STATES ---
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // --- FETCH ROLES ON MOUNT ---
-  // Fetches all available system roles once when the modal initializes.
+  // --- FETCH DATA ON MOUNT ---
   useEffect(() => {
-    const fetchRoles = async () => {
+    const fetchFormData = async () => {
       try {
-        const response = await api.get<Role[]>("/roles");
-        setRoles(response.data);
+        const [rolesRes, deptsRes] = await Promise.all([
+          api.get<Role[]>("/roles/"),
+          api.get<Department[]>("/departments/"),
+        ]);
+        setRoles(rolesRes.data);
+        setDepartments(deptsRes.data);
       } catch (err) {
-        console.error("Failed to fetch roles list", err);
+        console.error("Failed to fetch roles and departments list", err);
       }
     };
-    fetchRoles();
+    fetchFormData();
   }, []);
 
   // --- LIFECYCLE HOOKS ---
@@ -71,7 +80,8 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
       setEditName(user.name);
       setEditLastName(user.lastname);
       setEditSap(user.sap_number);
-      setEditRoleId(user.role_id || (user.role?.id as number) || "");
+      setEditRoleId(user.role_id || user.role?.id || "");
+      setEditDepartmentId((user as any).department_id || (user as any).department?.id || "");
       setActiveTab("info");
       setError("");
       setNewPassword("");
@@ -83,7 +93,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 
   // --- API HANDLERS ---
 
-  // 1. Handle User Information & Role Update
+  // 1. Handle User Information & Role & Department Update
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -95,6 +105,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
         lastname: editLastName,
         sap_number: editSap,
         role_id: editRoleId !== "" ? Number(editRoleId) : null,
+        department_id: editDepartmentId !== "" ? Number(editDepartmentId) : null,
       });
       onUpdated();
       setActiveTab("info");
@@ -113,7 +124,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     e.preventDefault();
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("Hasła nie są identyczne.");
       return;
     }
 
@@ -126,9 +137,9 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
       });
       onUpdated();
       setActiveTab("info");
-      alert("Password has been successfully changed!");
+      alert("Hasło zostało pomyślnie zmienione!");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to change the password.");
+      setError(err.response?.data?.detail || "Nie udało się zmienić hasła.");
     } finally {
       setIsLoading(false);
     }
@@ -138,7 +149,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   const handleDeleteUser = async () => {
     if (
       !window.confirm(
-        `Are you sure you want to delete ${user.name} ${user.lastname}? This action cannot be undone.`,
+        `Czy na pewno chcesz usunąć pracownika ${user.name} ${user.lastname}? Ta akcja jest nieodwracalna.`,
       )
     ) {
       return;
@@ -150,7 +161,7 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
       onUpdated();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to delete the user.");
+      setError(err.response?.data?.detail || "Nie udało się usunąć użytkownika.");
       setIsLoading(false);
     }
   };
@@ -231,6 +242,14 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase font-semibold">
+                    Wydział
+                  </p>
+                  <p className="font-medium text-purple-600 mt-0.5">
+                    {(user as any).department?.name || "Brak (Ogólne)"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase font-semibold">
                     Status
                   </p>
                   <p
@@ -296,25 +315,48 @@ export const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                 />
               </div>
 
-              {/* Role Selection Dropdown */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rola użytkownika
-                </label>
-                <select
-                  value={editRoleId}
-                  onChange={(e) =>
-                    setEditRoleId(e.target.value ? Number(e.target.value) : "")
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"
-                >
-                  <option value="">Wybierz rolę...</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Role Selection Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Rola użytkownika
+                  </label>
+                  <select
+                    value={editRoleId}
+                    onChange={(e) =>
+                      setEditRoleId(e.target.value ? Number(e.target.value) : "")
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"
+                  >
+                    <option value="">Wybierz rolę...</option>
+                    {roles.map((role) => (
+                      <option key={role.id} value={role.id}>
+                        {role.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Department Selection Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Wydział
+                  </label>
+                  <select
+                    value={editDepartmentId}
+                    onChange={(e) =>
+                      setEditDepartmentId(e.target.value ? Number(e.target.value) : "")
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"
+                  >
+                    <option value="">Brak (Ogólny)</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div className="pt-4 flex justify-end gap-3 border-t border-gray-100">
