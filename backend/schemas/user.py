@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field
-
+from schemas.department import DepartmentResponse
 from schemas.role import RoleMinimal
 
 
@@ -20,6 +21,10 @@ class UserBase(BaseModel):
         ...,
         max_length=50,
         description="The surname of the employee.",
+    )
+    department_id: Optional[int] = Field(
+        None,
+        description="The internal database ID of the department the user belongs to. Optional.",
     )
     is_active: bool = Field(
         default=False,
@@ -61,6 +66,10 @@ class UserUpdate(BaseModel):
         min_length=8,
         description="Updated raw password.",
     )
+    department_id: Optional[int] = Field(
+        None,
+        description="Updated department ID.",
+    )
     role_id: int | None = Field(None, description="Updated role ID.")
 
 
@@ -79,5 +88,6 @@ class UserResponse(UserBase):
         ...,
         description="Timestamp of the last update to the user profile.",
     )
+    department: Optional["DepartmentResponse"] = None
     role: RoleMinimal = Field(..., description="Details of the assigned role")
     model_config = {"from_attributes": True}
