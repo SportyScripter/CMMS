@@ -6,6 +6,7 @@ export interface User {
     role_id : number,
     is_active : boolean,
     role: Role;
+    department_id?: number;
 }
 
 export interface Role {
