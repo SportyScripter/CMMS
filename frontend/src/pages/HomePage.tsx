@@ -33,7 +33,6 @@ export const HomePage = () => {
     "dyrektor",
   ].includes(userRole);
 
-  // Pobieramy ID przypisanego departamentu z profilu użytkownika
   const userDeptId =
     (currentUser as any)?.department_id || (currentUser as any)?.department?.id;
   const userRoleId = currentUser?.role_id || currentUser?.role?.id;
@@ -87,7 +86,7 @@ export const HomePage = () => {
     return stats;
   }, [activeFailures]);
 
-  // --- ORDER STATS (FOR TODAY) ---
+  // --- ORDER STATS (FOR TODAY & OVERDUE) ---
   const todaysOrders = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -108,15 +107,37 @@ export const HomePage = () => {
   }, [orders, userRole, isManagement]);
 
   const orderStats = useMemo(() => {
-    const stats = { SCHEDULED: 0, IN_PROGRESS: 0, COMPLETED: 0 };
-    todaysOrders.forEach((o) => {
-      const s = o.status?.toUpperCase() as keyof typeof stats;
-      if (stats[s] !== undefined) {
-        stats[s]++;
+    const stats = { OVERDUE: 0, SCHEDULED: 0, IN_PROGRESS: 0, COMPLETED: 0 };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    orders.forEach((o) => {
+      if (
+        !isManagement &&
+        o.assigned_role?.name?.toLowerCase() !== userRole &&
+        o.assigned_role !== null
+      )
+        return;
+
+      const orderDate = new Date(ensureUtc(o.scheduled_date));
+      orderDate.setHours(0, 0, 0, 0);
+      const s = o.status?.toUpperCase() || "";
+
+      // Check whether the date has passed and whether the status indicates an unfinished order
+      const isOverdue =
+        orderDate.getTime() < today.getTime() &&
+        ["SCHEDULED", "UN_COMPLETED"].includes(s);
+
+      if (isOverdue) {
+        stats.OVERDUE++;
+      } else if (orderDate.getTime() === today.getTime()) {
+        if (s === "SCHEDULED") stats.SCHEDULED++;
+        else if (s === "IN_PROGRESS") stats.IN_PROGRESS++;
+        else if (s === "COMPLETED") stats.COMPLETED++;
       }
     });
     return stats;
-  }, [todaysOrders]);
+  }, [orders, userRole, isManagement]);
 
   // --- MACHINE STATS ---
   const machineStats = useMemo(() => {
@@ -130,7 +151,7 @@ export const HomePage = () => {
     return stats;
   }, [machines]);
 
-  // --- NAVIGATION AND FILTERS ---
+  // --- NAVIGATION WITH FILTERS ---
   const buildUrlWithFilters = (baseUrl: string, status?: string) => {
     const params = new URLSearchParams();
     if (status) {
@@ -138,12 +159,9 @@ export const HomePage = () => {
     }
 
     if (!isManagement) {
-      // Dla kalendarza filtrujemy po ROLI
       if (baseUrl.includes("/calendar")) {
         if (userRoleId) params.append("role", userRoleId.toString());
-      }
-      // Dla awarii i maszyn po DEPARTAMENCIE
-      else {
+      } else {
         if (userDeptId) params.append("department", userDeptId.toString());
       }
     }
@@ -245,11 +263,17 @@ export const HomePage = () => {
                 className="flex justify-between items-center hover:bg-gray-50 p-1.5 -mx-1.5 rounded-md transition-colors"
               >
                 <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getCalendarBadgeStyle(status)}`}
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${status === "OVERDUE" ? "bg-red-100 text-red-800 border-red-300" : getCalendarBadgeStyle(status)}`}
                 >
-                  {translateCalendarStatus(status)}
+                  {status === "OVERDUE"
+                    ? "Spóźnione"
+                    : translateCalendarStatus(status)}
                 </span>
-                <span className="font-bold">{count}</span>
+                <span
+                  className={`font-bold ${status === "OVERDUE" && count > 0 ? "text-red-600" : ""}`}
+                >
+                  {count}
+                </span>
               </div>
             ))}
           </div>
