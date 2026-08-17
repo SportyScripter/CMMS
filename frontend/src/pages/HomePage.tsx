@@ -10,14 +10,14 @@ import {
   Package,
   AlertTriangle,
   ArrowRight,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { ensureUtc } from "../utils/dateUtils";
-import { 
-  translateStatus, 
-  getStatusBadgeStyle, 
-  translateCalendarStatus, 
-  getCalendarBadgeStyle 
+import {
+  translateStatus,
+  getStatusBadgeStyle,
+  translateCalendarStatus,
+  getCalendarBadgeStyle,
 } from "../utils/statusUtils";
 
 export const HomePage = () => {
@@ -26,10 +26,17 @@ export const HomePage = () => {
   const navigate = useNavigate();
 
   const userRole = currentUser?.role?.name?.toLowerCase() || "";
-  const isManagement = ["admin", "super admin", "kierownik", "dyrektor"].includes(userRole);
-  
+  const isManagement = [
+    "admin",
+    "super admin",
+    "kierownik",
+    "dyrektor",
+  ].includes(userRole);
+
   // Pobieramy ID przypisanego departamentu z profilu użytkownika
-  const userDeptId = (currentUser as any)?.department_id || (currentUser as any)?.department?.id;
+  const userDeptId =
+    (currentUser as any)?.department_id || (currentUser as any)?.department?.id;
+  const userRoleId = currentUser?.role_id || currentUser?.role?.id;
 
   const [isLoading, setIsLoading] = useState(true);
   const [failures, setFailures] = useState<any[]>([]);
@@ -73,7 +80,7 @@ export const HomePage = () => {
 
   const failureStats = useMemo(() => {
     const stats: Record<string, number> = {};
-    activeFailures.forEach(f => {
+    activeFailures.forEach((f) => {
       const status = f.status?.toUpperCase() || "UNKNOWN";
       stats[status] = (stats[status] || 0) + 1;
     });
@@ -86,18 +93,23 @@ export const HomePage = () => {
     today.setHours(0, 0, 0, 0);
 
     return orders.filter((o) => {
-      if (!isManagement && o.assigned_role?.name?.toLowerCase() !== userRole && o.assigned_role !== null) return false;
-      
+      if (
+        !isManagement &&
+        o.assigned_role?.name?.toLowerCase() !== userRole &&
+        o.assigned_role !== null
+      )
+        return false;
+
       const orderDate = new Date(ensureUtc(o.scheduled_date));
       orderDate.setHours(0, 0, 0, 0);
-      
+
       return orderDate.getTime() === today.getTime();
     });
   }, [orders, userRole, isManagement]);
 
   const orderStats = useMemo(() => {
     const stats = { SCHEDULED: 0, IN_PROGRESS: 0, COMPLETED: 0 };
-    todaysOrders.forEach(o => {
+    todaysOrders.forEach((o) => {
       const s = o.status?.toUpperCase() as keyof typeof stats;
       if (stats[s] !== undefined) {
         stats[s]++;
@@ -109,7 +121,7 @@ export const HomePage = () => {
   // --- MACHINE STATS ---
   const machineStats = useMemo(() => {
     const stats = { OPERATIONAL: 0, WARNING: 0, CRITICAL: 0, OFF: 0 };
-    machines.forEach(m => {
+    machines.forEach((m) => {
       const s = m.status?.toUpperCase() as keyof typeof stats;
       if (stats[s] !== undefined) {
         stats[s]++;
@@ -124,8 +136,16 @@ export const HomePage = () => {
     if (status) {
       params.append("status", status);
     }
-    if (!isManagement && userDeptId) {
-      params.append("department", userDeptId.toString());
+
+    if (!isManagement) {
+      // Dla kalendarza filtrujemy po ROLI
+      if (baseUrl.includes("/calendar")) {
+        if (userRoleId) params.append("role", userRoleId.toString());
+      }
+      // Dla awarii i maszyn po DEPARTAMENCIE
+      else {
+        if (userDeptId) params.append("department", userDeptId.toString());
+      }
     }
     return `${baseUrl}?${params.toString()}`;
   };
@@ -142,15 +162,21 @@ export const HomePage = () => {
   return (
     <div className="max-w-7xl mx-auto p-4 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Witaj, {currentUser?.name}! 👋</h1>
-        <p className="text-gray-600 mt-1">Oto podsumowanie na dzisiaj dla działu: <span className="font-semibold text-blue-600 capitalize">{userRole}</span></p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Witaj, {currentUser?.name}! 👋
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Oto podsumowanie na dzisiaj dla działu:{" "}
+          <span className="font-semibold text-blue-600 capitalize">
+            {userRole}
+          </span>
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
         {/* Tile 1: Failures */}
-        <div 
-          onClick={() => navigate(buildUrlWithFilters('/failures', 'active'))} 
+        <div
+          onClick={() => navigate(buildUrlWithFilters("/failures", "active"))}
           className="bg-white rounded-2xl p-6 border border-red-100 shadow-sm hover:shadow-md hover:border-red-300 transition-all cursor-pointer group flex flex-col"
         >
           <div className="flex justify-between items-start mb-4">
@@ -161,21 +187,25 @@ export const HomePage = () => {
               {activeFailures.length} Aktywnych
             </span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Awarie i Usterki</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Awarie i Usterki
+          </h2>
           <div className="space-y-1.5 mb-4 flex-1">
             {Object.entries(failureStats).length === 0 ? (
               <p className="text-sm text-gray-500">Brak aktywnych awarii! 🎉</p>
             ) : (
               Object.entries(failureStats).map(([status, count]) => (
-                <div 
-                  key={status} 
+                <div
+                  key={status}
                   onClick={(e) => {
-                    e.stopPropagation(); 
-                    navigate(buildUrlWithFilters('/failures', status));
+                    e.stopPropagation();
+                    navigate(buildUrlWithFilters("/failures", status));
                   }}
                   className="flex justify-between items-center text-sm text-gray-600 hover:bg-gray-50 p-1.5 -mx-1.5 rounded-md transition-colors"
                 >
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getStatusBadgeStyle(status)}`}>
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getStatusBadgeStyle(status)}`}
+                  >
                     {translateStatus(status)}
                   </span>
                   <span className="font-bold">{count}</span>
@@ -189,8 +219,8 @@ export const HomePage = () => {
         </div>
 
         {/* Tile 2: Orders for Today */}
-        <div 
-          onClick={() => navigate(buildUrlWithFilters('/calendar'))} 
+        <div
+          onClick={() => navigate(buildUrlWithFilters("/calendar"))}
           className="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group flex flex-col"
         >
           <div className="flex justify-between items-start mb-4">
@@ -201,18 +231,22 @@ export const HomePage = () => {
               {todaysOrders.length} Na dzisiaj
             </span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Harmonogram Zleceń</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Harmonogram Zleceń
+          </h2>
           <div className="space-y-1.5 mb-4 flex-1 text-sm text-gray-600">
             {Object.entries(orderStats).map(([status, count]) => (
-              <div 
+              <div
                 key={status}
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(buildUrlWithFilters('/calendar', status));
+                  navigate(buildUrlWithFilters("/calendar", status));
                 }}
                 className="flex justify-between items-center hover:bg-gray-50 p-1.5 -mx-1.5 rounded-md transition-colors"
               >
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getCalendarBadgeStyle(status)}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getCalendarBadgeStyle(status)}`}
+                >
                   {translateCalendarStatus(status)}
                 </span>
                 <span className="font-bold">{count}</span>
@@ -225,8 +259,8 @@ export const HomePage = () => {
         </div>
 
         {/* Tile 4: Machines */}
-        <div 
-          onClick={() => navigate(buildUrlWithFilters('/machines'))} 
+        <div
+          onClick={() => navigate(buildUrlWithFilters("/machines"))}
           className="bg-white rounded-2xl p-6 border border-emerald-100 shadow-sm hover:shadow-md hover:border-emerald-300 transition-all cursor-pointer group flex flex-col"
         >
           <div className="flex justify-between items-start mb-4">
@@ -237,18 +271,22 @@ export const HomePage = () => {
               {machines.length} Maszyn
             </span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Park Maszynowy</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Park Maszynowy
+          </h2>
           <div className="space-y-1.5 mb-4 flex-1 text-sm text-gray-600">
             {Object.entries(machineStats).map(([status, count]) => (
-              <div 
+              <div
                 key={status}
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(buildUrlWithFilters('/machines', status));
+                  navigate(buildUrlWithFilters("/machines", status));
                 }}
                 className="flex justify-between items-center hover:bg-gray-50 p-1.5 -mx-1.5 rounded-md transition-colors"
               >
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getStatusBadgeStyle(status)}`}>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold border ${getStatusBadgeStyle(status)}`}
+                >
                   {translateStatus(status)}
                 </span>
                 <span className="font-bold">{count}</span>
@@ -261,8 +299,8 @@ export const HomePage = () => {
         </div>
 
         {/* Tile 5: Warehouse */}
-        <div 
-          onClick={() => navigate('/parts')} 
+        <div
+          onClick={() => navigate("/parts")}
           className="bg-white rounded-2xl p-6 border border-purple-100 shadow-sm hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group flex flex-col"
         >
           <div className="flex justify-between items-start mb-4">
@@ -270,9 +308,12 @@ export const HomePage = () => {
               <Package className="w-8 h-8" />
             </div>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Magazyn Części</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Magazyn Części
+          </h2>
           <p className="text-sm text-gray-600 mb-4 flex-1">
-            Zarządzaj stanami magazynowymi, zamawiaj części i przeglądaj stany minimalne dla maszyn.
+            Zarządzaj stanami magazynowymi, zamawiaj części i przeglądaj stany
+            minimalne dla maszyn.
           </p>
           <div className="flex items-center text-sm font-bold text-purple-600 group-hover:translate-x-1 transition-transform">
             Przejdź do magazynu <ArrowRight className="w-4 h-4 ml-1" />
@@ -291,10 +332,10 @@ export const HomePage = () => {
           </div>
           <h2 className="text-xl font-bold text-gray-500 mb-2">Wiadomości</h2>
           <p className="text-sm text-gray-400 mb-4 flex-1">
-            Wewnętrzny komunikator i system powiadomień dla pracowników utrzymania ruchu. Moduł w budowie.
+            Wewnętrzny komunikator i system powiadomień dla pracowników
+            utrzymania ruchu. Moduł w budowie.
           </p>
         </div>
-
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import {
   ChevronLeft,
@@ -10,6 +11,9 @@ import {
   AlertCircle,
   Eye,
   Users,
+  Play,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { Order } from "../types/order-calendar";
 import { AddOrderModal } from "../components/orders-calendar/AddOrderModal";
@@ -27,6 +31,8 @@ import { formatDateTime, ensureUtc } from "../utils/dateUtils";
 export const OrderCalendarPage = () => {
   const { user } = useAuth();
   const currentUser = user as User;
+
+  const [searchParams] = useSearchParams();
 
   const userRole = currentUser?.role?.name?.toLowerCase() || "";
   const canAddOrder = [
@@ -50,9 +56,13 @@ export const OrderCalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // --- FILTERS ---
+  const initialStatus = searchParams.get("status")?.toUpperCase() || "ALL";
+  const initialRole = searchParams.get("role") || "ALL"; // ODCZYT ROLI Z URL
+
   const [filterMachine, setFilterMachine] = useState("ALL");
   const [filterType, setFilterType] = useState("ALL");
-  const [filterRole, setFilterRole] = useState("ALL");
+  const [filterRole, setFilterRole] = useState(initialRole);
+  const [filterStatus, setFilterStatus] = useState(initialStatus);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -123,6 +133,16 @@ export const OrderCalendarPage = () => {
     );
   };
 
+  // HELPER: checks whether the order is late
+  const checkIsOverdue = (status: string, date: string) => {
+    if (!["scheduled", "un_completed"].includes(status.toLowerCase())) return false;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const orderDate = new Date(ensureUtc(date));
+    orderDate.setHours(0, 0, 0, 0);
+    return orderDate.getTime() < todayStart.getTime(); 
+  };
+
   const filteredOrders = useMemo(() => {
     const getStatusWeight = (status: string) => {
       const s = status.toLowerCase();
@@ -133,6 +153,13 @@ export const OrderCalendarPage = () => {
     };
 
     return orders
+      .filter((o) => {
+        // WIRTUALNY STATUS: OVERDUE
+        if (filterStatus === "OVERDUE") {
+          return checkIsOverdue(o.status, o.scheduled_date);
+        }
+        return filterStatus === "ALL" || o.status.toUpperCase() === filterStatus;
+      })
       .filter(
         (o) =>
           filterMachine === "ALL" ||
@@ -199,6 +226,7 @@ export const OrderCalendarPage = () => {
     filterMachine,
     filterType,
     filterRole,
+    filterStatus,
     viewMode,
     dateFrom,
     dateTo,
@@ -236,6 +264,64 @@ export const OrderCalendarPage = () => {
         </div>
       )}
 
+      {/* --- STATUS FILTER BAR --- */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-2">
+        <button
+          onClick={() => setFilterStatus("ALL")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            filterStatus === "ALL"
+              ? "bg-gray-800 text-white border-gray-800"
+              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+          }`}
+        >
+          <List className="w-4 h-4 inline mr-1.5" /> Wszystkie
+        </button>
+
+        <button
+          onClick={() => setFilterStatus("SCHEDULED")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            filterStatus === "SCHEDULED"
+              ? "bg-gray-600 text-white border-gray-600"
+              : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+          }`}
+        >
+          <Clock className="w-4 h-4 inline mr-1.5" /> Zaplanowane
+        </button>
+
+        <button
+          onClick={() => setFilterStatus("OVERDUE")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            filterStatus === "OVERDUE"
+              ? "bg-red-600 text-white border-red-600"
+              : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+          }`}
+        >
+          <AlertCircle className="w-4 h-4 inline mr-1.5" /> Spóźnione
+        </button>
+
+        <button
+          onClick={() => setFilterStatus("IN_PROGRESS")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            filterStatus === "IN_PROGRESS"
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+          }`}
+        >
+          <Play className="w-4 h-4 inline mr-1.5" /> W trakcie
+        </button>
+
+        <button
+          onClick={() => setFilterStatus("COMPLETED")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
+            filterStatus === "COMPLETED"
+              ? "bg-emerald-600 text-white border-emerald-600"
+              : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+          }`}
+        >
+          <CheckCircle2 className="w-4 h-4 inline mr-1.5" /> Zakończone
+        </button>
+      </div>
+
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 gap-4">
         {/* Calendar navigation */}
         {viewMode === "calendar" ? (
@@ -268,7 +354,7 @@ export const OrderCalendarPage = () => {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center text-gray-500 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
             <Filter className="w-4 h-4 mr-2" />
-            <span className="text-sm font-medium">Filtry:</span>
+            <span className="text-sm font-medium">Filtry dodatkowe:</span>
           </div>
 
           <select
@@ -406,18 +492,7 @@ export const OrderCalendarPage = () => {
                   }`}
                 >
                   {dayOrders.map((order) => {
-                    const todayStart = new Date();
-                    todayStart.setHours(0, 0, 0, 0);
-
-                    const orderDate = new Date(ensureUtc(order.scheduled_date));
-                    orderDate.setHours(0, 0, 0, 0);
-
-                    const isOverdue =
-                      orderDate.getTime() <= todayStart.getTime() &&
-                      ["scheduled", "un_completed"].includes(
-                        order.status.toLowerCase(),
-                      );
-
+                    const isOverdue = checkIsOverdue(order.status, order.scheduled_date);
                     let cardStyle = "bg-white border-gray-200";
 
                     if (isOverdue) {
@@ -465,7 +540,7 @@ export const OrderCalendarPage = () => {
                           <span
                             className={`text-xs font-bold px-2 py-1 rounded-md border uppercase inline-block w-max ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
                           >
-                            {translateCalendarStatus(order.status)}
+                            {isOverdue ? "SPÓŹNIONE" : translateCalendarStatus(order.status)}
                           </span>
                           {order.priority && (
                             <span
@@ -529,56 +604,59 @@ export const OrderCalendarPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredOrders.map((order) => (
-                    <tr
-                      key={order.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatDateTime(order.scheduled_date)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
-                        >
-                          {translateCalendarStatus(order.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {order.priority && (
+                  {filteredOrders.map((order) => {
+                    const isOverdue = checkIsOverdue(order.status, order.scheduled_date);
+                    return (
+                      <tr
+                        key={order.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {formatDateTime(order.scheduled_date)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <span
-                            className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getPriorityBadgeStyle(order.priority)}`}
+                            className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getCalendarBadgeStyle(order.status, order.scheduled_date)}`}
                           >
-                            {translatePriority(order.priority)}
+                            {isOverdue ? "SPÓŹNIONE" : translateCalendarStatus(order.status)}
                           </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
-                        <div className="flex items-center">
-                          <Users className="w-4 h-4 mr-1.5 opacity-70" />
-                          {order.assigned_role?.name || "Brak (Ogólne)"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                        {order.order_machine?.name || "Nie przypisano"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {order.order_type?.name || "Brak"}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell max-w-xs truncate">
-                        {order.description}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => setSelectedOrderId(order.id)}
-                          className="inline-flex items-center text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
-                        >
-                          <Eye className="w-4 h-4 mr-1.5" />
-                          Podgląd
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {order.priority && (
+                            <span
+                              className={`text-xs font-bold px-2 py-1 rounded-md border uppercase ${getPriorityBadgeStyle(order.priority)}`}
+                            >
+                              {translatePriority(order.priority)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-indigo-600">
+                          <div className="flex items-center">
+                            <Users className="w-4 h-4 mr-1.5 opacity-70" />
+                            {order.assigned_role?.name || "Brak (Ogólne)"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                          {order.order_machine?.name || "Nie przypisano"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {order.order_type?.name || "Brak"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell max-w-xs truncate">
+                          {order.description}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => setSelectedOrderId(order.id)}
+                            className="inline-flex items-center text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+                          >
+                            <Eye className="w-4 h-4 mr-1.5" />
+                            Podgląd
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
