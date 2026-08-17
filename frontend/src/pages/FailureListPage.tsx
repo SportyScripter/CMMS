@@ -46,10 +46,23 @@ export const FailureListPage = () => {
   );
 
   // --- FILTER STATES ---
+  const resolveStatusCategory = (rawStatus: string | null) => {
+    if (!rawStatus || rawStatus === "active") return "ALL";
+    
+    const status = rawStatus.toUpperCase();
+    if (["PENDING", "ACCEPTED"].includes(status)) return "NEW";
+    if (status === "CRITICAL") return "CRITICAL";
+    if (status === "WARNING") return "WARNING";
+    if (["IN_PROGRESS", "WAITING_FOR_PARTS", "WAITING_FOR_SERVICE"].includes(status)) return "IN_PROGRESS";
+    
+    return "ALL";
+  };
+
+  const initialStatus = resolveStatusCategory(searchParams.get("status"));
   const [viewMode, setViewMode] = useState<"active" | "history">("active");
   const [machineFilter, setMachineFilter] = useState("ALL");
   const [departmentFilter, setDepartmentFilter] = useState(initialDepartment);
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 

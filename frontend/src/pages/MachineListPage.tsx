@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Machine } from "../types/machine";
 import { useAuth } from "../context/AuthContext";
@@ -25,15 +26,19 @@ export const MachineListPage = () => {
     user?.role?.name === "Super Admin" ||
     user?.role?.name === "Admin" ||
     user?.role?.name === "Kierownik";
+
+  const [searchParams] = useSearchParams();
+  const initialStatus = searchParams.get("status")?.toUpperCase() || "";
+
   const [machines, setMachines] = useState<Machine[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(!!initialStatus);
   const [filterName, setFilterName] = useState("");
   const [filterQr, setFilterQr] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState(initialStatus);
 
   const [failuresModalMachine, setFailuresModalMachine] = useState<{
     id: number;
@@ -68,10 +73,10 @@ export const MachineListPage = () => {
   }, []);
 
   const uniqueLocations = Array.from(
-    new Set(machines.map((machine) => machine.location)),
+    new Set(machines.map((machine) => machine.location).filter(Boolean)),
   );
   const uniqueStatuses = Array.from(
-    new Set(machines.map((machine) => machine.status)),
+    new Set(machines.map((machine) => machine.status).filter(Boolean)),
   );
 
   const filteredMachines = machines
@@ -81,23 +86,27 @@ export const MachineListPage = () => {
         .toLowerCase()
         .includes(filterName.toLowerCase());
       const matchQr = machine.qr_code
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(filterQr.toLowerCase());
       const matchLocation =
         filterLocation === "" || machine.location === filterLocation;
       const matchStatus =
-        filterStatus === "" || machine.status === filterStatus;
+        filterStatus === "" || machine.status?.toUpperCase() === filterStatus;
       return matchName && matchQr && matchLocation && matchStatus;
     })
     .sort((a, b) => {
-      // 2. Sorting logic
-      // Sort by location first (alphabetically)
-      const locationComparison = a.location.localeCompare(b.location, "pl");
+      // 2. Sorting logic - safely handle possibly undefined locations
+      const locA = a.location || "";
+      const locB = b.location || "";
+      
+      const locationComparison = locA.localeCompare(locB, "pl");
       if (locationComparison !== 0) {
         return locationComparison;
       }
-      // If locations are the exact same, sort by machine name (alphabetically)
-      return a.name.localeCompare(b.name, "pl");
+      
+      const nameA = a.name || "";
+      const nameB = b.name || "";
+      return nameA.localeCompare(nameB, "pl");
     });
 
   const clearFilters = () => {
@@ -210,12 +219,12 @@ export const MachineListPage = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white uppercase"
               >
                 <option value="">Wszystkie statusy</option>
                 {uniqueStatuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
+                  <option key={status} value={status?.toUpperCase()}>
+                    {translateStatus(status)}
                   </option>
                 ))}
               </select>
@@ -273,7 +282,7 @@ export const MachineListPage = () => {
                   QR: {machine.qr_code}
                 </p>
                 <p className="text-sm font-medium mt-2 capitalize">
-                  Status: {translateStatus(machine.status)}
+                  Status: {translateStatus(machine.status,)}
                 </p>
               </div>
               <div className="mt-auto pt-4 flex gap-3 border-t border-black/5">
