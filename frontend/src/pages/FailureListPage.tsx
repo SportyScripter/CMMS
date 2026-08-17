@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../api/axiosConfig";
 import { Failure, Department } from "../types/failure";
 import { Machine } from "../types/machine";
@@ -27,34 +28,31 @@ import {
 } from "../utils/statusUtils";
 
 export const FailureListPage = () => {
+  // --- URL PARAMS ---
+  const [searchParams] = useSearchParams();
+
+  const initialDepartment = searchParams.get("department") || "ALL";
+
   // --- API DATA STATES ---
-  // Stores data fetched from the backend (failures, machines, departments)
   const [failures, setFailures] = useState<Failure[]>([]);
   const [machines, setMachines] = useState<Machine[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // --- MODAL STATES ---
-  // Controls the visibility of the Add/Edit modals and stores the selected failure ID
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedFailureId, setSelectedFailureId] = useState<number | null>(
     null,
   );
 
   // --- FILTER STATES ---
-  // viewMode: Toggles between active tickets and resolved history
   const [viewMode, setViewMode] = useState<"active" | "history">("active");
-  // machineFilter & departmentFilter: Global dropdown filters
   const [machineFilter, setMachineFilter] = useState("ALL");
-  const [departmentFilter, setDepartmentFilter] = useState("ALL");
-  // statusFilter: Active view status badges (NEW, CRITICAL, etc.)
-  const [statusFilter, setStatusFilter] = useState("ALL"); // ALL, NEW, CRITICAL, WARNING, IN_PROGRESS
-  // dateFrom & dateTo: History view date range filters
+  const [departmentFilter, setDepartmentFilter] = useState(initialDepartment);
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // --- TIMER STATE ---
-  // Forces a component re-render every 60 seconds to keep downtime calculations accurate
   const [tick, setTick] = useState(0);
 
   const fetchData = async () => {
@@ -75,32 +73,27 @@ export const FailureListPage = () => {
     }
   };
 
+  // --- INITIALIZATION EFFECT ---
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => setTick((t) => t + 1), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // --- INTEGRATED FILTERING & SORTING LOGIC ---
-  // This useMemo hook recalculates the list only when data or filter states change.
   const filteredAndSortedFailures = useMemo(() => {
-    // STEP 1: FILTERING
     const filtered = failures.filter((f) => {
-      // 1A. Filter by View Mode (Active vs. History)
-      // Active view hides RESOLVED, History view only shows RESOLVED
       if (viewMode === "active" && f.status === "RESOLVED") return false;
       if (viewMode === "history" && f.status !== "RESOLVED") return false;
 
-      // 1B. Apply Global Filters (Machine and Department dropdowns)
       if (machineFilter !== "ALL" && f.machine_id.toString() !== machineFilter)
         return false;
+        
       if (
         departmentFilter !== "ALL" &&
         f.department_id.toString() !== departmentFilter
       )
         return false;
 
-      // 1C. Apply Status Filters (Only applicable in the 'active' view)
       if (viewMode === "active" && statusFilter !== "ALL") {
         if (
           statusFilter === "NEW" &&
@@ -119,7 +112,6 @@ export const FailureListPage = () => {
           return false;
       }
 
-      // 1D. Apply Date Range Filters (Only applicable in the 'history' view)
       if (viewMode === "history") {
         const failureDate = new Date(f.end_date || f.created_at).getTime();
 
@@ -128,7 +120,6 @@ export const FailureListPage = () => {
           if (failureDate < from) return false;
         }
         if (dateTo) {
-          // Set to the very end of the selected "To" date (23:59:59) to include all records from that day
           const to = new Date(dateTo);
           to.setHours(23, 59, 59, 999);
           if (failureDate > to.getTime()) return false;
@@ -138,9 +129,7 @@ export const FailureListPage = () => {
       return true;
     });
 
-    // STEP 2: SORTING
     return filtered.sort((a, b) => {
-      // Priority 1: CRITICAL failures always come first in the 'active' view
       if (viewMode === "active") {
         const aIsCritical = a.status === "CRITICAL";
         const bIsCritical = b.status === "CRITICAL";
@@ -148,12 +137,9 @@ export const FailureListPage = () => {
         if (!aIsCritical && bIsCritical) return 1;
       }
 
-      // Priority 2: sort by updated_at descending (newest first) for all other cases
-      // Fallback (||): if modal was never updated, use created_at for sorting
       const dateA = new Date(a.updated_at || a.created_at).getTime();
       const dateB = new Date(b.updated_at || b.created_at).getTime();
 
-      // dateB - dateA sort descending (newest first)
       return dateB - dateA;
     });
   }, [
@@ -191,7 +177,6 @@ export const FailureListPage = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Active / History View Toggle Buttons */}
           <div className="flex items-center bg-gray-100 p-1 rounded-lg border border-gray-200">
             <button
               onClick={() => setViewMode("active")}
@@ -215,7 +200,6 @@ export const FailureListPage = () => {
             </button>
           </div>
 
-          {/* Add New Failure Button */}
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center shadow-sm"
@@ -227,7 +211,6 @@ export const FailureListPage = () => {
 
       {/* --- FILTER BAR --- */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col xl:flex-row gap-4 justify-between">
-        {/* LEFT SIDE: Status Badges OR Date Pickers (depending on current view mode) */}
         <div className="flex-1">
           {viewMode === "active" ? (
             <div className="flex flex-wrap gap-2">
@@ -316,7 +299,6 @@ export const FailureListPage = () => {
           )}
         </div>
 
-        {/* RIGHT SIDE: Global Department and Machine Dropdowns */}
         <div className="flex items-center gap-3 border-t xl:border-t-0 xl:border-l border-gray-200 pt-4 xl:pt-0 xl:pl-4">
           <div className="flex items-center">
             <Filter className="w-4 h-4 text-gray-400 mr-2" />
