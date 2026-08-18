@@ -344,21 +344,23 @@ export const HomePage = () => {
           </div>
         </div>
 
-        {/* Tile 3: Messages (Placeholder) */}
-        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 opacity-70 relative flex flex-col">
-          <div className="absolute top-4 right-4 bg-gray-200 text-gray-600 text-xs font-bold px-2 py-1 rounded-md uppercase">
-            Wkrótce
-          </div>
+       {/* Tile 6: Messages */}
+        <div 
+          onClick={() => navigate('/messages')} 
+          className="bg-white rounded-2xl p-6 border border-indigo-100 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group flex flex-col"
+        >
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-gray-200 text-gray-500 rounded-xl">
+            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
               <MessageSquare className="w-8 h-8" />
             </div>
           </div>
-          <h2 className="text-xl font-bold text-gray-500 mb-2">Wiadomości</h2>
-          <p className="text-sm text-gray-400 mb-4 flex-1">
-            Wewnętrzny komunikator i system powiadomień dla pracowników
-            utrzymania ruchu. Moduł w budowie.
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Wiadomości</h2>
+          <p className="text-sm text-gray-600 mb-4 flex-1">
+            Wewnętrzna komunikacja, powiadomienia o zleceniach i zgłaszanie zapotrzebowania na części.
           </p>
+          <div className="flex items-center text-sm font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
+            Otwórz skrzynkę <ArrowRight className="w-4 h-4 ml-1" />
+          </div>
         </div>
       </div>
     </div>

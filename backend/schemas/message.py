@@ -1,7 +1,5 @@
 from datetime import datetime
-
 from pydantic import BaseModel, Field
-
 from schemas.message_recipient import MessageRecipientResponse
 from schemas.user import UserResponse
 
@@ -19,15 +17,21 @@ class MessageBase(BaseModel):
     )
     subject: str = Field(..., description="Topic or summary of the message.")
     content: str = Field(..., description="Main body text of the message.")
-    sender_id: int = Field(..., description="User who sent the message.")
+
     role_id: int | None = Field(
         None,
         description="Optional role-based broadcast target.",
+    )
+    department_id: int | None = Field(
+        None,
+        description="Optional department-based broadcast target.",
     )
 
 
 class MessageCreate(MessageBase):
     """Schema used for creating and sending a new internal message."""
+
+    pass
 
 
 class MessageUpdate(BaseModel):
@@ -38,8 +42,10 @@ class MessageUpdate(BaseModel):
     subject: str | None = Field(None, description="Updated topic or summary.")
     content: str | None = Field(None, description="Updated main body text.")
     role_id: int | None = Field(
-        None,
-        description="Updated role-based broadcast target.",
+        None, description="Updated role-based broadcast target."
+    )
+    department_id: int | None = Field(
+        None, description="Updated department-based broadcast target."
     )
 
 
@@ -49,6 +55,7 @@ class MessageResponse(MessageBase):
     """
 
     id: int = Field(..., description="The unique internal identifier of the message.")
+    sender_id: int = Field(..., description="User who sent the message.")
     sent_at: datetime = Field(
         ...,
         description="Exact timestamp when the message was dispatched.",

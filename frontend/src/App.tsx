@@ -13,7 +13,8 @@ import { PartListPage } from "./pages/PartListPage";
 import { FailureListPage } from "./pages/FailureListPage";
 import { DepartmentManagementPage } from "./pages/DepartmentManagementPage";
 import { OrderCalendarPage } from "./pages/OrderCalendarPage";
-import {HomePage} from "./pages/HomePage";
+import { MessagesPage } from "./pages/MessagesPage";
+import { HomePage } from "./pages/HomePage";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoading } = useAuth();
 
@@ -69,11 +70,11 @@ const AppRoutes = () => {
         <Route path="/calendar" element={<OrderCalendarPage />} />
         <Route path="/parts" element={<PartListPage />} />
         <Route
-          path="messages"
+          path="/messages"
           element={
-            <div>
-              <h1 className="text-2xl font-bold mb-4">Wiadomości</h1>
-            </div>
+            <ProtectedRoute>
+              <MessagesPage />
+            </ProtectedRoute>
           }
         />
         <Route path="users" element={<UsersDashboard />} />

@@ -2,26 +2,43 @@ from sqlalchemy.orm import Session, joinedload
 
 from models.message import Message
 from models.message_recipient import MessageRecipient
+from models.user import User
 from schemas.message import MessageCreate
 
 
-def create_message(db: Session, message_in: MessageCreate) -> Message:
-    """Create a new message and assign it to its recipients."""
+def create_message(db: Session, message_in: MessageCreate, sender_id: int) -> Message:
+    """Create a new message and auto-resolve recipients based on direct IDs, role, and department."""
     msg_data = message_in.model_dump(exclude={"recipient_ids"})
-    db_message = Message(**msg_data)
+    db_message = Message(**msg_data, sender_id=sender_id)
     db.add(db_message)
     db.commit()
     db.refresh(db_message)
-    if message_in.recipient_ids:
-        for r_id in message_in.recipient_ids:
+    final_recipient_ids = set(message_in.recipient_ids)
+
+    if message_in.role_id:
+        role_users = db.query(User.id).filter(User.role_id == message_in.role_id).all()
+        final_recipient_ids.update([u.id for u in role_users])
+
+    if message_in.department_id:
+        dept_users = (
+            db.query(User.id)
+            .filter(User.department_id == message_in.department_id)
+            .all()
+        )
+        final_recipient_ids.update([u.id for u in dept_users])
+
+    final_recipient_ids.discard(sender_id)
+
+    if final_recipient_ids:
+        for r_id in final_recipient_ids:
             db_recipient = MessageRecipient(message_id=db_message.id, recipient_id=r_id)
             db.add(db_recipient)
         db.commit()
+
     return get_message(db, message_id=db_message.id)
 
 
 def get_message(db: Session, message_id: int) -> Message | None:
-    """Retrieve a specific message with sender and recipients fully loaded"""
     return (
         db.query(Message)
         .options(

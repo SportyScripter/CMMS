@@ -19,8 +19,9 @@ def create_message(
     current_user: User = Depends(ALLOW_READ_ONLY),
 ) -> Any:
     """Create a new message and assign it to its recipients."""
-    message_in.sender_id = current_user.id
-    return crud_messages.create_message(db=db, message_in=message_in)
+    return crud_messages.create_message(
+        db=db, message_in=message_in, sender_id=current_user.id
+    )
 
 
 @router.get("/inbox", response_model=list[MessageResponse])

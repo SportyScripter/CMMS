@@ -43,6 +43,12 @@ class Message(Base, TimestampMixin):
         nullable=True,
         comment="Optional role-based broadcast target",
     )
+    department_id = Column(
+        Integer,
+        ForeignKey("departments.id"),
+        nullable=True,
+        comment="Optional department-based broadcast target",
+    )
 
     sent_at = Column(
         DateTime,
