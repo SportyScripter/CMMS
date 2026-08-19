@@ -28,6 +28,12 @@ export const MessagesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [replyData, setReplyData] = useState<{
+    subject: string;
+    recipientId: number;
+    parentId: number;
+  } | null>(null);
+
   const fetchMessages = async () => {
     setIsLoading(true);
     setError("");
@@ -238,10 +244,15 @@ export const MessagesPage = () => {
       {/* MODAL */}
       <ComposeMessageModal
         isOpen={isComposeModalOpen}
-        onClose={() => setIsComposeModalOpen(false)}
+        initialData={replyData}
+        onClose={() => {
+          setIsComposeModalOpen(false);
+          setReplyData(null);
+        }}
         onSuccess={() => {
           setIsComposeModalOpen(false);
-          fetchMessages(); // odświeża listę po wysłaniu
+          setReplyData(null);
+          fetchMessages();
         }}
       />
       {/* MESSAGE DETAILS MODAL */}
@@ -251,7 +262,15 @@ export const MessagesPage = () => {
         message={selectedMessage}
         currentUserId={currentUser.id}
         activeTab={activeTab}
-        onRead={() => fetchMessages()} // Odśwież, żeby zniknęło pogrubienie
+        onRead={() => fetchMessages()}
+        onReply={(msg) => {
+          setReplyData({
+            subject: msg.subject,
+            recipientId: msg.sender_id,
+            parentId: msg.id,
+          });
+          setIsComposeModalOpen(true);
+        }}
       />
     </div>
   );

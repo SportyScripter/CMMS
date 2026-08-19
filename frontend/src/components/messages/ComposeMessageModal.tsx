@@ -1,4 +1,3 @@
-// src/components/messages/ComposeMessageModal.tsx
 import React, { useState, useEffect } from "react";
 import { api } from "../../api/axiosConfig";
 import { X, Send, Loader2, Users, Briefcase, Building2 } from "lucide-react";
@@ -9,12 +8,18 @@ interface ComposeMessageModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: {
+    subject: string;
+    recipientId: number;
+    parentId: number;
+  } | null;
 }
 
 export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  initialData,
 }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -43,6 +48,15 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
           setUsers(usersRes.data);
           setRoles(rolesRes.data);
           setDepartments(deptsRes.data);
+
+          if (initialData) {
+            setSubject(
+              initialData.subject.startsWith("RE:")
+                ? initialData.subject
+                : `RE: ${initialData.subject}`
+            );
+            setSelectedUsers([initialData.recipientId]);
+          }
         } catch (err) {
           console.error("Błąd pobierania słowników", err);
           setError("Nie udało się pobrać list odbiorców.");
@@ -59,11 +73,11 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
       setSelectedDepartment("");
       setError("");
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   const handleUserSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedOptions = Array.from(e.target.selectedOptions).map((opt) =>
-      Number(opt.value)
+      Number(opt.value),
     );
     setSelectedUsers(selectedOptions);
   };
@@ -75,7 +89,11 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
       return;
     }
 
-    if (selectedUsers.length === 0 && selectedRole === "" && selectedDepartment === "") {
+    if (
+      selectedUsers.length === 0 &&
+      selectedRole === "" &&
+      selectedDepartment === ""
+    ) {
       setError("Wybierz przynajmniej jednego odbiorcę, rolę lub wydział.");
       return;
     }
@@ -90,6 +108,7 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
         recipient_ids: selectedUsers,
         role_id: selectedRole === "" ? null : Number(selectedRole),
         department_id: selectedDepartment === "" ? null : Number(selectedDepartment),
+        parent_message_id: initialData ? initialData.parentId : null,
       };
 
       await api.post("/messages/", payload);
@@ -135,41 +154,62 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
               Ładowanie odbiorców...
             </div>
           ) : (
-            <form id="compose-message-form" onSubmit={handleSubmit} className="space-y-6">
-              
+            <form
+              id="compose-message-form"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
               {/* Audience section */}
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-4">
-                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Odbiorcy (wybierz co najmniej jedno)</h3>
-                
+                <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">
+                  Odbiorcy (wybierz co najmniej jedno)
+                </h3>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-1.5">
-                      <Briefcase className="w-4 h-4 mr-1.5 text-gray-400" /> Wyślij do Roli
+                      <Briefcase className="w-4 h-4 mr-1.5 text-gray-400" />{" "}
+                      Wyślij do Roli
                     </label>
                     <select
                       value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value === "" ? "" : Number(e.target.value))}
+                      onChange={(e) =>
+                        setSelectedRole(
+                          e.target.value === "" ? "" : Number(e.target.value),
+                        )
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     >
                       <option value="">-- Wybierz rolę (opcjonalnie) --</option>
-                      {roles.map(r => (
-                        <option key={r.id} value={r.id}>{r.name}</option>
+                      {roles.map((r) => (
+                        <option key={r.id} value={r.id}>
+                          {r.name}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
                     <label className="flex items-center text-sm font-semibold text-gray-700 mb-1.5">
-                      <Building2 className="w-4 h-4 mr-1.5 text-gray-400" /> Wyślij do Wydziału
+                      <Building2 className="w-4 h-4 mr-1.5 text-gray-400" />{" "}
+                      Wyślij do Wydziału
                     </label>
                     <select
                       value={selectedDepartment}
-                      onChange={(e) => setSelectedDepartment(e.target.value === "" ? "" : Number(e.target.value))}
+                      onChange={(e) =>
+                        setSelectedDepartment(
+                          e.target.value === "" ? "" : Number(e.target.value),
+                        )
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     >
-                      <option value="">-- Wybierz wydział (opcjonalnie) --</option>
-                      {departments.map(d => (
-                        <option key={d.id} value={d.id}>{d.name}</option>
+                      <option value="">
+                        -- Wybierz wydział (opcjonalnie) --
+                      </option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -177,7 +217,8 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
 
                 <div>
                   <label className="flex items-center text-sm font-semibold text-gray-700 mb-1.5">
-                    <Users className="w-4 h-4 mr-1.5 text-gray-400" /> Konkretni użytkownicy
+                    <Users className="w-4 h-4 mr-1.5 text-gray-400" /> Konkretni
+                    użytkownicy
                   </label>
                   <select
                     multiple
@@ -185,21 +226,24 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
                     onChange={handleUserSelection}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 text-sm min-h-[100px]"
                   >
-                    {users.map(u => (
+                    {users.map((u) => (
                       <option key={u.id} value={u.id} className="py-1">
                         {u.name} {u.lastname} ({u.role?.name || "Brak roli"})
                       </option>
                     ))}
                   </select>
                   <p className="text-xs text-gray-500 mt-1">
-                    Przytrzymaj <kbd className="px-1 py-0.5 bg-gray-200 rounded">Ctrl</kbd> (lub Cmd na Macu), aby wybrać wiele osób.
+                    Przytrzymaj <kbd className="px-1 py-0.5 bg-gray-200 rounded">Ctrl</kbd>{" "}
+                    (lub Cmd na Macu), aby wybrać wiele osób.
                   </p>
                 </div>
               </div>
 
               {/* Content section */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Temat wiadomości</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Temat wiadomości
+                </label>
                 <input
                   type="text"
                   value={subject}
@@ -210,7 +254,9 @@ export const ComposeMessageModal: React.FC<ComposeMessageModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Treść</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                  Treść
+                </label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}

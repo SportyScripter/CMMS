@@ -41,19 +41,32 @@ export const HomePage = () => {
   const [failures, setFailures] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [machines, setMachines] = useState<any[]>([]);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        const [failuresRes, ordersRes, machinesRes] = await Promise.all([
-          api.get("/failures"),
-          api.get("/order-calendar"),
-          api.get("/machines"),
-        ]);
+        const [failuresRes, ordersRes, machinesRes, inboxRes] =
+          await Promise.all([
+            api.get("/failures"),
+            api.get("/order-calendar"),
+            api.get("/machines"),
+            api.get("/messages/inbox"),
+          ]);
+
         setFailures(failuresRes.data || []);
         setOrders(ordersRes.data || []);
         setMachines(machinesRes.data || []);
+
+        const inboxData = inboxRes.data || [];
+        const unreadCount = inboxData.filter((msg: any) => {
+          const recipientRecord = msg.recipients?.find(
+            (r: any) => r.recipient_id === currentUser.id,
+          );
+          return recipientRecord && !recipientRecord.is_read;
+        }).length;
+        setUnreadMessages(unreadCount);
       } catch (error) {
         console.error("Błąd pobierania danych na pulpit", error);
       } finally {
@@ -61,7 +74,7 @@ export const HomePage = () => {
       }
     };
     fetchDashboardData();
-  }, []);
+  }, [currentUser.id]);
 
   // --- FAILURE STATS ---
   const activeFailures = useMemo(() => {
@@ -344,23 +357,34 @@ export const HomePage = () => {
           </div>
         </div>
 
-       {/* Tile 6: Messages */}
-        <div 
-          onClick={() => navigate('/messages')} 
-          className="bg-white rounded-2xl p-6 border border-indigo-100 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group flex flex-col"
+        {/* Tile 6: Messages */}
+        <div
+          onClick={() => navigate("/messages")}
+          className="bg-white rounded-2xl p-6 border border-indigo-100 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer group flex flex-col relative overflow-hidden"
         >
-          <div className="flex justify-between items-start mb-4">
+          <div className="flex justify-between items-start mb-4 relative z-10">
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
               <MessageSquare className="w-8 h-8" />
             </div>
+            {unreadMessages > 0 && (
+              <span className="flex items-center text-sm font-bold text-white bg-red-500 px-3 py-1 rounded-full animate-in zoom-in">
+                {unreadMessages} Nowe
+              </span>
+            )}
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Wiadomości</h2>
-          <p className="text-sm text-gray-600 mb-4 flex-1">
-            Wewnętrzna komunikacja, powiadomienia o zleceniach i zgłaszanie zapotrzebowania na części.
+          <h2 className="text-xl font-bold text-gray-900 mb-2 relative z-10">
+            Wiadomości
+          </h2>
+          <p className="text-sm text-gray-600 mb-4 flex-1 relative z-10">
+            Wewnętrzna komunikacja, powiadomienia o zleceniach i zgłaszanie
+            zapotrzebowania na części.
           </p>
-          <div className="flex items-center text-sm font-bold text-indigo-600 group-hover:translate-x-1 transition-transform">
+          <div className="flex items-center text-sm font-bold text-indigo-600 group-hover:translate-x-1 transition-transform relative z-10">
             Otwórz skrzynkę <ArrowRight className="w-4 h-4 ml-1" />
           </div>
+          {unreadMessages > 0 && (
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -z-0 opacity-50"></div>
+          )}
         </div>
       </div>
     </div>
