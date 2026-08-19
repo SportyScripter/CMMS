@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from api.dependencies import get_current_user, get_db
-from core.permissions import ALLOW_MANAGE_USERS
+from core.permissions import ALLOW_MANAGE_USERS, ALLOW_READ_ONLY
 from crud import crud_users
 from models.user import User
 from schemas.user import UserCreate, UserResponse, UserUpdate
@@ -61,7 +61,7 @@ def read_user(
 def read_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    allow_manage_users: bool = Depends(ALLOW_MANAGE_USERS),
+    allow_manage_users: bool = Depends(ALLOW_READ_ONLY),
 ) -> Any:
     """Read a list of all users only if the current user has the required role."""
     users = crud_users.get_users(db)
