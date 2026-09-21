@@ -1,22 +1,22 @@
-"""Initial CMMS tables
+"""fresh_init
 
-Revision ID: fc5443389ed0
-Revises:
-Create Date: 2026-07-09 17:12:12.870101
+Revision ID: f8dd2b400273
+Revises: 
+Create Date: 2026-09-01 18:38:01.080907
 
 """
 
-from collections.abc import Sequence
+from typing import Sequence, Union
 
+from alembic import op
 import sqlalchemy as sa
 
-from alembic import op  # type: ignore
 
 # revision identifiers, used by Alembic.
-revision: str = "fc5443389ed0"
-down_revision: str | Sequence[str] | None = None
-branch_labels: str | Sequence[str] | None = None
-depends_on: str | Sequence[str] | None = None
+revision: str = "f8dd2b400273"
+down_revision: Union[str, Sequence[str], None] = None
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
@@ -29,51 +29,56 @@ def upgrade() -> None:
             "name",
             sa.String(),
             nullable=False,
-            comment="Name of the department",
+            comment="Official name of the department (e.g., Electrical, Mechanical)",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
-        comment="Table for departments wchich are responsible for machines and failures",
+        comment="Organizational units responsible for handling machine failures",
     )
     op.create_index(op.f("ix_departments_id"), "departments", ["id"], unique=False)
     op.create_table(
         "machines",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("name", sa.String(), nullable=False, comment="Name of the machine"),
+        sa.Column(
+            "name",
+            sa.String(),
+            nullable=False,
+            comment="Official designation or asset tag of the machine",
+        ),
         sa.Column(
             "location",
             sa.String(),
             nullable=False,
-            comment="Location of the machine",
+            comment="Physical location on the production floor (e.g., Hall A, Sector 3)",
         ),
         sa.Column(
             "qr_code",
             sa.String(),
             nullable=False,
-            comment="QR code of the machine",
+            comment="Unique QR identifier used for mobile scanning and quick asset retrieval",
         ),
         sa.Column(
             "status",
             sa.String(),
             nullable=False,
-            comment="Status of the machine (e.g., operational, under maintenance, out of service)",
+            comment="Current operational state (e.g., 'operational', 'under_maintenance', 'out_of_service')",
         ),
         sa.Column(
             "created_at",
             sa.DateTime(),
             nullable=False,
-            comment="Timestamp when the machine was created",
+            comment="UTC timestamp when the machine record was created",
         ),
         sa.Column(
             "updated_at",
             sa.DateTime(),
             nullable=False,
-            comment="Timestamp when the machine was last updated",
+            comment="UTC timestamp when the machine record was last updated",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
         sa.UniqueConstraint("qr_code"),
-        comment="Table for machines",
+        comment="Core inventory of physical machines and production equipment",
     )
     op.create_index(op.f("ix_machines_id"), "machines", ["id"], unique=False)
     op.create_table(
@@ -83,11 +88,11 @@ def upgrade() -> None:
             "name",
             sa.String(),
             nullable=False,
-            comment="Name of the order type",
+            comment="Unique identifier/name for the order type category",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
-        comment="Table for order types",
+        comment="Dictionary of standardized maintenance order categories",
     )
     op.create_index(op.f("ix_order_types_id"), "order_types", ["id"], unique=False)
     op.create_table(
@@ -97,25 +102,33 @@ def upgrade() -> None:
             "name",
             sa.String(),
             nullable=False,
-            comment="Name of the part category",
+            comment="Unique identifier/name for the part category",
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
-        comment="Table for part categories",
+        comment="Dictionary of spare part categories for inventory organization",
     )
     op.create_index(
-        op.f("ix_part_categories_id"),
-        "part_categories",
-        ["id"],
-        unique=False,
+        op.f("ix_part_categories_id"), "part_categories", ["id"], unique=False
     )
     op.create_table(
         "roles",
-        sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("name", sa.String(), nullable=False, comment="Name of the role"),
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column(
+            "name",
+            sa.String(),
+            nullable=False,
+            comment="Unique role identifier (e.g., 'Admin', 'Technician')",
+        ),
+        sa.Column(
+            "description",
+            sa.String(),
+            nullable=True,
+            comment="Detailed description of the role's purpose",
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name"),
-        comment="Table for user roles",
+        comment="Dictionary of available user roles for access control",
     )
     op.create_index(op.f("ix_roles_id"), "roles", ["id"], unique=False)
     op.create_table(
@@ -125,78 +138,128 @@ def upgrade() -> None:
             "category_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to the part_categories table",
+            comment="Links to the category (e.g., Bearings, Electrical) for organizational grouping",
         ),
-        sa.Column("name", sa.String(), nullable=False, comment="Name of the part"),
-        sa.Column("type", sa.String(), nullable=False, comment="Type of the part"),
+        sa.Column(
+            "producer",
+            sa.String(),
+            nullable=True,
+            comment="Manufacturer or supplier of the part",
+        ),
+        sa.Column(
+            "name",
+            sa.String(),
+            nullable=False,
+            comment="Descriptive name or part number identifier",
+        ),
+        sa.Column(
+            "type",
+            sa.String(),
+            nullable=False,
+            comment="Classification of part type (e.g., consumables, strategic spare)",
+        ),
         sa.Column(
             "quantity",
             sa.Integer(),
             nullable=False,
-            comment="Quantity of the part in stock",
+            comment="Current physical stock level in the warehouse",
         ),
         sa.Column(
             "min_quantity",
             sa.Integer(),
             nullable=False,
-            comment="Minimum quantity of the part in stock",
+            comment="Threshold level for triggering automatic restocking notifications",
         ),
         sa.Column(
             "location",
             sa.String(),
             nullable=False,
-            comment="Location of the part in the warehouse",
+            comment="Specific warehouse aisle/shelf identifier",
         ),
-        sa.Column("price", sa.Double(), nullable=False, comment="Price of the part"),
+        sa.Column(
+            "price", sa.Double(), nullable=False, comment="Unit cost of the part"
+        ),
         sa.Column(
             "url_address",
             sa.String(),
             nullable=True,
-            comment="URL address of the part (nullable)",
+            comment="External URL for reordering or supplier reference",
         ),
         sa.Column(
             "docs",
             sa.String(),
             nullable=True,
-            comment="Documentation of the part (nullable)",
+            comment="Path or link to technical documentation/datasheets",
         ),
         sa.Column(
             "qr_code",
             sa.String(),
             nullable=False,
-            comment="QR code of the part",
+            comment="Unique identifier for mobile warehouse management",
         ),
         sa.ForeignKeyConstraint(
             ["category_id"],
             ["part_categories.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
         sa.UniqueConstraint("qr_code"),
-        comment="Table for parts",
+        comment="Comprehensive inventory of spare parts and warehouse stock metadata",
     )
     op.create_index(op.f("ix_parts_id"), "parts", ["id"], unique=False)
     op.create_table(
         "users",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("name", sa.String(), nullable=False, comment="Name of the user"),
         sa.Column(
-            "lastname",
+            "password",
             sa.String(),
             nullable=False,
-            comment="Last name of the user",
+            comment="Securely hashed password for authentication",
+        ),
+        sa.Column(
+            "is_active",
+            sa.Boolean(),
+            nullable=False,
+            comment="Determines if the user can currently access the system",
+        ),
+        sa.Column(
+            "name", sa.String(), nullable=False, comment="Given name of the employee"
+        ),
+        sa.Column(
+            "lastname", sa.String(), nullable=False, comment="Surname of the employee"
         ),
         sa.Column(
             "sap_number",
             sa.String(),
             nullable=False,
-            comment="SAP number of the user",
+            comment="Unique identifier from SAP system",
         ),
         sa.Column(
             "role_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to the roles table",
+            comment="Determines the access level and permissions for the user",
+        ),
+        sa.Column(
+            "department_id",
+            sa.Integer(),
+            nullable=True,
+            comment="Optional link to the department the user belongs to",
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            comment="UTC timestamp when the record was initially created",
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            comment="UTC timestamp when the record was last modified",
+        ),
+        sa.ForeignKeyConstraint(
+            ["department_id"],
+            ["departments.id"],
         ),
         sa.ForeignKeyConstraint(
             ["role_id"],
@@ -204,7 +267,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("sap_number"),
-        comment="Table for users",
+        comment="Registry of system users and their authentication data",
     )
     op.create_index(op.f("ix_users_id"), "users", ["id"], unique=False)
     op.create_table(
@@ -214,67 +277,67 @@ def upgrade() -> None:
             "submitter_id",
             sa.Integer(),
             nullable=False,
-            comment="User who submitted the failure",
+            comment="Reference to the user who initially reported the issue",
         ),
         sa.Column(
             "machine_id",
             sa.Integer(),
             nullable=False,
-            comment="Machine associated with the failure",
+            comment="Reference to the broken or malfunctioning machine",
         ),
         sa.Column(
             "department_id",
             sa.Integer(),
             nullable=False,
-            comment="Department associated with the failure",
+            comment="Reference to the department responsible for the repair",
         ),
         sa.Column(
             "status",
             sa.String(),
             nullable=False,
-            comment="Status of the failure (e.g., 'open', 'in_progress', 'closed')",
+            comment="Current lifecycle state (e.g., 'open', 'in_progress', 'closed')",
         ),
         sa.Column(
             "recipient_id",
             sa.Integer(),
             nullable=True,
-            comment="User assigned to handle the failure",
+            comment="Reference to the mechanic or technician assigned to fix the issue",
         ),
         sa.Column(
             "failure_description",
             sa.String(),
             nullable=False,
-            comment="Description of the failure",
+            comment="Detailed description of the problem reported by the submitter",
         ),
         sa.Column(
             "end_date",
             sa.DateTime(),
             nullable=True,
-            comment="Date when the failure was resolved",
+            comment="Timestamp when the repair was completed and the issue was closed",
         ),
         sa.Column(
             "repair_description",
             sa.String(),
             nullable=True,
-            comment="Description of the repair performed",
+            comment="Technical details of the actions taken to resolve the failure",
         ),
         sa.Column(
             "comment",
             sa.String(),
             nullable=True,
-            comment="Additional comments regarding the failure",
+            comment="Additional notes or remarks from the maintenance team",
         ),
         sa.Column(
             "created_at",
-            sa.DateTime(),
+            sa.DateTime(timezone=True),
             nullable=False,
-            comment="Timestamp when the record was created",
+            comment="UTC timestamp when the record was initially created",
         ),
         sa.Column(
             "updated_at",
-            sa.DateTime(),
+            sa.DateTime(timezone=True),
             nullable=False,
-            comment="Timestamp when the record was last updated",
+            comment="UTC timestamp when the record was last modified",
         ),
         sa.ForeignKeyConstraint(
             ["department_id"],
@@ -293,39 +356,69 @@ def upgrade() -> None:
             ["users.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        comment="Table for failures",
+        comment="Core table tracking machine breakdowns and repair lifecycle",
     )
     op.create_index(op.f("ix_failures_id"), "failures", ["id"], unique=False)
     op.create_table(
         "messages",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("parent_message_id", sa.Integer(), nullable=True),
+        sa.Column(
+            "parent_message_id",
+            sa.Integer(),
+            nullable=True,
+            comment="Reference to a parent message to support threading/replies",
+        ),
         sa.Column(
             "subject",
             sa.String(),
             nullable=False,
-            comment="Subject of the message",
+            comment="Topic or summary of the message",
         ),
         sa.Column(
             "content",
             sa.String(),
             nullable=False,
-            comment="Content of the message",
+            comment="Main body text of the message",
         ),
-        sa.Column("sender_id", sa.Integer(), nullable=False),
-        sa.Column("role_id", sa.Integer(), nullable=True),
-        sa.Column("sent_at", sa.DateTime(), nullable=False),
         sa.Column(
-            "created_at",
+            "sender_id",
+            sa.Integer(),
+            nullable=False,
+            comment="User who sent the message",
+        ),
+        sa.Column(
+            "role_id",
+            sa.Integer(),
+            nullable=True,
+            comment="Optional role-based broadcast target",
+        ),
+        sa.Column(
+            "department_id",
+            sa.Integer(),
+            nullable=True,
+            comment="Optional department-based broadcast target",
+        ),
+        sa.Column(
+            "sent_at",
             sa.DateTime(),
             nullable=False,
-            comment="Timestamp when the record was created",
+            comment="Exact timestamp when the message was dispatched",
+        ),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            comment="UTC timestamp when the record was initially created",
         ),
         sa.Column(
             "updated_at",
-            sa.DateTime(),
+            sa.DateTime(timezone=True),
             nullable=False,
-            comment="Timestamp when the record was last updated",
+            comment="UTC timestamp when the record was last modified",
+        ),
+        sa.ForeignKeyConstraint(
+            ["department_id"],
+            ["departments.id"],
         ),
         sa.ForeignKeyConstraint(
             ["parent_message_id"],
@@ -340,7 +433,7 @@ def upgrade() -> None:
             ["users.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        comment="Table for messages",
+        comment="Central storage for internal messages and threads",
     )
     op.create_index(op.f("ix_messages_id"), "messages", ["id"], unique=False)
     op.create_table(
@@ -350,61 +443,114 @@ def upgrade() -> None:
             "order_type_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to the order_types table",
+            comment="Reference to the classification of the maintenance task",
         ),
         sa.Column(
             "description",
             sa.String(),
             nullable=False,
-            comment="Description of the task or event",
+            comment="Summary of the work to be performed",
         ),
         sa.Column(
             "principal_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to the users table for the principal user",
+            comment="User who created or requested the order",
         ),
         sa.Column(
             "performed_id",
             sa.Integer(),
             nullable=True,
-            comment="Foreign key to the users table for the user who performed the task",
+            comment="Technician assigned to execute the task",
         ),
         sa.Column(
             "machine_id",
             sa.Integer(),
             nullable=True,
-            comment="Foreign key to the machines table",
+            comment="Target machine for the maintenance task",
         ),
         sa.Column(
             "comments",
             sa.String(),
             nullable=True,
-            comment="Additional comments or notes",
+            comment="Additional notes regarding the execution or scope of work",
         ),
         sa.Column(
             "scheduled_date",
             sa.DateTime(),
             nullable=False,
-            comment="Scheduled date and time for the task or event",
+            comment="Planned date and time for task execution",
         ),
         sa.Column(
             "status",
             sa.String(),
             nullable=False,
-            comment="Status of the task or event (e.g., 'scheduled', 'completed', 'canceled')",
+            comment="Current execution state (e.g., 'scheduled', 'in_progress', 'completed')",
         ),
         sa.Column(
+            "started_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            comment="Timestamp when the task execution began",
+        ),
+        sa.Column(
+            "completed_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            comment="Timestamp when the task execution was completed",
+        ),
+        sa.Column(
+            "priority",
+            sa.String(length=50),
+            nullable=True,
+            comment="Priority level of the order (e.g., 'low', 'normal', 'high')",
+        ),
+        sa.Column(
+            "execution_report",
+            sa.String(),
+            nullable=True,
+            comment="Detailed report of the work performed, including observations and outcomes",
+        ),
+        sa.Column(
+            "pause_reason",
+            sa.String(),
+            nullable=True,
+            comment="Reason for pausing the task, if applicable",
+        ),
+        sa.Column(
+            "is_machine_operational",
+            sa.Boolean(),
+            nullable=True,
+            comment="Indicates if the machine is operational",
+        ),
+        sa.Column(
+            "work_time_minutes",
+            sa.Integer(),
+            nullable=True,
+            comment="Total time spent on the task in minutes",
+        ),
+        sa.Column(
+            "last_resumed_at",
+            sa.DateTime(timezone=True),
+            nullable=True,
+            comment="Timestamp when the task was last resumed",
+        ),
+        sa.Column("assigned_role_id", sa.Integer(), nullable=True),
+        sa.Column(
             "created_at",
-            sa.DateTime(),
+            sa.DateTime(timezone=True),
             nullable=False,
-            comment="Timestamp when the record was created",
+            comment="UTC timestamp when the record was initially created",
         ),
         sa.Column(
             "updated_at",
-            sa.DateTime(),
+            sa.DateTime(timezone=True),
             nullable=False,
-            comment="Timestamp when the record was last updated",
+            comment="UTC timestamp when the record was last modified",
+        ),
+        sa.ForeignKeyConstraint(
+            ["assigned_role_id"],
+            ["roles.id"],
         ),
         sa.ForeignKeyConstraint(
             ["machine_id"],
@@ -423,13 +569,10 @@ def upgrade() -> None:
             ["users.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        comment="Table for order calendar entries",
+        comment="Central schedule for maintenance orders and tasks",
     )
     op.create_index(
-        op.f("ix_order_calendar_id"),
-        "order_calendar",
-        ["id"],
-        unique=False,
+        op.f("ix_order_calendar_id"), "order_calendar", ["id"], unique=False
     )
     op.create_table(
         "part_compatibilities",
@@ -437,13 +580,13 @@ def upgrade() -> None:
             "part_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to parts table",
+            comment="Reference to the spare part",
         ),
         sa.Column(
             "machine_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to machines table",
+            comment="Reference to the machine compatible with the part",
         ),
         sa.ForeignKeyConstraint(
             ["machine_id"],
@@ -454,7 +597,7 @@ def upgrade() -> None:
             ["parts.id"],
         ),
         sa.PrimaryKeyConstraint("part_id", "machine_id"),
-        comment="Table for part compatibilities",
+        comment="Defines compatibility mapping between spare parts and machines",
     )
     op.create_table(
         "attachments",
@@ -462,26 +605,26 @@ def upgrade() -> None:
         sa.Column(
             "failure_id",
             sa.Integer(),
-            nullable=False,
-            comment="Foreign key to the failures table",
+            nullable=True,
+            comment="Links the file to a specific failure report",
         ),
         sa.Column(
             "order_id",
             sa.Integer(),
             nullable=True,
-            comment="Foreign key to the orders table (nullable)",
+            comment="Links the file to a scheduled maintenance order",
         ),
         sa.Column(
             "file_path",
             sa.String(),
             nullable=False,
-            comment="Path to the attachment file",
+            comment="Storage path or URI of the physical file",
         ),
         sa.Column(
             "uploaded_at",
             sa.DateTime(),
             nullable=False,
-            comment="Timestamp when the attachment was uploaded",
+            comment="UTC timestamp of the file upload",
         ),
         sa.ForeignKeyConstraint(
             ["failure_id"],
@@ -492,7 +635,7 @@ def upgrade() -> None:
             ["order_calendar.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        comment="Table for attachments",
+        comment="Stores metadata and file paths for user-uploaded documents",
     )
     op.create_index(op.f("ix_attachments_id"), "attachments", ["id"], unique=False)
     op.create_table(
@@ -501,19 +644,19 @@ def upgrade() -> None:
             "failure_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to failures table",
+            comment="Reference to the repaired failure",
         ),
         sa.Column(
             "part_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to parts table",
+            comment="Reference to the specific spare part consumed",
         ),
         sa.Column(
             "quantity_used",
             sa.Integer(),
             nullable=False,
-            comment="Quantity of the part used in the failure",
+            comment="Number of units removed from inventory for this repair",
         ),
         sa.ForeignKeyConstraint(
             ["failure_id"],
@@ -524,17 +667,27 @@ def upgrade() -> None:
             ["parts.id"],
         ),
         sa.PrimaryKeyConstraint("failure_id", "part_id"),
-        comment="Table for failure parts",
+        comment="Association table tracking inventory consumed during failure repairs",
     )
     op.create_table(
         "message_recipients",
-        sa.Column("message_id", sa.Integer(), nullable=False),
-        sa.Column("recipient_id", sa.Integer(), nullable=False),
+        sa.Column(
+            "message_id",
+            sa.Integer(),
+            nullable=False,
+            comment="Reference to the specific message broadcasted",
+        ),
+        sa.Column(
+            "recipient_id",
+            sa.Integer(),
+            nullable=False,
+            comment="Reference to the targeted user receiving the message",
+        ),
         sa.Column(
             "is_read",
             sa.Boolean(),
             nullable=False,
-            comment="Has the user read this message?",
+            comment="Indicates whether the recipient has opened and read the message",
         ),
         sa.ForeignKeyConstraint(
             ["message_id"],
@@ -545,7 +698,7 @@ def upgrade() -> None:
             ["users.id"],
         ),
         sa.PrimaryKeyConstraint("message_id", "recipient_id"),
-        comment="Table linking messages to their recipients",
+        comment="Association table tracking message delivery and read status per user",
     )
     op.create_table(
         "order_checklist_items",
@@ -554,32 +707,32 @@ def upgrade() -> None:
             "order_calendar_id",
             sa.Integer(),
             nullable=False,
-            comment="Foreign key to order_calendar table",
+            comment="Reference to the parent maintenance order",
         ),
         sa.Column(
             "task_description",
             sa.String(),
-            nullable=False,
-            comment="Description of the checklist item",
+            nullable=True,
+            comment="Detailed instruction for this specific checklist step",
         ),
         sa.Column(
             "status",
             sa.String(),
             nullable=False,
-            comment="Status of the checklist item",
+            comment="Completion status (e.g., 'pending', 'completed', 'not_applicable')",
         ),
         sa.Column(
             "comments",
             sa.String(),
             nullable=True,
-            comment="Additional comments for the checklist item",
+            comment="Technician's notes or findings specific to this checklist item",
         ),
         sa.ForeignKeyConstraint(
             ["order_calendar_id"],
             ["order_calendar.id"],
         ),
         sa.PrimaryKeyConstraint("id"),
-        comment="Table for order checklist items",
+        comment="Granular task items belonging to a maintenance order checklist",
     )
     op.create_index(
         op.f("ix_order_checklist_items_id"),
@@ -587,15 +740,46 @@ def upgrade() -> None:
         ["id"],
         unique=False,
     )
+    op.create_table(
+        "part_history",
+        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("part_id", sa.Integer(), nullable=False),
+        sa.Column("user_id", sa.Integer(), nullable=False),
+        sa.Column("machine_id", sa.Integer(), nullable=True),
+        sa.Column("failure_id", sa.Integer(), nullable=True),
+        sa.Column("quantity_change", sa.Integer(), nullable=False),
+        sa.Column("transaction_type", sa.String(), nullable=False),
+        sa.Column("reason", sa.String(), nullable=True),
+        sa.Column("created_at", sa.DateTime(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["failure_id"],
+            ["failures.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["machine_id"],
+            ["machines.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["part_id"],
+            ["parts.id"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+        ),
+        sa.PrimaryKeyConstraint("id"),
+    )
+    op.create_index(op.f("ix_part_history_id"), "part_history", ["id"], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f("ix_part_history_id"), table_name="part_history")
+    op.drop_table("part_history")
     op.drop_index(
-        op.f("ix_order_checklist_items_id"),
-        table_name="order_checklist_items",
+        op.f("ix_order_checklist_items_id"), table_name="order_checklist_items"
     )
     op.drop_table("order_checklist_items")
     op.drop_table("message_recipients")
