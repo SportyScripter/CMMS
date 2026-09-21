@@ -15,7 +15,6 @@ import { Role } from "../../types/auth";
 import { AddOrderModalProps, OrderType } from "../../types/order-calendar";
 import { ManageOrderTypesModal } from "./ManageOrderTypesModal";
 import { AddChecklistItemsModal } from "./AddChecklistItemsModal";
-import { formatDateTime } from "../../utils/dateUtils";
 export const AddOrderModal: React.FC<AddOrderModalProps> = ({
   isOpen,
   onClose,
@@ -88,8 +87,7 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
   };
 
   const handleAddTasksFromModal = (newTasks: string[]) => {
-    const combined = Array.from(new Set([...checklistTasks, ...newTasks]));
-    setChecklistTasks(combined);
+    setChecklistTasks(newTasks);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -413,13 +411,15 @@ export const AddOrderModal: React.FC<AddOrderModalProps> = ({
         onUpdated={fetchFormData}
       />
 
-      {/* MODAL CHECKLISTY */}
+      {/* CHECKLIST MODAL */}
       <AddChecklistItemsModal
         isOpen={isAddChecklistModalOpen}
         onClose={() => setIsAddChecklistModalOpen(false)}
         onAdd={handleAddTasksFromModal}
         machines={machines}
         orderTypes={orderTypes}
+        initialSelectedTasks={checklistTasks}
+        roles={roles}
       />
     </>
   );
