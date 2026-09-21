@@ -18,6 +18,25 @@ export const OrderDetailsChecklistModal: React.FC<
 
   const { order } = details;
 
+  const handleChecklistUpdate = (selectedTaskStrings: string[]) => {
+    const updatedTasks = selectedTaskStrings.map((taskDesc) => {
+      const existingTask = details.editChecklistTasks.find(
+        (t) => t.task_description === taskDesc
+      );
+      
+      if (existingTask) {
+        return existingTask;
+      }
+      
+      return {
+        task_description: taskDesc,
+        status: "pending",
+      };
+    });
+
+    details.setEditChecklistTasks(updatedTasks as any);
+  };
+
   return (
     <>
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -91,9 +110,11 @@ export const OrderDetailsChecklistModal: React.FC<
       <AddChecklistItemsModal
         isOpen={details.isAddChecklistModalOpen}
         onClose={() => details.setIsAddChecklistModalOpen(false)}
-        onAdd={details.handleAddTasksFromModal}
+        onAdd={handleChecklistUpdate}
         machines={details.machines}
         orderTypes={details.orderTypes}
+        roles={details.rolesList}
+        initialSelectedTasks={details.editChecklistTasks.map((t: any) => t.task_description)}
       />
     </>
   );

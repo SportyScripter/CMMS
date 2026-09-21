@@ -160,9 +160,17 @@ export const useOrderDetails = (
     setEditChecklistTasks((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  const handleAddTasksFromModal = (newTasksDesc: string[]) => {
-    const newTasks = newTasksDesc.map((desc) => ({ task_description: desc }));
-    setEditChecklistTasks((prev) => [...prev, ...newTasks]);
+  const handleAddTasksFromModal = (selectedTaskStrings: string[]) => {
+    const updatedTasks = selectedTaskStrings.map((desc) => {
+      const existingTask = editChecklistTasks.find(
+        (t) => t.task_description === desc,
+      );
+      if (existingTask) {
+        return existingTask;
+      }
+      return { task_description: desc };
+    });
+    setEditChecklistTasks(updatedTasks);
   };
 
   // --- SAVING CHANGES FROM EDIT MODE ---
@@ -327,6 +335,7 @@ export const useOrderDetails = (
     localExecutionReport,
     localChecklist,
     setLocalExecutionReport,
+    setEditChecklistTasks,
     isEditMode,
     setIsEditMode,
     editOrderTypeId,

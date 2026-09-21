@@ -1,4 +1,5 @@
 import { Machine } from "./machine";
+import { Role } from "./auth";
 
 export interface Order {
   id: number;
@@ -61,6 +62,8 @@ export interface AddChecklistItemsModalProps {
   onAdd: (tasks: string[]) => void;
   machines: Machine[];
   orderTypes: OrderType[];
+  initialSelectedTasks: string[];
+  roles: Role[];
 }
 
 export interface OrderDetailsChecklistModalProps {
