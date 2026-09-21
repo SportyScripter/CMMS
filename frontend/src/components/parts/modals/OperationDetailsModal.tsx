@@ -1,7 +1,7 @@
 import React from "react";
 import {
   X,
-  User,
+  User2,
   Clock,
   Link,
   Package,
@@ -12,6 +12,7 @@ import {
   Boxes,
 } from "lucide-react";
 import { Part } from "../../../types/part";
+import { User } from "../../../types/auth";
 import { TRANSACTION_TYPES } from "../../../utils/constants";
 
 interface OperationDetailsModalProps {
@@ -19,6 +20,7 @@ interface OperationDetailsModalProps {
   onClose: () => void;
   operation: any;
   parts: Part[];
+  users: User[];
 }
 
 export const OperationDetailsModal: React.FC<OperationDetailsModalProps> = ({
@@ -26,9 +28,11 @@ export const OperationDetailsModal: React.FC<OperationDetailsModalProps> = ({
   onClose,
   operation,
   parts,
+  users,
 }) => {
   if (!isOpen || !operation) return null;
   const part = parts.find((p) => p.id === operation.part_id);
+  const user = users?.find((u) => u.id === Number(operation.user_id));
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
@@ -57,9 +61,13 @@ export const OperationDetailsModal: React.FC<OperationDetailsModalProps> = ({
                 value={new Date(operation.created_at).toLocaleString("pl-PL")}
               />
               <InfoItem
-                icon={<User />}
-                label="Użytkownik ID"
-                value={`#${operation.user_id}`}
+                icon={<User2 />}
+                label="Użytkownik"
+                value={
+                  user
+                    ? `${user.name} ${user.lastname} (${user.role?.name || "Brak roli"})`
+                    : `ID: #${operation.user_id}`
+                }
               />
               <InfoItem
                 icon={<Hash />}

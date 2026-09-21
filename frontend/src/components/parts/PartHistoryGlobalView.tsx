@@ -6,9 +6,11 @@ import { OperationDetailsModal } from "./modals/OperationDetailsModal";
 import { TRANSACTION_TYPES } from "../../utils/constants";
 import {PartHistoryItem} from "../../types/part";
 import { formatDateTime } from "../../utils/dateUtils";
+import { User } from "../../types/auth";
 
 interface PartHistoryGlobalViewProps {
   parts: Part[];
+  users: User[];
   categories: PartCategory[];
   filterProducer: string;
   filterName: string;
@@ -20,6 +22,7 @@ interface PartHistoryGlobalViewProps {
 
 export const PartHistoryGlobalView: React.FC<PartHistoryGlobalViewProps> = ({
   parts,
+  users,
   categories,
   filterProducer,
   filterName,
@@ -236,6 +239,7 @@ export const PartHistoryGlobalView: React.FC<PartHistoryGlobalViewProps> = ({
         onClose={() => setSelectedOp(null)}
         operation={selectedOp}
         parts={parts}
+        users={users}
       />
     </div>
   );

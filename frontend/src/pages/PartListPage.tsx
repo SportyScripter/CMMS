@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/axiosConfig";
 import { Part, PartCategory } from "../types/part";
+import { User } from "../types/auth";
 import { PartEditModal } from "../components/parts/modals/PartEditModal";
 import { CreatePartModal } from "../components/parts/modals/CreatePartModal";
 import { PartDetailsModal } from "../components/parts/modals/PartDetailsModal";
@@ -23,6 +24,7 @@ import {
 
 export const PartListPage = () => {
   const { user } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
   const canManageParts =
     user?.role.name === "Super Admin" ||
     user?.role.name === "Kierownik" ||
@@ -67,8 +69,10 @@ export const PartListPage = () => {
       const partResponse = await api.get<Part[]>("/parts");
       const categoryResponse =
         await api.get<PartCategory[]>("/part-categories");
+      const userResponse = await api.get<User[]>("/users/");
       setParts(partResponse.data);
       setCategories(categoryResponse.data);
+      setUsers(userResponse.data);
     } catch (err: any) {
       setError(
         "Nie udało się pobrać danych z serwera. Sprawdź połączenie z bazą danych.",
@@ -332,6 +336,7 @@ export const PartListPage = () => {
       ) : (
         <PartHistoryGlobalView
           parts={parts}
+          users={users} 
           categories={categories}
           filterProducer={filterProducer}
           filterName={filterName}
